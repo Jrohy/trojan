@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"trojan/core"
-	"trojan/database"
 	"trojan/util"
 )
 
@@ -38,15 +37,15 @@ func DelUser() {
 	userList := *UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要删除的用户序号: ", userList)
-	if mysql.DeleteUser(userList[choice - 1].ID) == nil {
+	if mysql.DeleteUser(userList[choice-1].ID) == nil {
 		fmt.Println("删除用户成功!")
 	}
 }
 
 func SetUserQuota() {
 	var (
-		limit  int
-		err    error
+		limit int
+		err   error
 	)
 	userList := *UserList()
 	mysql := core.GetMysql()
@@ -55,7 +54,7 @@ func SetUserQuota() {
 		return
 	}
 	for {
-		quota := util.Input("请输入用户" + userList[choice-1].Username + "限制的流量大小(单位byte)", "")
+		quota := util.Input("请输入用户"+userList[choice-1].Username+"限制的流量大小(单位byte)", "")
 		limit, err = strconv.Atoi(quota)
 		if err != nil {
 			fmt.Printf("%s 不是数字, 请重新输入!\n", quota)
@@ -63,7 +62,7 @@ func SetUserQuota() {
 			break
 		}
 	}
-	if mysql.SetQuota(userList[choice - 1].ID, limit) == nil {
+	if mysql.SetQuota(userList[choice-1].ID, limit) == nil {
 		fmt.Println("成功设置用户" + userList[choice-1].Username + "限制流量" + util.Bytefmt(uint64(limit)))
 	}
 }
@@ -72,7 +71,7 @@ func CleanData() {
 	userList := *UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要清空流量的用户序号: ", userList)
-	if mysql.CleanData(userList[choice - 1].ID) == nil {
+	if mysql.CleanData(userList[choice-1].ID) == nil {
 		fmt.Println("清空流量成功!")
 	}
 }
@@ -81,19 +80,19 @@ func UserList(ids ...string) *[]core.User {
 	mysql := core.GetMysql()
 	userList := *mysql.GetData(ids...)
 	for i, k := range userList {
-		pass, err := database.GetValue(k.Username + "_pass")
+		pass, err := core.GetValue(k.Username + "_pass")
 		if err != nil {
 			pass = ""
 		}
-		fmt.Printf("%d.\n", i + 1)
+		fmt.Printf("%d.\n", i+1)
 		fmt.Println("用户名: " + k.Username)
 		fmt.Println("密码: " + pass)
-		fmt.Println("上传流量: " + util.Bytefmt(k.Upload))
-		fmt.Println("下载流量: " + util.Bytefmt(k.Download))
+		fmt.Println("上传流量: " + util.Cyan(util.Bytefmt(k.Upload)))
+		fmt.Println("下载流量: " + util.Cyan(util.Bytefmt(k.Download)))
 		if k.Quota < 0 {
-			fmt.Println("流量限额: 无限制")
+			fmt.Println(util.Cyan("流量限额: 无限制"))
 		} else {
-			fmt.Println("流量限额: " + util.Bytefmt(uint64(k.Quota)))
+			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
 		}
 		fmt.Println()
 	}

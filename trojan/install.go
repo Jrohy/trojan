@@ -8,13 +8,12 @@ import (
 	"strings"
 	"time"
 	"trojan/core"
-	"trojan/database"
 	"trojan/util"
 )
 
 var (
 	dockerInstallUrl = "https://git.io/docker-install"
-	mysqlDodkcerRun = "docker run --name trojan-mysql --restart=always -p %d:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7"
+	mysqlDodkcerRun  = "docker run --name trojan-mysql --restart=always -p %d:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7"
 )
 
 func InstallMenu() {
@@ -99,7 +98,7 @@ func InstallTls() {
 			core.WriterTls(crtFile, keyFile)
 		}
 	}
-	database.SetValue("domain", domain)
+	core.SetValue("domain", domain)
 	fmt.Println()
 }
 
@@ -109,7 +108,7 @@ func InstallMysql() {
 	if choice < 0 {
 		return
 	} else if choice == 1 {
-		mysql = core.Mysql{ServerAddr:"127.0.0.1", ServerPort: util.RandomPort(), Password: util.RandString(5), Username:"root", Database:"trojan"}
+		mysql = core.Mysql{ServerAddr: "127.0.0.1", ServerPort: util.RandomPort(), Password: util.RandString(5), Username: "root", Database: "trojan"}
 		InstallDocker()
 		fmt.Println(fmt.Sprintf(mysqlDodkcerRun, mysql.ServerPort, mysql.Password))
 		if util.CheckCommandExists("setenforce") {
@@ -129,7 +128,7 @@ func InstallMysql() {
 		}
 		fmt.Println("mysql启动成功!")
 	} else if choice == 2 {
-		mysql = core.Mysql{Username:"root"}
+		mysql = core.Mysql{Username: "root"}
 		for {
 			for {
 				mysqlUrl := util.Input("请输入mysql连接地址(格式: host:port), 默认连接地址为127.0.0.1:3306, 使用直接回车, 否则输入自定义连接地址: ",

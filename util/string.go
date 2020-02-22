@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+const (
+	RED     = "\033[31m"
+	GREEN   = "\033[32m"
+	YELLOW  = "\033[33m"
+	BLUE    = "\033[34m"
+	FUCHSIA = "\033[35m"
+	CYAN    = "\033[36m"
+	WHITE   = "\033[37m"
+	RESET   = "\033[0m"
+)
+
 // IsNumeric is_numeric()
 // Numeric strings consist of optional sign, any number of digits, optional decimal part and optional exponential part.
 // Thus +0123.45e6 is a valid numeric value.
@@ -99,7 +110,7 @@ func LoopInput(tip string, choices interface{}) int {
 	length := reflectValue.Len()
 	if reflectValue.Type().String() == "[]string" {
 		for i := 0; i < length; i++ {
-			fmt.Printf("%d.%s\n\n", i + 1, reflectValue.Index(i).Interface())
+			fmt.Printf("%d.%s\n\n", i+1, reflectValue.Index(i).Interface())
 		}
 	}
 	for {
@@ -135,3 +146,30 @@ func Input(tip string, defaultValue string) string {
 	return input
 }
 
+func Red(str string) string {
+	return RED + str + RESET
+}
+
+func Green(str string) string {
+	return GREEN + str + RESET
+}
+
+func Yellow(str string) string {
+	return YELLOW + str + RESET
+}
+
+func Blue(str string) string {
+	return BLUE + str + RESET
+}
+
+func Fuchsia(str string) string {
+	return FUCHSIA + str + RESET
+}
+
+func Cyan(str string) string {
+	return CYAN + str + RESET
+}
+
+func White(str string) string {
+	return WHITE + str + RESET
+}

@@ -22,9 +22,10 @@ import (
 	"trojan/trojan"
 	"trojan/util"
 )
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "trojan",
+	Use: "trojan",
 	Run: func(cmd *cobra.Command, args []string) {
 		mainMenu()
 	},
@@ -54,7 +55,7 @@ func mainMenu() {
 exit:
 	for {
 		fmt.Println()
-		fmt.Println("欢迎使用trojan管理程序")
+		fmt.Println(util.Cyan("欢迎使用trojan管理程序"))
 		fmt.Println()
 		menuList := []string{"trojan管理", "用户管理", "安装管理", "查看配置", "生成客户端配置文件"}
 		switch util.LoopInput("请选择: ", menuList) {

@@ -20,7 +20,6 @@ func ControllMenu() {
 	}
 }
 
-
 func Restart() {
 	util.ExecCommand("systemctl restart trojan")
 }
