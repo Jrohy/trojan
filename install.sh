@@ -54,7 +54,6 @@ help(){
     echo "bash $0 [-h|--help] [--remove]"
     echo "  -h, --help           Show help"
     echo "      --remove         remove trojan"
-    echo "                       no params to new install"
     return 0
 }
 
@@ -100,9 +99,6 @@ checkSys() {
 #安装依赖
 installDependent(){
     if [[ ${PACKAGE_MANAGER} == 'dnf' || ${PACKAGE_MANAGER} == 'yum' ]];then
-        if [[ ${PACKAGE_MANAGER} == 'yum' ]];then
-            ${PACKAGE_MANAGER} ntpdate -y
-        fi
         ${PACKAGE_MANAGER} install socat bash-completion -y
     else
         ${PACKAGE_MANAGER} update
