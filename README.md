@@ -13,15 +13,16 @@ trojan多用户管理部署脚本
 ###  a. 一键脚本安装
 ```
 #安装
-链接待补充
+source <(https://git.io/trojan-install)
 
 #卸载
-链接待补充
+source <(https://git.io/trojan-install) --remove
 
 ```
 
 ### b. 二进制文件运行
-到release页面直接下载二进制文件后, 放到linux服务器上
+到release页面直接下载二进制文件后, 放到linux服务器上  
+**因为trojan本身仅支持x86_64, 所以只编译了x86_64版本的管理程序**
 ```
 chomd +x trojan
 ./trojan
