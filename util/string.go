@@ -101,14 +101,14 @@ func getChar(str string) string {
 	}
 }
 
-func LoopInput(tip string, choices interface{}) int {
+func LoopInput(tip string, choices interface{}, print bool) int {
 	reflectValue := reflect.ValueOf(choices)
 	if reflectValue.Kind() != reflect.Slice && reflectValue.Kind() != reflect.Array {
 		fmt.Println("only support slice or array type!")
 		return -1
 	}
 	length := reflectValue.Len()
-	if reflectValue.Type().String() == "[]string" {
+	if print && reflectValue.Type().String() == "[]string" {
 		for i := 0; i < length; i++ {
 			fmt.Printf("%d.%s\n\n", i+1, reflectValue.Index(i).Interface())
 		}

@@ -23,7 +23,7 @@ func GenClientJson() {
 		user = userList[0]
 	} else {
 		UserList()
-		choice := util.LoopInput("请选择要生成配置文件的用户序号: ", userList)
+		choice := util.LoopInput("请选择要生成配置文件的用户序号: ", userList, true)
 		if choice < 0 {
 			return
 		}

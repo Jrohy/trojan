@@ -10,7 +10,7 @@ import (
 func UserMenu() {
 	fmt.Println()
 	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量"}
-	switch util.LoopInput("请选择: ", menu) {
+	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
 		AddUser()
 	case 2:
@@ -36,7 +36,7 @@ func AddUser() {
 func DelUser() {
 	userList := *UserList()
 	mysql := core.GetMysql()
-	choice := util.LoopInput("请选择要删除的用户序号: ", userList)
+	choice := util.LoopInput("请选择要删除的用户序号: ", userList, true)
 	if mysql.DeleteUser(userList[choice-1].ID) == nil {
 		fmt.Println("删除用户成功!")
 	}
@@ -49,7 +49,7 @@ func SetUserQuota() {
 	)
 	userList := *UserList()
 	mysql := core.GetMysql()
-	choice := util.LoopInput("请选择要限制流量的用户序号: ", userList)
+	choice := util.LoopInput("请选择要限制流量的用户序号: ", userList, true)
 	if choice == -1 {
 		return
 	}
@@ -70,7 +70,7 @@ func SetUserQuota() {
 func CleanData() {
 	userList := *UserList()
 	mysql := core.GetMysql()
-	choice := util.LoopInput("请选择要清空流量的用户序号: ", userList)
+	choice := util.LoopInput("请选择要清空流量的用户序号: ", userList, true)
 	if mysql.CleanData(userList[choice-1].ID) == nil {
 		fmt.Println("清空流量成功!")
 	}

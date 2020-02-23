@@ -19,7 +19,7 @@ var (
 func InstallMenu() {
 	fmt.Println()
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
-	switch util.LoopInput("请选择: ", menu) {
+	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
 		InstallTrojan()
 	case 2:
@@ -50,7 +50,7 @@ func InstallTrojan() {
 
 func InstallTls() {
 	domain := ""
-	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"})
+	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"}, true)
 	if choice == 1 {
 		localIP := util.GetLocalIP()
 		fmt.Printf("本机ip: %s\n", localIP)
@@ -104,7 +104,7 @@ func InstallTls() {
 
 func InstallMysql() {
 	var mysql core.Mysql
-	choice := util.LoopInput("请选择: ", []string{"安装docker版mysql", "输入自定义mysql连接"})
+	choice := util.LoopInput("请选择: ", []string{"安装docker版mysql", "输入自定义mysql连接"}, true)
 	if choice < 0 {
 		return
 	} else if choice == 1 {
