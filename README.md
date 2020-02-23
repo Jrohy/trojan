@@ -1,9 +1,9 @@
 # trojan
 
 docker 运行
-`
+```
 #systemctl可用
 docker run -d --name test --net=host --privileged trojan-manager /sbin/init
 #容器里面操作容器
 docker run -it -d --name test -v /var/run/docker.sock:/var/run/docker.sock -v `which docker`:`which docker` centos tail -f
-`
+```
