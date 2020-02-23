@@ -90,7 +90,7 @@ func UserList(ids ...string) *[]core.User {
 		fmt.Println("上传流量: " + util.Cyan(util.Bytefmt(k.Upload)))
 		fmt.Println("下载流量: " + util.Cyan(util.Bytefmt(k.Download)))
 		if k.Quota < 0 {
-			fmt.Println(util.Cyan("流量限额: 无限制"))
+			fmt.Println("流量限额: " + util.Cyan("无限制"))
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
 		}
