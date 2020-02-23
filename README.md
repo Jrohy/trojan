@@ -11,6 +11,8 @@ trojan多用户管理部署程序
 - 生成客户端配置文件
 
 ## 安装方式
+*trojan使用请提前准备好服务器可用的域名*
+
 ###  a. 一键脚本安装
 ```
 #安装
@@ -20,6 +22,7 @@ source <(curl -sL https://git.io/trojan-install)
 source <(curl -sL https://git.io/trojan-install) --remove
 
 ```
+安装完后输入'trojan'即可进入管理程序
 
 ### b. 二进制文件运行
 到release页面直接下载二进制文件后, 放到linux服务器上  
