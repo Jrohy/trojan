@@ -59,14 +59,14 @@ help(){
 
 removeTrojan() {
     #移除trojan
-    rm -rf /usr/bin/trojan
-    rm -rf /usr/local/etc/trojan
-    rm -f /etc/systemd/system/trojan.service
+    rm -rf /usr/bin/trojan >/dev/null 2>&1
+    rm -rf /usr/local/etc/trojan >/dev/null 2>&1
+    rm -f /etc/systemd/system/trojan.service >/dev/null 2>&1
     systemctl daemon-reload
 
     #移除trojan管理程序
-    rm -f /usr/local/bin/trojan
-    rm -rf /var/lib/trojan-manager
+    rm -f /usr/local/bin/trojan >/dev/null 2>&1
+    rm -rf /var/lib/trojan-manager >/dev/null 2>&1
     
     #移除环境变量
     sed -i '/trojan/d' ~/.${SHELL_WAY}rc
@@ -112,7 +112,7 @@ installTrojan(){
     chmod +x /usr/local/bin/trojan
     #命令补全环境变量
     [[ -z $(grep trojan ~/.${SHELL_WAY}rc) ]] && { echo "source <(trojan completion ${SHELL_WAY})" >> ~/.${SHELL_WAY}rc; source ~/.${SHELL_WAY}rc; }
-    if [[ UPDATE == 0 ]];then
+    if [[ $UPDATE == 0 ]];then
         colorEcho $GREEN "安装trojan管理程序成功!\n"
         echo "运行命令`colorEcho $BLUE trojan`可进行trojan管理"
         trojan
@@ -124,6 +124,7 @@ installTrojan(){
 main(){
     [[ ${HELP} == 1 ]] && help && return
     [[ ${REMOVE} == 1 ]] && removeTrojan && return
+    [[ $UPDATE == 0 ]] && echo "正在安装trojan管理程序.." || echo "正在更新trojan管理程序.."
     checkSys
     installDependent
     installTrojan
