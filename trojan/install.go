@@ -160,5 +160,6 @@ func InstallMysql() {
 	mysql.CreateTable()
 	core.WriterMysql(&mysql)
 	AddUser()
+	Restart()
 	fmt.Println()
 }
