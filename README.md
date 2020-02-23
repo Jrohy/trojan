@@ -11,7 +11,7 @@ trojan多用户管理部署程序
 - 生成客户端配置文件
 
 ## 安装方式
-*trojan使用请提前准备好服务器可用的域名*
+*trojan使用请提前准备好服务器可用的域名*  
 
 ###  a. 一键脚本安装
 ```
@@ -68,3 +68,6 @@ Available Commands:
 Flags:
   -h, --help   help for trojan
 ```
+
+## 注意
+安装完trojan后建议开启BBR等加速: [Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)
