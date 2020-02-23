@@ -111,8 +111,9 @@ installDependent(){
 }
 
 installTrojan(){
-    LASTEST_VERSION=$(curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4 | sed 's/v//g')
+    LASTEST_VERSION=$(curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4)
     curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/trojan" -o /usr/local/bin/trojan
+    chmod +x /usr/local/bin/trojan
     #命令补全环境变量
     [[ -z $(grep trojan ~/.${SHELL_WAY}rc) ]] && { echo "source <(trojan completion ${SHELL_WAY})" >> ~/.${SHELL_WAY}rc; source ~/.${SHELL_WAY}rc; }
     if [[ UPDATE == 0 ]];then
