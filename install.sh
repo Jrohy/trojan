@@ -69,7 +69,7 @@ removeTrojan() {
     rm -rf /var/lib/trojan-manager
     
     #移除环境变量
-    sed -i '/trojan/d' ~/${SHELL_WAY}rc
+    sed -i '/trojan/d' ~/.${SHELL_WAY}rc
     source ~/.${SHELL_WAY}rc
 
 
