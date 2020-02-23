@@ -4,6 +4,9 @@ GITHUB_TOKEN=""
 
 PROJECT="Jrohy/trojan"
 
+#获取当前的这个脚本所在绝对路径
+SHELL_PATH=$(cd `dirname $0`; pwd)
+
 RELEASE_ID=`curl -H 'Cache-Control: no-cache' -s https://api.github.com/repos/$PROJECT/releases/latest|grep id|awk 'NR==1{print $2}'|sed 's/,//'`
 
 function uploadfile() {
@@ -26,11 +29,11 @@ function upload() {
   uploadfile $DGST
 }
 
-pushd `pwd` &>/dev/null
+cd $SHELL_PATH/..
 
 go get -u github.com/gobuffalo/packr/packr
 
-packr build -ldflags "-s -w" -o "result/trojan" ..
+packr build -ldflags "-s -w" -o "result/trojan" .
 
 cd result
 
@@ -41,9 +44,8 @@ do
     upload $ITEM
 done
 
-echo ""
 echo "upload completed!"
 
-popd &>/dev/null
+cd $SHELL_PATH/..
 
 rm -rf result
