@@ -31,9 +31,11 @@ function upload() {
 
 cd $SHELL_PATH/..
 
-go get -u github.com/gobuffalo/packr/packr
+go get -u github.com/gobuffalo/packr/v2/packr2
 
-packr build -ldflags "-s -w" -o "result/trojan" .
+packr2
+
+go build -ldflags "-s -w" -o "result/trojan" .
 
 cd result
 
@@ -47,5 +49,7 @@ done
 echo "upload completed!"
 
 cd $SHELL_PATH/..
+
+packr2 clean
 
 rm -rf result
