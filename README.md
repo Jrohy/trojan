@@ -13,10 +13,10 @@ trojan多用户管理部署脚本
 ###  a. 一键脚本安装
 ```
 #安装
-source <(https://git.io/trojan-install)
+source <(curl -sL https://git.io/trojan-install)
 
 #卸载
-source <(https://git.io/trojan-install) --remove
+source <(curl -sL https://git.io/trojan-install) --remove
 
 ```
 
