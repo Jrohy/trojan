@@ -10,24 +10,24 @@ var configPath = "/usr/local/etc/trojan/config.json"
 
 type ServerConfig struct {
 	Config
-	SSl          ServerSSL       `json:"ssl"`
-	Tcp          ServerTCP       `json:"tcp"`
-	Mysql        Mysql           `json:"mysql"`
+	SSl   ServerSSL `json:"ssl"`
+	Tcp   ServerTCP `json:"tcp"`
+	Mysql Mysql     `json:"mysql"`
 }
 
 type ServerSSL struct {
 	SSL
-	Key                   string   `json:"key"`
-	KeyPassword           string   `json:"key_password"`
-	PreferServerCipher    bool     `json:"prefer_server_cipher"`
-	SessionTimeout        int      `json:"session_timeout"`
-	PlainHttpResponse     string   `json:"plain_http_response"`
-	Dhparam               string   `json:"dhparam"`
+	Key                string `json:"key"`
+	KeyPassword        string `json:"key_password"`
+	PreferServerCipher bool   `json:"prefer_server_cipher"`
+	SessionTimeout     int    `json:"session_timeout"`
+	PlainHttpResponse  string `json:"plain_http_response"`
+	Dhparam            string `json:"dhparam"`
 }
 
 type ServerTCP struct {
 	TCP
-	PreferIPv4        bool   `json:"prefer_ipv4"`
+	PreferIPv4 bool `json:"prefer_ipv4"`
 }
 
 func Load(path string) *ServerConfig {
@@ -73,12 +73,18 @@ func WriterMysql(mysql *Mysql) bool {
 	mysql.Database = "trojan"
 	config := Load("")
 	config.Mysql = *mysql
-	return  Save(config, "")
+	return Save(config, "")
 }
 
 func WriterTls(cert string, key string) bool {
 	config := Load("")
 	config.SSl.Cert = cert
 	config.SSl.Key = key
-	return  Save(config, "")
+	return Save(config, "")
+}
+
+func WriterPassword(pass []string) bool {
+	config := Load("")
+	config.Password = pass
+	return Save(config, "")
 }

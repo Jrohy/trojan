@@ -55,7 +55,7 @@ func asyncLog(reader io.ReadCloser) error {
 }
 
 // ExecCommand 运行命令并实时查看运行结果
-func ExecCommand(command string) {
+func ExecCommand(command string) error {
 	cmd := exec.Command("bash", "-c", command)
 
 	stdout, _ := cmd.StdoutPipe()
@@ -63,7 +63,7 @@ func ExecCommand(command string) {
 
 	if err := cmd.Start(); err != nil {
 		fmt.Println("Error:The command is err: ", err.Error())
-		return
+		return err
 	}
 
 	go asyncLog(stdout)
@@ -73,7 +73,9 @@ func ExecCommand(command string) {
 		if !strings.Contains(err.Error(), "exit status") {
 			fmt.Println("wait:", err.Error())
 		}
+		return err
 	}
+	return nil
 }
 
 func ExecCommandWithResult(command string) string {

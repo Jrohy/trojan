@@ -12,7 +12,7 @@ import (
 )
 
 func PortIsUse(port int) bool {
-	if _, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), time.Millisecond * 50); err == nil {
+	if _, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), time.Millisecond*50); err == nil {
 		return true
 	} else {
 		return false
@@ -23,7 +23,7 @@ func RandomPort() int {
 	for {
 		rand.Seed(time.Now().UnixNano())
 		newPort := rand.Intn(65536)
-		if ! PortIsUse(newPort) {
+		if !PortIsUse(newPort) {
 			return newPort
 		}
 	}
@@ -47,7 +47,7 @@ func GetLocalIP() string {
 		resp, err = http.Get("http://icanhazip.com")
 	}
 	defer resp.Body.Close()
-	s, err:=ioutil.ReadAll(resp.Body)
+	s, err := ioutil.ReadAll(resp.Body)
 	return string(s)
 }
 
@@ -71,7 +71,7 @@ func InstallPack(name string) {
 	}
 }
 
-func OpenPort(port int)  {
+func OpenPort(port int) {
 	if CheckCommandExists("firewall-cmd") {
 		ExecCommand(fmt.Sprintf("firewall-cmd --zone=public --add-port=%d/tcp --add-port=%d/udp --permanent >/dev/null 2>&1", port, port))
 		ExecCommand("firewall-cmd --reload >/dev/null 2>&1")

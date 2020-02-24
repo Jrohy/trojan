@@ -64,6 +64,7 @@ Available Commands:
   stop        停止trojan
   tls         证书安装
   update      更新trojan
+  version     显示版本号
 
 Flags:
   -h, --help   help for trojan

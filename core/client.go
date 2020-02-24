@@ -9,15 +9,15 @@ import (
 
 type ClientConfig struct {
 	Config
-	SSl          ClientSSL       `json:"ssl"`
-	Tcp          ClientTCP       `json:"tcp"`
+	SSl ClientSSL `json:"ssl"`
+	Tcp ClientTCP `json:"tcp"`
 }
 
 type ClientSSL struct {
 	SSL
-	Verify                bool     `json:"verify"`
-	VerifyHostname        bool     `json:"verify_hostname"`
-	Sni                   string   `json:"sni"`
+	Verify         bool   `json:"verify"`
+	VerifyHostname bool   `json:"verify_hostname"`
+	Sni            string `json:"sni"`
 }
 
 type ClientTCP struct {

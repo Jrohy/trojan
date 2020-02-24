@@ -21,15 +21,27 @@ func ControllMenu() {
 }
 
 func Restart() {
-	util.ExecCommand("systemctl restart trojan")
+	if err := util.ExecCommand("systemctl restart trojan"); err != nil {
+		fmt.Println(util.Red("重启trojan失败!"))
+	} else {
+		fmt.Println(util.Green("重启trojan成功!"))
+	}
 }
 
 func Start() {
-	util.ExecCommand("systemctl start trojan")
+	if err := util.ExecCommand("systemctl start trojan"); err != nil {
+		fmt.Println(util.Red("启动trojan失败!"))
+	} else {
+		fmt.Println(util.Green("启动trojan成功!"))
+	}
 }
 
 func Stop() {
-	util.ExecCommand("systemctl stop trojan")
+	if err := util.ExecCommand("systemctl stop trojan"); err != nil {
+		fmt.Println(util.Red("停止trojan失败!"))
+	} else {
+		fmt.Println(util.Green("停止trojan成功!"))
+	}
 }
 
 func Status() {

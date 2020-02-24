@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"trojan/core"
 	"trojan/trojan"
 	"trojan/util"
 )
@@ -44,6 +45,7 @@ func check() {
 	if !util.IsExists("/usr/local/etc/trojan/config.json") {
 		fmt.Println("本机未安装trojan, 正在自动安装...")
 		trojan.InstallTrojan()
+		core.WriterPassword(nil)
 		trojan.InstallTls()
 		trojan.InstallMysql()
 		trojan.Restart()

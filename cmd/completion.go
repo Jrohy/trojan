@@ -36,10 +36,10 @@ b. zsh环境添加以下命令到~/.zshrc
 
 func init() {
 	rootCmd.AddCommand(completionCmd)
-	completionCmd.AddCommand(&cobra.Command{Use:"bash", Short:"bash命令补全", Run: func(cmd *cobra.Command, args []string) {
+	completionCmd.AddCommand(&cobra.Command{Use: "bash", Short: "bash命令补全", Run: func(cmd *cobra.Command, args []string) {
 		rootCmd.GenBashCompletion(os.Stdout)
 	}})
-	completionCmd.AddCommand(&cobra.Command{Use:"zsh", Short:"zsh命令补全",  Run: func(cmd *cobra.Command, args []string) {
+	completionCmd.AddCommand(&cobra.Command{Use: "zsh", Short: "zsh命令补全", Run: func(cmd *cobra.Command, args []string) {
 		rootCmd.GenZshCompletion(os.Stdout)
 	}})
 }
