@@ -26,7 +26,10 @@ func InstallMenu() {
 		InstallTls()
 	case 3:
 		InstallMysql()
+	default:
+		return
 	}
+	Restart()
 }
 
 func InstallDocker() {
@@ -45,6 +48,7 @@ func InstallTrojan() {
 	util.ExecCommand(data)
 	util.ExecCommand("systemctl restart trojan")
 	util.ExecCommand("systemctl enable trojan")
+	util.OpenPort(443)
 	fmt.Println()
 }
 
@@ -114,6 +118,7 @@ func InstallMysql() {
 		if util.CheckCommandExists("setenforce") {
 			util.ExecCommand("setenforce 0")
 		}
+		util.OpenPort(mysql.ServerPort)
 		util.ExecCommand(fmt.Sprintf(mysqlDodkcerRun, mysql.ServerPort, mysql.Password))
 		fmt.Println("mysql启动中, 请稍等...")
 		for {
@@ -160,6 +165,5 @@ func InstallMysql() {
 	mysql.CreateTable()
 	core.WriterMysql(&mysql)
 	AddUser()
-	Restart()
 	fmt.Println()
 }
