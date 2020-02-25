@@ -111,7 +111,8 @@ installTrojan(){
     curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/trojan" -o /usr/local/bin/trojan
     chmod +x /usr/local/bin/trojan
     #命令补全环境变量
-    [[ -z $(grep trojan ~/.${SHELL_WAY}rc) ]] && { echo "source <(trojan completion ${SHELL_WAY})" >> ~/.${SHELL_WAY}rc; source ~/.${SHELL_WAY}rc; }
+    [[ -z $(grep trojan ~/.${SHELL_WAY}rc) ]] && echo "source <(trojan completion ${SHELL_WAY})" >> ~/.${SHELL_WAY}rc
+    source ~/.${SHELL_WAY}rc
     if [[ $UPDATE == 0 ]];then
         colorEcho $GREEN "安装trojan管理程序成功!\n"
         echo "运行命令`colorEcho $BLUE trojan`可进行trojan管理\n"
@@ -126,7 +127,7 @@ main(){
     [[ ${REMOVE} == 1 ]] && removeTrojan && return
     [[ $UPDATE == 0 ]] && echo "正在安装trojan管理程序.." || echo "正在更新trojan管理程序.."
     checkSys
-    installDependent
+    [[ $UPDATE == 0 ]] && installDependent
     installTrojan
 }
 
