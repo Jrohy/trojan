@@ -16,7 +16,7 @@ trojan多用户管理部署程序
 
 ###  a. 一键脚本安装
 ```
-#安装
+#安装/更新
 source <(curl -sL https://git.io/trojan-install)
 
 #卸载
