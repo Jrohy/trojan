@@ -16,7 +16,6 @@ func GenClientJson() {
 		fmt.Println(util.Yellow("无域名记录, 生成的配置文件需手填域名字段(ssl.sni)"))
 		domain = ""
 	}
-	ip := util.GetLocalIP()
 	mysql := core.GetMysql()
 	userList := *mysql.GetData()
 	if len(userList) == 1 {
@@ -34,7 +33,7 @@ func GenClientJson() {
 		fmt.Println(util.Red("无法获取选择用户的原始密码, 生成配置文件失败!"))
 		return
 	}
-	if !core.WriteClient(password, ip, domain, clientPath) {
+	if !core.WriteClient(password, domain, clientPath) {
 		fmt.Println(util.Red("生成配置文件失败!"))
 	} else {
 		fmt.Println("成功生成配置文件: " + util.Green(clientPath))

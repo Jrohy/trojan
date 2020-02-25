@@ -79,6 +79,10 @@ func CleanData() {
 func UserList(ids ...string) *[]core.User {
 	mysql := core.GetMysql()
 	userList := *mysql.GetData(ids...)
+	domain, err := core.GetValue("domain")
+	if err != nil {
+		domain = ""
+	}
 	for i, k := range userList {
 		pass, err := core.GetValue(k.Username + "_pass")
 		if err != nil {
@@ -94,6 +98,7 @@ func UserList(ids ...string) *[]core.User {
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
 		}
+		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:443", pass, domain)))
 		fmt.Println()
 	}
 	return &userList

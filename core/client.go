@@ -24,7 +24,7 @@ type ClientTCP struct {
 	TCP
 }
 
-func WriteClient(password string, ip string, domain string, writePath string) bool {
+func WriteClient(password string, domain string, writePath string) bool {
 	box := packr.New("client.json", "../asset")
 	data, err := box.Find("client.json")
 	if err != nil {
@@ -36,9 +36,8 @@ func WriteClient(password string, ip string, domain string, writePath string) bo
 		fmt.Println(err)
 		return false
 	}
-	config.RemoteAddr = ip
+	config.RemoteAddr = domain
 	config.Password = []string{password}
-	config.SSl.Sni = domain
 	outData, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
 		fmt.Println(err)
