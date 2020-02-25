@@ -32,7 +32,7 @@ var versionCmd = &cobra.Command{
 		fmt.Println("管理程序版本号: " + util.Cyan(VERSION))
 		fmt.Println()
 		fmt.Println("trojan版本号: ")
-		util.ExecCommand("/usr/bin/trojan/trojan -v")
+		fmt.Println(util.ExecCommandWithResult("/usr/bin/trojan/trojan -v"))
 	},
 }
 

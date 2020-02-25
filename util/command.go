@@ -79,7 +79,7 @@ func ExecCommand(command string) error {
 }
 
 func ExecCommandWithResult(command string) string {
-	out, err := exec.Command("bash", "-c", command).Output()
+	out, err := exec.Command("bash", "-c", command).CombinedOutput()
 	if err != nil {
 		return ""
 	}
