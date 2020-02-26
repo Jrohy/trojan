@@ -54,7 +54,7 @@ func Start() {
 
 func Stop() {
 	if util.IsExists("/.dockerenv") {
-		util.ExecCommand(`ps aux|grep "/usr/bin/trojan/trojan"|grep -v grep|awk '{print $2}'|xargs -r kill -9 2>/dev/null`)
+		util.ExecCommandWithResult(`ps aux|grep "/usr/bin/trojan/trojan"|grep -v grep|awk '{print $2}'|xargs -r kill -9`)
 		fmt.Println(util.Green("停止trojan成功!"))
 	} else {
 		if err := util.ExecCommand("systemctl stop trojan"); err != nil {
