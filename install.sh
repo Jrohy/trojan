@@ -67,11 +67,14 @@ removeTrojan() {
     #移除trojan管理程序
     rm -f /usr/local/bin/trojan >/dev/null 2>&1
     rm -rf /var/lib/trojan-manager >/dev/null 2>&1
+
+    #移除trojan的专用mysql
+    docker rm -f trojan-mysql
+    rm -rf /home/mysql >/dev/null 2>&1
     
     #移除环境变量
     sed -i '/trojan/d' ~/.${SHELL_WAY}rc
     source ~/.${SHELL_WAY}rc
-
 
     colorEcho ${GREEN} "uninstall success!"
 }
