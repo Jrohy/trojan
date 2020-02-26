@@ -1,12 +1,15 @@
 package util
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 // CheckCommandExists 检查命令是否存在
@@ -84,4 +87,25 @@ func ExecCommandWithResult(command string) string {
 		return ""
 	}
 	return string(out)
+}
+
+func ExecCommandWithTimeout(command string) ([]byte, error) {
+	ctxt, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctxt, "bash", "-c", command)
+
+	var buf bytes.Buffer
+	cmd.Stdout = &buf
+	cmd.Stderr = &buf
+
+	if err := cmd.Start(); err != nil {
+		return buf.Bytes(), err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return buf.Bytes(), err
+	}
+
+	return buf.Bytes(), nil
 }

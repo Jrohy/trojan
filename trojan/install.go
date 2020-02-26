@@ -46,8 +46,10 @@ func InstallTrojan() {
 		fmt.Println(err)
 	}
 	util.ExecCommand(data)
-	util.ExecCommand("systemctl restart trojan")
-	util.ExecCommand("systemctl enable trojan")
+	if !util.IsExists("/.dockerenv") {
+		util.ExecCommand("systemctl restart trojan")
+		util.ExecCommand("systemctl enable trojan")
+	}
 	util.OpenPort(443)
 	fmt.Println()
 }
