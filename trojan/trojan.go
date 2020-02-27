@@ -41,7 +41,7 @@ func Start() {
 			Stop()
 		}
 		util.ExecCommand(`echo "" > /.run.log`)
-		util.ExecCommandWithTimeout(`/usr/bin/trojan/trojan -c /usr/local/etc/trojan/config.json -l /.run.log & -y`)
+		util.StartProcess("/usr/bin/trojan/trojan", "-c", "/usr/local/etc/trojan/config.json", "-l", "/.run.log")
 		fmt.Println(util.Green("启动trojan成功!"))
 	} else {
 		if err := util.ExecCommand("systemctl start trojan"); err != nil {
