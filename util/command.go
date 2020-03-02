@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"os/exec"
 	"strings"
 )
@@ -85,20 +84,4 @@ func ExecCommandWithResult(command string) string {
 		return ""
 	}
 	return string(out)
-}
-
-func StartProcess(name string, args ...string) {
-	env := os.Environ()
-	procAttr := &os.ProcAttr{
-		Env: env,
-		Files: []*os.File{
-			os.Stdin,
-			os.Stdout,
-			os.Stderr,
-		},
-	}
-	_, err := os.StartProcess(name, args, procAttr)
-	if err != nil {
-		fmt.Println(err)
-	}
 }

@@ -109,8 +109,15 @@ func InstallTls() {
 }
 
 func InstallMysql() {
-	var mysql core.Mysql
-	choice := util.LoopInput("请选择: ", []string{"安装docker版mysql", "输入自定义mysql连接"}, true)
+	var (
+		mysql  core.Mysql
+		choice int
+	)
+	if util.IsExists("/.dockerenv") {
+		choice = 2
+	} else {
+		choice = util.LoopInput("请选择: ", []string{"安装docker版mysql", "输入自定义mysql连接"}, true)
+	}
 	if choice < 0 {
 		return
 	} else if choice == 1 {
