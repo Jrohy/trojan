@@ -45,7 +45,17 @@ source ~/.zshrc
 如果还是无法补全, 可能系统缺少bash-completion依赖, 需手动安装
 
 ### c. docker运行
-开发中
+1. 安装mysql
+```
+docker run --name trojan-mysql --restart=always -p 3306:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=trojan -e MYSQL_ROOT_HOST=% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7
+```
+端口和root密码以及持久化目录都可以改成其他的
+
+2. 安装trojan
+```
+docker run -it -d --name trojan --net=host --restart=always --privileged jrohy/trojan init
+```
+运行完后进入容器 `docker exec -it trojan bash`, 然后输入'trojan'即可进行初始化安装
 
 ## 命令行
 ```
