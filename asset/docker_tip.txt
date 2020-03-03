@@ -1,3 +1,6 @@
-docker 运行
-docker run -it -d --name trojan --net=host --restart=always --privileged -v /var/run/docker.sock:/var/run/docker.sock -v `which docker`:`which docker` jrohy/trojan
+mysql 运行
+docker run --name trojan-mysql --restart=always -p 3306:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=trojan -e MYSQL_ROOT_HOST=% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7
+
+trojan 运行
+docker run -it -d --name trojan --net=host --restart=always --privileged jrohy/trojan init
 

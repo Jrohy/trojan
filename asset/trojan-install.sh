@@ -58,7 +58,7 @@ else
     echo Skipping installing $NAME server config...
 fi
 
-if [[ ! -e "/.dockerenv" && -d "$SYSTEMDPREFIX" ]]; then
+if [[ -d "$SYSTEMDPREFIX" ]]; then
     echo Installing $NAME systemd service to $SYSTEMDPATH...
     if ! [[ -f "$SYSTEMDPATH" ]] || prompt "The systemd service already exists in $SYSTEMDPATH, overwrite?"; then
         cat > "$SYSTEMDPATH" << EOF
