@@ -11,7 +11,4 @@ RUN yum install socat bash-completion iptables crontabs openssl -y && \
     curl -L "$DOWNLAOD_URL/$LATEST_VERSION/trojan" -o /usr/local/bin/trojan && \
     chmod +x /usr/local/bin/trojan && \
     echo "source <(trojan completion bash)" >> ~/.bashrc && \
-    touch /.run.log && \
     yum clean all
-
-ENTRYPOINT ["tail", "-f", "/.run.log"]
