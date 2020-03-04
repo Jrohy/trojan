@@ -147,12 +147,12 @@ func InstallMysql() {
 					"127.0.0.1:3306")
 				urlInfo := strings.Split(mysqlUrl, ":")
 				if len(urlInfo) != 2 {
-					fmt.Printf("输入的%s不符合匹配格式(host:port)", mysqlUrl)
+					fmt.Printf("输入的%s不符合匹配格式(host:port)\n", mysqlUrl)
 					continue
 				}
 				port, err := strconv.Atoi(urlInfo[1])
 				if err != nil {
-					fmt.Printf("%s不是数字: ", urlInfo[1])
+					fmt.Printf("%s不是数字\n", urlInfo[1])
 					continue
 				}
 				mysql.ServerAddr, mysql.ServerPort = urlInfo[0], port
@@ -160,17 +160,19 @@ func InstallMysql() {
 			}
 			mysql.Password = util.Input("请输入mysql root用户的密码: ", "")
 			db := mysql.GetDB()
-			if db == nil {
-				continue
-			} else {
+			if db != nil && db.Ping() == nil {
 				db.Exec("CREATE DATABASE IF NOT EXISTS trojan;")
+				break
+			} else {
+				fmt.Println("连接mysql失败, 请重新输入")
 			}
-			break
 		}
 	}
 	mysql.Database = "trojan"
 	mysql.CreateTable()
 	core.WriterMysql(&mysql)
-	AddUser()
+	if len(*mysql.GetData()) == 0 {
+		AddUser()
+	}
 	fmt.Println()
 }

@@ -41,7 +41,7 @@ func (mysql *Mysql) CreateTable() {
 	db := mysql.GetDB()
 	defer db.Close()
 	if _, err := db.Exec(`
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     username VARCHAR(64) NOT NULL,
     password CHAR(56) NOT NULL,
