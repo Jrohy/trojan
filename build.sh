@@ -31,8 +31,6 @@ function upload() {
 
 cd $SHELL_PATH
 
-go get -u github.com/gobuffalo/packr/v2/packr2
-
 packr2
 
 go build -ldflags "-s -w -X 'trojan/cmd.Version=`git tag|awk 'END {print}'`' -X 'trojan/cmd.BuildDate=`date "+%Y%m%d-%H%M"`' -X 'trojan/cmd.GoVersion=`go version|awk '{print $3,$4}'`' -X 'trojan/cmd.GitVersion=`git rev-parse HEAD`'" -o "result/trojan" .
