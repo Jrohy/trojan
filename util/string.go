@@ -79,7 +79,6 @@ func IsNumeric(val interface{}) bool {
 		}
 		return true
 	}
-
 	return false
 }
 
@@ -105,9 +104,8 @@ func getChar(str string) string {
 	fmt.Printf("%c\n", char)
 	if char == 0 {
 		return ""
-	} else {
-		return string(char)
 	}
+	return string(char)
 }
 
 // LoopInput 循环输入选择, 或者直接回车退出
@@ -140,9 +138,8 @@ func LoopInput(tip string, choices interface{}, print bool) int {
 		number, _ := strconv.Atoi(inputString)
 		if number <= length && number > 0 {
 			return number
-		} else {
-			fmt.Println("输入数字越界,请重新输入")
 		}
+		fmt.Println("输入数字越界,请重新输入")
 	}
 }
 
@@ -157,37 +154,37 @@ func Input(tip string, defaultValue string) string {
 	return input
 }
 
-// Red
+// Red 红色
 func Red(str string) string {
 	return RED + str + RESET
 }
 
-// Green
+// Green 绿色
 func Green(str string) string {
 	return GREEN + str + RESET
 }
 
-// Yellow
+// Yellow 黄色
 func Yellow(str string) string {
 	return YELLOW + str + RESET
 }
 
-// Blue
+// Blue 蓝色
 func Blue(str string) string {
 	return BLUE + str + RESET
 }
 
-// Fuchsia
+// Fuchsia 紫红色
 func Fuchsia(str string) string {
 	return FUCHSIA + str + RESET
 }
 
-// Cyan
+// Cyan 青色
 func Cyan(str string) string {
 	return CYAN + str + RESET
 }
 
-// White
+// White 白色
 func White(str string) string {
 	return WHITE + str + RESET
 }
