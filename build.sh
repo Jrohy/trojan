@@ -29,13 +29,13 @@ function upload() {
   uploadfile $DGST
 }
 
-cd $SHELL_PATH/..
+cd $SHELL_PATH
 
 go get -u github.com/gobuffalo/packr/v2/packr2
 
 packr2
 
-go build -ldflags "-s -w" -o "result/trojan" .
+go build -ldflags "-s -w -X 'trojan/cmd.Version=`git tag|awk 'END {print}'`' -X 'trojan/cmd.BuildDate=`date "+%Y%m%d-%H%M"`' -X 'trojan/cmd.GoVersion=`go version|awk '{print $3,$4}'`' -X 'trojan/cmd.GitVersion=`git rev-parse HEAD`'" -o "result/trojan" .
 
 cd result
 
@@ -43,12 +43,12 @@ UPLOAD_ITEM=($(ls -l|awk '{print $9}'|xargs -r))
 
 for ITEM in ${UPLOAD_ITEM[@]}
 do
-    upload $ITEM
+   upload $ITEM
 done
 
 echo "upload completed!"
 
-cd $SHELL_PATH/..
+cd $SHELL_PATH
 
 packr2 clean
 
