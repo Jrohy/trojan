@@ -7,6 +7,7 @@ import (
 	"trojan/util"
 )
 
+// UserMenu 用户管理菜单
 func UserMenu() {
 	fmt.Println()
 	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量"}
@@ -22,6 +23,7 @@ func UserMenu() {
 	}
 }
 
+// UserMenu 添加用户
 func AddUser() {
 	randomUser := util.RandString(4)
 	randomPass := util.RandString(8)
@@ -33,6 +35,7 @@ func AddUser() {
 	}
 }
 
+// DelUser 删除用户
 func DelUser() {
 	userList := *UserList()
 	mysql := core.GetMysql()
@@ -42,6 +45,7 @@ func DelUser() {
 	}
 }
 
+// SetUserQuota 限制用户流量
 func SetUserQuota() {
 	var (
 		limit int
@@ -67,6 +71,7 @@ func SetUserQuota() {
 	}
 }
 
+// CleanData 清空用户流量
 func CleanData() {
 	userList := *UserList()
 	mysql := core.GetMysql()
@@ -76,6 +81,7 @@ func CleanData() {
 	}
 }
 
+// UserList 获取用户列表并打印显示
 func UserList(ids ...string) *[]core.User {
 	mysql := core.GetMysql()
 	userList := *mysql.GetData(ids...)

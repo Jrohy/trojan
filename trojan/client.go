@@ -8,6 +8,7 @@ import (
 
 var clientPath = "/root/config.json"
 
+// GenClientJson 生成客户端json
 func GenClientJson() {
 	fmt.Println()
 	var user core.User

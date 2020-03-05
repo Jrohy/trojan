@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	// BYTE
 	BYTE = 1 << (10 * iota)
 	KILOBYTE
 	MEGABYTE
@@ -15,7 +16,7 @@ const (
 	EXABYTE
 )
 
-// ByteSize returns a human-readable byte string of the form 10M, 12.5K, and so forth.  The following units are available:
+// Bytefmt returns a human-readable byte string of the form 10M, 12.5K, and so forth.  The following units are available:
 //	E: Exabyte
 //	P: Petabyte
 //	T: Terabyte

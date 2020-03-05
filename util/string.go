@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// 颜色字体
 	RED     = "\033[31m"
 	GREEN   = "\033[32m"
 	YELLOW  = "\033[33m"
@@ -75,6 +76,7 @@ func IsNumeric(val interface{}) bool {
 	return false
 }
 
+// RandString 随机字符串
 func RandString(length int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, length)
@@ -101,6 +103,7 @@ func getChar(str string) string {
 	}
 }
 
+// LoopInput 循环输入选择, 或者直接回车退出
 func LoopInput(tip string, choices interface{}, print bool) int {
 	reflectValue := reflect.ValueOf(choices)
 	if reflectValue.Kind() != reflect.Slice && reflectValue.Kind() != reflect.Array {
@@ -136,6 +139,7 @@ func LoopInput(tip string, choices interface{}, print bool) int {
 	}
 }
 
+// Input 读取终端用户输入
 func Input(tip string, defaultValue string) string {
 	input := ""
 	fmt.Print(tip)
@@ -146,30 +150,37 @@ func Input(tip string, defaultValue string) string {
 	return input
 }
 
+// Red
 func Red(str string) string {
 	return RED + str + RESET
 }
 
+// Green
 func Green(str string) string {
 	return GREEN + str + RESET
 }
 
+// Yellow
 func Yellow(str string) string {
 	return YELLOW + str + RESET
 }
 
+// Blue
 func Blue(str string) string {
 	return BLUE + str + RESET
 }
 
+// Fuchsia
 func Fuchsia(str string) string {
 	return FUCHSIA + str + RESET
 }
 
+// Cyan
 func Cyan(str string) string {
 	return CYAN + str + RESET
 }
 
+// White
 func White(str string) string {
 	return WHITE + str + RESET
 }

@@ -16,6 +16,7 @@ var (
 	mysqlDodkcerRun  = "docker run --name trojan-mysql --restart=always -p %d:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7"
 )
 
+// InstallMenu 安装目录
 func InstallMenu() {
 	fmt.Println()
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
@@ -32,6 +33,7 @@ func InstallMenu() {
 	Restart()
 }
 
+// InstallDocker 安装docker
 func InstallDocker() {
 	if !util.CheckCommandExists("docker") {
 		util.RunWebShell(dockerInstallUrl)
@@ -39,6 +41,7 @@ func InstallDocker() {
 	}
 }
 
+// InstallTrojan 安装trojan
 func InstallTrojan() {
 	box := packr.New("trojan-install", "../asset")
 	data, err := box.FindString("trojan-install.sh")
@@ -52,6 +55,7 @@ func InstallTrojan() {
 	fmt.Println()
 }
 
+// InstallTls 安装证书
 func InstallTls() {
 	domain := ""
 	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"}, true)
@@ -106,6 +110,7 @@ func InstallTls() {
 	fmt.Println()
 }
 
+// InstallMysql 安装mysql
 func InstallMysql() {
 	var (
 		mysql  core.Mysql

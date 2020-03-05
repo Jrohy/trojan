@@ -7,12 +7,14 @@ import (
 	"io/ioutil"
 )
 
+// ClientConfig 结构体
 type ClientConfig struct {
 	Config
 	SSl ClientSSL `json:"ssl"`
 	Tcp ClientTCP `json:"tcp"`
 }
 
+// ClientSSL 结构体
 type ClientSSL struct {
 	SSL
 	Verify         bool   `json:"verify"`
@@ -20,10 +22,12 @@ type ClientSSL struct {
 	Sni            string `json:"sni"`
 }
 
+// ClientTCP 结构体
 type ClientTCP struct {
 	TCP
 }
 
+// WriteClient 生成客户端json
 func WriteClient(password string, domain string, writePath string) bool {
 	box := packr.New("client.json", "../asset")
 	data, err := box.Find("client.json")

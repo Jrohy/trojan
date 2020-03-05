@@ -11,14 +11,13 @@ import (
 	"time"
 )
 
+// PortIsUse 判断端口是否占用
 func PortIsUse(port int) bool {
-	if _, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), time.Millisecond*50); err == nil {
-		return true
-	} else {
-		return false
-	}
+	_, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), time.Millisecond*50)
+	return err == nil
 }
 
+// RandomPort 获取没占用的随机端口
 func RandomPort() int {
 	for {
 		rand.Seed(time.Now().UnixNano())
@@ -41,6 +40,7 @@ func IsExists(path string) bool {
 	return true
 }
 
+// GetLocalIP 获取本机ipv4地址
 func GetLocalIP() string {
 	resp, err := http.Get("http://api.ipify.org")
 	if err != nil {
@@ -60,6 +60,7 @@ func CheckIP(ip string) bool {
 	return isOk
 }
 
+// InstallPack 安装指定名字软件
 func InstallPack(name string) {
 	if !CheckCommandExists(name) {
 		if CheckCommandExists("yum") {
@@ -71,6 +72,7 @@ func InstallPack(name string) {
 	}
 }
 
+// OpenPort 开通指定端口
 func OpenPort(port int) {
 	if CheckCommandExists("firewall-cmd") {
 		ExecCommand(fmt.Sprintf("firewall-cmd --zone=public --add-port=%d/tcp --add-port=%d/udp --permanent >/dev/null 2>&1", port, port))

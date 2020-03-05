@@ -4,11 +4,13 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
+	// mysql sql驱动
 	_ "github.com/go-sql-driver/mysql"
 	"strconv"
 	"strings"
 )
 
+// Mysql 结构体
 type Mysql struct {
 	Enabled    bool   `json:"enabled"`
 	ServerAddr string `json:"server_addr"`
@@ -18,6 +20,7 @@ type Mysql struct {
 	Password   string `json:"password"`
 }
 
+// User 用户表记录结构体
 type User struct {
 	ID       uint
 	Username string
@@ -27,6 +30,7 @@ type User struct {
 	Upload   uint64
 }
 
+// GetDB 获取mysql数据库连接
 func (mysql *Mysql) GetDB() *sql.DB {
 	conn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", mysql.Username, mysql.Password, mysql.ServerAddr, mysql.ServerPort, mysql.Database)
 	db, err := sql.Open("mysql", conn)
@@ -37,6 +41,7 @@ func (mysql *Mysql) GetDB() *sql.DB {
 	return db
 }
 
+// CreateTable 不存在trojan user表则自动创建
 func (mysql *Mysql) CreateTable() {
 	db := mysql.GetDB()
 	defer db.Close()
@@ -56,6 +61,7 @@ CREATE TABLE IF NOT EXISTS users (
 	}
 }
 
+// CreateUser 创建Trojan用户
 func (mysql *Mysql) CreateUser(username string, password string) error {
 	db := mysql.GetDB()
 	defer db.Close()
@@ -71,6 +77,7 @@ func (mysql *Mysql) CreateUser(username string, password string) error {
 	return nil
 }
 
+// DeleteUser 删除用户
 func (mysql *Mysql) DeleteUser(id uint) error {
 	db := mysql.GetDB()
 	defer db.Close()
@@ -83,6 +90,7 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 	return nil
 }
 
+// SetQuota 限制流量
 func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	db := mysql.GetDB()
 	defer db.Close()
@@ -93,6 +101,7 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	return nil
 }
 
+// CleanData 清空流量统计
 func (mysql *Mysql) CleanData(id uint) error {
 	db := mysql.GetDB()
 	defer db.Close()
@@ -103,6 +112,7 @@ func (mysql *Mysql) CleanData(id uint) error {
 	return nil
 }
 
+// GetData 获取用户记录
 func (mysql *Mysql) GetData(ids ...string) *[]User {
 	var dataList []User
 	querySQL := "SELECT * FROM users"

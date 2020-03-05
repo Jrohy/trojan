@@ -8,6 +8,7 @@ import (
 
 var configPath = "/usr/local/etc/trojan/config.json"
 
+// ServerConfig 结构体
 type ServerConfig struct {
 	Config
 	SSl   ServerSSL `json:"ssl"`
@@ -15,6 +16,7 @@ type ServerConfig struct {
 	Mysql Mysql     `json:"mysql"`
 }
 
+// ServerSSL 结构体
 type ServerSSL struct {
 	SSL
 	Key                string `json:"key"`
@@ -25,11 +27,13 @@ type ServerSSL struct {
 	Dhparam            string `json:"dhparam"`
 }
 
+// ServerTCP 结构体
 type ServerTCP struct {
 	TCP
 	PreferIPv4 bool `json:"prefer_ipv4"`
 }
 
+// Load 加载服务端配置文件
 func Load(path string) *ServerConfig {
 	if path == "" {
 		path = configPath
@@ -47,6 +51,7 @@ func Load(path string) *ServerConfig {
 	return &config
 }
 
+// Save 保存服务端配置文件
 func Save(config *ServerConfig, path string) bool {
 	if path == "" {
 		path = configPath
@@ -63,11 +68,13 @@ func Save(config *ServerConfig, path string) bool {
 	return true
 }
 
+// GetMysql 获取mysql连接
 func GetMysql() *Mysql {
 	config := Load("")
 	return &config.Mysql
 }
 
+// WriterMysql 写mysql配置
 func WriterMysql(mysql *Mysql) bool {
 	mysql.Enabled = true
 	mysql.Database = "trojan"
@@ -76,6 +83,7 @@ func WriterMysql(mysql *Mysql) bool {
 	return Save(config, "")
 }
 
+// WriterTls 写tls配置
 func WriterTls(cert string, key string) bool {
 	config := Load("")
 	config.SSl.Cert = cert
@@ -83,6 +91,7 @@ func WriterTls(cert string, key string) bool {
 	return Save(config, "")
 }
 
+// WriterPassword 写密码
 func WriterPassword(pass []string) bool {
 	config := Load("")
 	config.Password = pass

@@ -78,6 +78,7 @@ func ExecCommand(command string) error {
 	return nil
 }
 
+// ExecCommandWithResult 运行命令并获取结果
 func ExecCommandWithResult(command string) string {
 	out, err := exec.Command("bash", "-c", command).CombinedOutput()
 	if err != nil {
