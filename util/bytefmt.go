@@ -6,13 +6,19 @@ import (
 )
 
 const (
-	// BYTE
+	// BYTE 字节
 	BYTE = 1 << (10 * iota)
+	// KILOBYTE 千字节
 	KILOBYTE
+	// MEGABYTE 兆字节
 	MEGABYTE
+	// GIGABYTE 吉字节
 	GIGABYTE
+	// TERABYTE 太字节
 	TERABYTE
+	// PETABYTE 拍字节
 	PETABYTE
+	// EXABYTE 艾字节
 	EXABYTE
 )
 

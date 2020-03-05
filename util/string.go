@@ -11,15 +11,22 @@ import (
 )
 
 const (
-	// 颜色字体
-	RED     = "\033[31m"
-	GREEN   = "\033[32m"
-	YELLOW  = "\033[33m"
-	BLUE    = "\033[34m"
+	// RED 红色
+	RED = "\033[31m"
+	// GREEN 绿色
+	GREEN = "\033[32m"
+	// YELLOW 黄色
+	YELLOW = "\033[33m"
+	// BLUE 蓝色
+	BLUE = "\033[34m"
+	// FUCHSIA 紫红色
 	FUCHSIA = "\033[35m"
-	CYAN    = "\033[36m"
-	WHITE   = "\033[37m"
-	RESET   = "\033[0m"
+	// CYAN 青色
+	CYAN = "\033[36m"
+	// WHITE 白色
+	WHITE = "\033[37m"
+	// RESET 重置颜色
+	RESET = "\033[0m"
 )
 
 // IsNumeric is_numeric()
@@ -94,7 +101,7 @@ func getChar(str string) string {
 	}
 	defer keyboard.Close()
 	fmt.Print(str)
-	char, _, err := keyboard.GetKey()
+	char, _, _ := keyboard.GetKey()
 	fmt.Printf("%c\n", char)
 	if char == 0 {
 		return ""

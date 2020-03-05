@@ -23,7 +23,7 @@ func UserMenu() {
 	}
 }
 
-// UserMenu 添加用户
+// AddUser 添加用户
 func AddUser() {
 	randomUser := util.RandString(4)
 	randomPass := util.RandString(8)

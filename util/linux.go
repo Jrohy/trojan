@@ -44,10 +44,10 @@ func IsExists(path string) bool {
 func GetLocalIP() string {
 	resp, err := http.Get("http://api.ipify.org")
 	if err != nil {
-		resp, err = http.Get("http://icanhazip.com")
+		resp, _ = http.Get("http://icanhazip.com")
 	}
 	defer resp.Body.Close()
-	s, err := ioutil.ReadAll(resp.Body)
+	s, _ := ioutil.ReadAll(resp.Body)
 	return string(s)
 }
 

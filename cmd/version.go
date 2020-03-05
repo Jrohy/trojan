@@ -8,10 +8,13 @@ import (
 )
 
 var (
-	// Version
-	Version    string
-	BuildDate  string
-	GoVersion  string
+	// Version 程序版本号
+	Version string
+	// BuildDate 编译时间
+	BuildDate string
+	// GoVersion go版本
+	GoVersion string
+	// GitVersion git版本
 	GitVersion string
 )
 
