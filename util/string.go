@@ -28,8 +28,8 @@ const (
 	RESET = "\033[0m"
 )
 
-// IsNumber 判断字符串是否为数字
-func IsNumber(input string) bool {
+// IsInteger 判断字符串是否为整数
+func IsInteger(input string) bool {
 	_, err := strconv.Atoi(input)
 	return err == nil
 }
@@ -83,7 +83,7 @@ func LoopInput(tip string, choices interface{}, print bool) int {
 		}
 		if inputString == "" {
 			return -1
-		} else if !IsNumber(inputString) {
+		} else if !IsInteger(inputString) {
 			fmt.Println("输入有误,请重新输入")
 			continue
 		}
