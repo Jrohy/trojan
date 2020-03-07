@@ -3,10 +3,11 @@ module trojan
 go 1.14
 
 require (
+	github.com/appleboy/gin-jwt/v2 v2.6.3
 	github.com/eiannone/keyboard v0.0.0-20190314115158-7169d0afeb4f
+	github.com/gin-gonic/gin v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/packr/v2 v2.7.1
-	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/syndtr/goleveldb v1.0.0
