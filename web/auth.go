@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"time"
 	"trojan/core"
+	"trojan/web/controller"
 )
 
 var (
@@ -82,8 +83,8 @@ func init() {
 }
 
 func updateUser(c *gin.Context) {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
+	responseBody := controller.ResponseBody{Msg: "success"}
+	defer controller.TimeCost(time.Now(), &responseBody)
 	username := c.DefaultPostForm("username", "admin")
 	pass := c.PostForm("password")
 	err := core.SetValue(fmt.Sprintf("%s_pass", username), pass)

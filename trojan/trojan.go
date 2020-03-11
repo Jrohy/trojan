@@ -2,6 +2,7 @@ package trojan
 
 import (
 	"fmt"
+	"strings"
 	"trojan/util"
 )
 
@@ -51,4 +52,25 @@ func Stop() {
 // Status 获取trojan状态
 func Status() {
 	util.ExecCommand("systemctl status trojan")
+}
+
+// RunTime Trojan运行时间
+func RunTime() string {
+	result := strings.TrimSpace(util.ExecCommandWithResult("ps -Ao etime,args|grep -v grep|grep trojan"))
+	resultSlice := strings.Split(result, " ")
+	if len(resultSlice) > 0 {
+		return resultSlice[0]
+	}
+	return ""
+}
+
+// Version Trojan版本
+func Version() string {
+	result := strings.TrimSpace(util.ExecCommandWithResult("/usr/bin/trojan/trojan -v"))
+	if len(result) == 0 {
+		return ""
+	}
+	firstLine := strings.Split(result, "\n")[0]
+	tempSlice := strings.Split(firstLine, " ")
+	return tempSlice[len(tempSlice)-1]
 }

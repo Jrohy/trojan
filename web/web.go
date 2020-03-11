@@ -1,94 +1,28 @@
 package web
 
 import (
-	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/gobuffalo/packr/v2"
+	"net/http"
 	"strconv"
-	"time"
-	"trojan/core"
+	"trojan/web/controller"
 )
-
-// ResponseBody 结构体
-type ResponseBody struct {
-	Duration string
-	Data     interface{}
-	Msg      string
-}
-
-// TimeCost web函数执行用时统计方法
-func TimeCost(start time.Time, body *ResponseBody) {
-	body.Duration = time.Since(start).String()
-}
-
-func userList() *ResponseBody {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
-	mysql := core.GetMysql()
-	userList := *mysql.GetData()
-	responseBody.Data = userList
-	return &responseBody
-}
-
-func createUser(username string, password string) *ResponseBody {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
-	mysql := core.GetMysql()
-	pass, err := base64.StdEncoding.DecodeString(password)
-	if err != nil {
-		responseBody.Msg = "Base64解码失败: " + err.Error()
-		return &responseBody
-	}
-	if err := mysql.CreateUser(username, string(pass)); err != nil {
-		responseBody.Msg = err.Error()
-	}
-	return &responseBody
-}
-
-func delUser(id uint) *ResponseBody {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
-	mysql := core.GetMysql()
-	if err := mysql.DeleteUser(id); err != nil {
-		responseBody.Msg = err.Error()
-	}
-	return &responseBody
-}
-
-func setData(id uint, quota int) *ResponseBody {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
-	mysql := core.GetMysql()
-	if err := mysql.SetQuota(id, quota); err != nil {
-		responseBody.Msg = err.Error()
-	}
-	return &responseBody
-}
-
-func cleanData(id uint) *ResponseBody {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
-	mysql := core.GetMysql()
-	if err := mysql.CleanData(id); err != nil {
-		responseBody.Msg = err.Error()
-	}
-	return &responseBody
-}
 
 func userRouter(router *gin.Engine) {
 	user := router.Group("/trojan/user")
 	{
 		user.GET("", func(c *gin.Context) {
-			c.JSON(200, userList())
+			c.JSON(200, controller.UserList())
 		})
 		user.POST("", func(c *gin.Context) {
 			username := c.PostForm("username")
 			password := c.PostForm("password")
-			c.JSON(200, createUser(username, password))
+			c.JSON(200, controller.CreateUser(username, password))
 		})
 		user.DELETE("", func(c *gin.Context) {
 			stringId := c.PostForm("id")
 			id, _ := strconv.Atoi(stringId)
-			c.JSON(200, delUser(uint(id)))
+			c.JSON(200, controller.DelUser(uint(id)))
 		})
 	}
 }
@@ -101,21 +35,43 @@ func dataRouter(router *gin.Engine) {
 			sQuota := c.PostForm("quota")
 			id, _ := strconv.Atoi(sID)
 			quota, _ := strconv.Atoi(sQuota)
-			c.JSON(200, setData(uint(id), quota))
+			c.JSON(200, controller.SetData(uint(id), quota))
 		})
 		data.DELETE("", func(c *gin.Context) {
 			sID := c.PostForm("id")
 			id, _ := strconv.Atoi(sID)
-			c.JSON(200, cleanData(uint(id)))
+			c.JSON(200, controller.CleanData(uint(id)))
 		})
 	}
+}
+
+func commonRouter(router *gin.Engine) {
+	common := router.Group("/common")
+	{
+		common.GET("/version", func(c *gin.Context) {
+			c.JSON(200, controller.Version())
+		})
+	}
+}
+
+func staticRouter(router *gin.Engine) {
+	box := packr.New("trojanBox", "./templates")
+	router.Use(func(c *gin.Context) {
+		requestUrl := c.Request.URL.Path
+		if box.Has(requestUrl) || requestUrl == "/" {
+			http.FileServer(box).ServeHTTP(c.Writer, c.Request)
+			c.Abort()
+		}
+	})
 }
 
 // Start web启动入口
 func Start() {
 	router := gin.Default()
+	//staticRouter(router)
 	router.Use(Auth(router).MiddlewareFunc())
 	userRouter(router)
 	dataRouter(router)
+	commonRouter(router)
 	_ = router.Run(":80")
 }
