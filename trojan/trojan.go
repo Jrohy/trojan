@@ -56,7 +56,7 @@ func Status() {
 
 // RunTime Trojan运行时间
 func RunTime() string {
-	result := strings.TrimSpace(util.ExecCommandWithResult("ps -Ao etime,args|grep -v grep|grep trojan"))
+	result := strings.TrimSpace(util.ExecCommandWithResult("ps -Ao etime,args|grep -v grep|grep /usr/local/etc/trojan/config.json"))
 	resultSlice := strings.Split(result, " ")
 	if len(resultSlice) > 0 {
 		return resultSlice[0]
