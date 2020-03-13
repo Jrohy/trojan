@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/appleboy/gin-jwt/v2 v2.6.3
 	github.com/eiannone/keyboard v0.0.0-20190314115158-7169d0afeb4f
+	github.com/gin-contrib/gzip v0.0.1
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/packr/v2 v2.7.1

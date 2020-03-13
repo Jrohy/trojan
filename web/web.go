@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr/v2"
 	"net/http"
@@ -68,6 +69,7 @@ func staticRouter(router *gin.Engine) {
 // Start web启动入口
 func Start() {
 	router := gin.Default()
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	//staticRouter(router)
 	router.Use(Auth(router).MiddlewareFunc())
 	userRouter(router)
