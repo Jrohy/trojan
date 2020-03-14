@@ -13,8 +13,13 @@ import (
 
 // PortIsUse 判断端口是否占用
 func PortIsUse(port int) bool {
-	_, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), time.Millisecond*50)
-	return err == nil
+	_, tcpError := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), time.Millisecond*50)
+	udpAddr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf(":%d", port))
+	udpConn, udpError := net.ListenUDP("udp", udpAddr)
+	if udpConn != nil {
+		defer udpConn.Close()
+	}
+	return tcpError == nil || udpError != nil
 }
 
 // RandomPort 获取没占用的随机端口
