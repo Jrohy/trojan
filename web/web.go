@@ -21,7 +21,7 @@ func userRouter(router *gin.Engine) {
 			c.JSON(200, controller.CreateUser(username, password))
 		})
 		user.DELETE("", func(c *gin.Context) {
-			stringId := c.PostForm("id")
+			stringId := c.Query("id")
 			id, _ := strconv.Atoi(stringId)
 			c.JSON(200, controller.DelUser(uint(id)))
 		})
@@ -39,7 +39,7 @@ func dataRouter(router *gin.Engine) {
 			c.JSON(200, controller.SetData(uint(id), quota))
 		})
 		data.DELETE("", func(c *gin.Context) {
-			sID := c.PostForm("id")
+			sID := c.Query("id")
 			id, _ := strconv.Atoi(sID)
 			c.JSON(200, controller.CleanData(uint(id)))
 		})
