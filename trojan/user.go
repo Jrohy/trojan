@@ -90,13 +90,9 @@ func UserList(ids ...string) *[]core.User {
 		domain = ""
 	}
 	for i, k := range userList {
-		pass, err := core.GetValue(k.Username + "_pass")
-		if err != nil {
-			pass = ""
-		}
 		fmt.Printf("%d.\n", i+1)
 		fmt.Println("用户名: " + k.Username)
-		fmt.Println("密码: " + pass)
+		fmt.Println("密码: " + k.Password)
 		fmt.Println("上传流量: " + util.Cyan(util.Bytefmt(k.Upload)))
 		fmt.Println("下载流量: " + util.Cyan(util.Bytefmt(k.Download)))
 		if k.Quota < 0 {
@@ -104,7 +100,7 @@ func UserList(ids ...string) *[]core.User {
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
 		}
-		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:443", pass, domain)))
+		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:443", k.Password, domain)))
 		fmt.Println()
 	}
 	return &userList

@@ -12,7 +12,14 @@ func UserList() *ResponseBody {
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
 	userList := *mysql.GetData()
-	responseBody.Data = userList
+	domain, err := core.GetValue("domain")
+	if err != nil {
+		domain = ""
+	}
+	responseBody.Data = map[string]interface{}{
+		"domain":   domain,
+		"userList": userList,
+	}
 	return &responseBody
 }
 

@@ -129,16 +129,20 @@ func (mysql *Mysql) GetData(ids ...string) *[]User {
 	defer rows.Close()
 	for rows.Next() {
 		var (
-			username string
-			password string
-			download uint64
-			upload   uint64
-			quota    int64
-			id       uint
+			username   string
+			originPass string
+			download   uint64
+			upload     uint64
+			quota      int64
+			id         uint
 		)
-		if err := rows.Scan(&id, &username, &password, &quota, &download, &upload); err != nil {
+		if err := rows.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
 			fmt.Println(err)
 			return nil
+		}
+		password, err := GetValue(username + "_pass")
+		if err != nil {
+			password = ""
 		}
 		dataList = append(dataList, User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
 	}
