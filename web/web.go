@@ -73,7 +73,7 @@ func staticRouter(router *gin.Engine) {
 func Start() {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
-	//staticRouter(router)
+	staticRouter(router)
 	router.Use(Auth(router).MiddlewareFunc())
 	userRouter(router)
 	dataRouter(router)
