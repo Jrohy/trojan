@@ -105,7 +105,7 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 func (mysql *Mysql) CleanData(id uint) error {
 	db := mysql.GetDB()
 	defer db.Close()
-	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET download=0 AND upload=0 WHERE id=%d;", id)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET download=0, upload=0 WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
 		return err
 	}
