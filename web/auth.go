@@ -106,7 +106,12 @@ func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
 		if result == "" {
 			c.JSON(201, gin.H{"code": 201, "message": "No administrator account found inside the database"})
 		} else {
-			c.JSON(200, gin.H{"code": 200, "message": "administrator is ok!"})
+			title, err := core.GetValue("login_title")
+			if err != nil {
+				c.JSON(200, gin.H{"title": "trojan 管理平台"})
+			} else {
+				c.JSON(200, gin.H{"title": title})
+			}
 		}
 	})
 	r.POST("/auth/login", authMiddleware.LoginHandler)

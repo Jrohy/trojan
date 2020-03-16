@@ -52,6 +52,9 @@ func commonRouter(router *gin.Engine) {
 		common.GET("/version", func(c *gin.Context) {
 			c.JSON(200, controller.Version())
 		})
+		common.POST("/loginInfo", func(c *gin.Context) {
+			c.JSON(200, controller.SetLoginInfo(c.PostForm("title")))
+		})
 	}
 }
 
