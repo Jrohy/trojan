@@ -34,7 +34,7 @@ source <(curl -sL https://git.io/trojan-install) --remove
 到release页面直接下载二进制文件后, 放到linux服务器上  
 **因为trojan本身仅支持x86_64, 所以只编译了x86_64版本的管理程序**
 ```
-chomd +x trojan
+chmod +x trojan
 ./trojan
 ```
 若需要命令补全, 则需将trojan文件放置在/usr/local/bin/目录下, 然后运行
