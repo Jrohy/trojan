@@ -13,6 +13,8 @@ DOWNLAOD_URL="https://github.com/Jrohy/trojan/releases/download/"
 
 VERSION_CHECK="https://api.github.com/repos/Jrohy/trojan/releases/latest"
 
+SERVICE_URL="https://raw.githubusercontent.com/Jrohy/trojan/master/asset/trojan-web.service"
+
 [[ -e /var/lib/trojan-manager ]] && UPDATE=1
 
 #Centos 临时取消别名
@@ -62,11 +64,13 @@ removeTrojan() {
     rm -rf /usr/bin/trojan >/dev/null 2>&1
     rm -rf /usr/local/etc/trojan >/dev/null 2>&1
     rm -f /etc/systemd/system/trojan.service >/dev/null 2>&1
-    systemctl daemon-reload
 
     #移除trojan管理程序
     rm -f /usr/local/bin/trojan >/dev/null 2>&1
     rm -rf /var/lib/trojan-manager >/dev/null 2>&1
+    rm -f /etc/systemd/system/trojan-web.service >/dev/null 2>&1
+
+    systemctl daemon-reload
 
     #移除trojan的专用mysql
     docker rm -f trojan-mysql
@@ -113,6 +117,12 @@ installTrojan(){
     LASTEST_VERSION=$(curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4)
     curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/trojan" -o /usr/local/bin/trojan
     chmod +x /usr/local/bin/trojan
+    if [[ ! -e /etc/systemd/system/trojan-web.service ]];then
+      curl -L $SERVICE_URL -o /etc/systemd/system/trojan-web.service
+      systemctl daemon-reload
+      systemctl enable trojan-web
+    fi
+    systemctl restart trojan-web
     #命令补全环境变量
     [[ -z $(grep trojan ~/.${SHELL_WAY}rc) ]] && echo "source <(trojan completion ${SHELL_WAY})" >> ~/.${SHELL_WAY}rc
     source ~/.${SHELL_WAY}rc
