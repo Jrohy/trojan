@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr/v2"
@@ -70,7 +71,7 @@ func staticRouter(router *gin.Engine) {
 }
 
 // Start web启动入口
-func Start() {
+func Start(port int) {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
@@ -78,5 +79,5 @@ func Start() {
 	userRouter(router)
 	dataRouter(router)
 	commonRouter(router)
-	_ = router.Run(":80")
+	_ = router.Run(fmt.Sprintf(":%d", port))
 }
