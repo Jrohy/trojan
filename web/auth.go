@@ -104,14 +104,19 @@ func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
 	r.GET("/auth/check", func(c *gin.Context) {
 		result, _ := core.GetValue("admin_pass")
 		if result == "" {
-			c.JSON(201, gin.H{"code": 201, "message": "No administrator account found inside the database"})
+			c.JSON(201, gin.H{"code": 201, "message": "No administrator account found inside the database", "data": nil})
 		} else {
 			title, err := core.GetValue("login_title")
 			if err != nil {
-				c.JSON(200, gin.H{"title": "trojan 管理平台"})
-			} else {
-				c.JSON(200, gin.H{"title": title})
+				title = "trojan 管理平台"
 			}
+			c.JSON(200, gin.H{
+				"code":    200,
+				"message": "success",
+				"data": map[string]string{
+					"title": title,
+				},
+			})
 		}
 	})
 	r.POST("/auth/login", authMiddleware.LoginHandler)

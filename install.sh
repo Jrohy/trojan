@@ -114,13 +114,15 @@ installDependent(){
 }
 
 installTrojan(){
+    local SHOW_TIP=0
     LASTEST_VERSION=$(curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4)
     curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/trojan" -o /usr/local/bin/trojan
     chmod +x /usr/local/bin/trojan
     if [[ ! -e /etc/systemd/system/trojan-web.service ]];then
-      curl -L $SERVICE_URL -o /etc/systemd/system/trojan-web.service
-      systemctl daemon-reload
-      systemctl enable trojan-web
+        SHOW_TIP=1
+        curl -L $SERVICE_URL -o /etc/systemd/system/trojan-web.service
+        systemctl daemon-reload
+        systemctl enable trojan-web
     fi
     systemctl restart trojan-web
     #命令补全环境变量
@@ -128,11 +130,12 @@ installTrojan(){
     source ~/.${SHELL_WAY}rc
     if [[ $UPDATE == 0 ]];then
         colorEcho $GREEN "安装trojan管理程序成功!\n"
-        echo "运行命令`colorEcho $BLUE trojan`可进行trojan管理\n"
+        echo "运行命令`colorEcho $BLUE trojan`可进行trojan管理, 浏览器访问'http://域名'可在线trojan多用户管理\n"
         trojan
     else
         colorEcho $GREEN "更新trojan管理程序成功!\n"
     fi
+    [[ $SHOW_TIP == 1 ]] && echo "浏览器访问'`colorEcho $BLUE http://域名`'可在线trojan多用户管理"
 }
 
 main(){
