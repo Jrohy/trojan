@@ -29,7 +29,7 @@ source <(curl -sL https://git.io/trojan-install) --remove
 
 ```
 安装完后输入'trojan'可进入管理程序   
-浏览器访问'http://域名'可在线web页面管理trojan用户  
+浏览器访问 http://域名 可在线web页面管理trojan用户  
 前端页面项目地址: [trojan-web](https://github.com/Jrohy/trojan-web)
 
 ### b. docker运行
