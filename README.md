@@ -33,7 +33,7 @@ source <(curl -sL https://git.io/trojan-install) --remove
 前端页面源码地址: [trojan-web](https://github.com/Jrohy/trojan-web)
 
 web界面:
-![avatar](asset/web.jpg)
+![avatar](asset/web.png)
 
 ### b. docker运行
 1. 安装mysql
