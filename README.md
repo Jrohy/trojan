@@ -32,6 +32,9 @@ source <(curl -sL https://git.io/trojan-install) --remove
 浏览器访问 http://域名 可在线web页面管理trojan用户  
 前端页面源码地址: [trojan-web](https://github.com/Jrohy/trojan-web)
 
+web界面:
+![avatar](asset/web.jpg)
+
 ### b. docker运行
 1. 安装mysql
 ```
