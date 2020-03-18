@@ -43,7 +43,9 @@ docker run --name trojan-mysql --restart=always -p 3306:3306 -v /home/mysql:/var
 ```
 docker run -it -d --name trojan --net=host --restart=always --privileged jrohy/trojan init
 ```
-运行完后进入容器 `docker exec -it trojan bash`, 然后输入'trojan'即可进行初始化安装
+运行完后进入容器 `docker exec -it trojan bash`, 然后输入'trojan'即可进行初始化安装   
+
+运行`systemctl start trojan-web`可启动web服务
 
 ## 命令行
 ```
