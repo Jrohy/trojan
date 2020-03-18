@@ -45,7 +45,9 @@ docker run -it -d --name trojan --net=host --restart=always --privileged jrohy/t
 ```
 运行完后进入容器 `docker exec -it trojan bash`, 然后输入'trojan'即可进行初始化安装   
 
-运行`systemctl start trojan-web`可启动web服务
+启动web服务: `systemctl start trojan-web`   
+
+设置自启动: `systemctl enable trojan-web`
 
 ## 命令行
 ```

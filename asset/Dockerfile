@@ -13,7 +13,5 @@ RUN yum install socat bash-completion iptables crontabs openssl -y && \
     curl -L "$DOWNLAOD_URL/$LATEST_VERSION/trojan" -o /usr/local/bin/trojan && \
     curl -L $SERVICE_URL -o /etc/systemd/system/trojan-web.service && \
     chmod +x /usr/local/bin/trojan && \
-    systemctl daemon-reload && \
-    systemctl enable trojan-web && \
     echo "source <(trojan completion bash)" >> ~/.bashrc && \
     yum clean all
