@@ -14,7 +14,7 @@ trojan多用户管理部署程序
 - 命令行模式管理, 支持命令补全
 - 集成acme.sh证书申请
 - 生成客户端配置文件
-- 支持trojan://分享链接和二维码分享(仅限web页面)
+- 支持trojan://分享链接和二维码分享(二维码仅限web页面)
 
 ## 安装方式
 *trojan使用请提前准备好服务器可用的域名*  
@@ -30,7 +30,7 @@ source <(curl -sL https://git.io/trojan-install) --remove
 ```
 安装完后输入'trojan'可进入管理程序   
 浏览器访问 http://域名 可在线web页面管理trojan用户  
-前端页面项目地址: [trojan-web](https://github.com/Jrohy/trojan-web)
+前端页面源码地址: [trojan-web](https://github.com/Jrohy/trojan-web)
 
 ### b. docker运行
 1. 安装mysql
@@ -71,4 +71,5 @@ Flags:
 ```
 
 ## 注意
-安装完trojan后建议开启BBR等加速: [Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)
+安装完trojan后强烈建议开启BBR等加速: [Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)  
+推荐的trojan客户端: [Trojan-Qt5](https://github.com/TheWanderingCoel/Trojan-Qt5)
