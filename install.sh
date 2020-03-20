@@ -124,7 +124,6 @@ installTrojan(){
         systemctl daemon-reload
         systemctl enable trojan-web
     fi
-    systemctl restart trojan-web
     #命令补全环境变量
     [[ -z $(grep trojan ~/.${SHELL_WAY}rc) ]] && echo "source <(trojan completion ${SHELL_WAY})" >> ~/.${SHELL_WAY}rc
     source ~/.${SHELL_WAY}rc
@@ -135,6 +134,7 @@ installTrojan(){
     else
         colorEcho $GREEN "更新trojan管理程序成功!\n"
     fi
+    systemctl restart trojan-web
     [[ $SHOW_TIP == 1 ]] && echo "浏览器访问'`colorEcho $BLUE http://域名`'可在线trojan多用户管理"
 }
 
