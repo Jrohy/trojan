@@ -129,7 +129,7 @@ installTrojan(){
     source ~/.${SHELL_WAY}rc
     if [[ $UPDATE == 0 ]];then
         colorEcho $GREEN "安装trojan管理程序成功!\n"
-        echo "运行命令`colorEcho $BLUE trojan`可进行trojan管理, 浏览器访问'http://域名'可在线trojan多用户管理\n"
+        echo -e "运行命令`colorEcho $BLUE trojan`可进行trojan管理\n"
         trojan
     else
         colorEcho $GREEN "更新trojan管理程序成功!\n"
