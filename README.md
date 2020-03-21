@@ -1,7 +1,9 @@
 # trojan
+![](https://img.shields.io/github/v/release/Jrohy/trojan.svg)  
 ![](https://img.shields.io/github/stars/Jrohy/trojan.svg) 
 ![](https://img.shields.io/github/forks/Jrohy/trojan.svg) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Jrohy/trojan)](https://goreportcard.com/report/github.com/Jrohy/trojan)
+[![HitCount](http://hits.dwyl.com/Jrohy/trojan.svg)](http://hits.dwyl.com/Jrohy/trojan)
 [![Downloads](https://img.shields.io/github/downloads/Jrohy/trojan/total.svg)](https://img.shields.io/github/downloads/Jrohy/sshcopy/total.svg)
 
 
