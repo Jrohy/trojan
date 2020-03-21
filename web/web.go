@@ -7,6 +7,7 @@ import (
 	"github.com/gobuffalo/packr/v2"
 	"net/http"
 	"strconv"
+	"trojan/util"
 	"trojan/web/controller"
 )
 
@@ -79,5 +80,6 @@ func Start(port int) {
 	userRouter(router)
 	dataRouter(router)
 	commonRouter(router)
+	util.OpenPort(port)
 	_ = router.Run(fmt.Sprintf(":%d", port))
 }
