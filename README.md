@@ -78,6 +78,34 @@ Flags:
   -h, --help   help for trojan
 ```
 
+## web服务
+```
+trojan help web
+以web方式启动
+
+Usage:
+  trojan web [flags]
+
+Flags:
+  -p, --port int   web服务启动端口 (default 80)
+      --ssl        web服务是否以https方式运行
+```
+安装完管理程序, 默认以http 80端口运行着web服务, 如果想换成其他端口传参-p port 
+ 
+如果想以https来运行, 则需要传参--ssl 和 -p port(需指定https的运行端口), 以下步骤:
+
+a. 修改/etc/systemd/system/trojan-web.service 配置文件
+在`/usr/local/bin/trojan web`后面添加 --ssl -p port  
+b. 运行以下命令:  
+```
+systemctl daemon-reload
+systemctl restart trojan-web
+```
+开启https运行后, 输入http的链接(不管是域名还是ip)都会自动跳转到https的链接
+
+如果更改了web端口出现无法访问请清理下浏览器缓存(浏览器会记住之前的跳转)
+
+
 ## 注意
 安装完trojan后强烈建议开启BBR等加速: [Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)  
 
