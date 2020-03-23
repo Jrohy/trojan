@@ -136,7 +136,7 @@ installTrojan(){
         colorEcho $GREEN "更新trojan管理程序成功!\n"
     fi
     systemctl restart trojan-web
-    [[ $SHOW_TIP == 1 ]] && echo "浏览器访问'`colorEcho $BLUE http://域名`'可在线trojan多用户管理"
+    [[ $SHOW_TIP == 1 ]] && echo "浏览器访问'`colorEcho $BLUE https://域名`'可在线trojan多用户管理"
 }
 
 main(){
