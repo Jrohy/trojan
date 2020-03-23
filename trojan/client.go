@@ -18,16 +18,20 @@ func GenClientJson() {
 		domain = ""
 	}
 	mysql := core.GetMysql()
-	userList := *mysql.GetData()
+	userList := mysql.GetData()
+	if userList == nil {
+		fmt.Println("连接mysql失败!")
+		return
+	}
 	if len(userList) == 1 {
-		user = userList[0]
+		user = *userList[0]
 	} else {
 		UserList()
 		choice := util.LoopInput("请选择要生成配置文件的用户序号: ", userList, true)
 		if choice < 0 {
 			return
 		}
-		user = userList[choice-1]
+		user = *userList[choice-1]
 	}
 	password, err := core.GetValue(user.Username + "_pass")
 	if err != nil {

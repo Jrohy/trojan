@@ -41,7 +41,7 @@ func AddUser() {
 
 // DelUser 删除用户
 func DelUser() {
-	userList := *UserList()
+	userList := UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要删除的用户序号: ", userList, true)
 	if mysql.DeleteUser(userList[choice-1].ID) == nil {
@@ -55,7 +55,7 @@ func SetUserQuota() {
 		limit int
 		err   error
 	)
-	userList := *UserList()
+	userList := UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要限制流量的用户序号: ", userList, true)
 	if choice == -1 {
@@ -77,7 +77,7 @@ func SetUserQuota() {
 
 // CleanData 清空用户流量
 func CleanData() {
-	userList := *UserList()
+	userList := UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要清空流量的用户序号: ", userList, true)
 	if mysql.CleanData(userList[choice-1].ID) == nil {
@@ -86,9 +86,13 @@ func CleanData() {
 }
 
 // UserList 获取用户列表并打印显示
-func UserList(ids ...string) *[]core.User {
+func UserList(ids ...string) []*core.User {
 	mysql := core.GetMysql()
-	userList := *mysql.GetData(ids...)
+	userList := mysql.GetData(ids...)
+	if userList == nil {
+		fmt.Println("连接mysql失败!")
+		return nil
+	}
 	domain, err := core.GetValue("domain")
 	if err != nil {
 		domain = ""
@@ -107,5 +111,5 @@ func UserList(ids ...string) *[]core.User {
 		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:443", k.Password, domain)))
 		fmt.Println()
 	}
-	return &userList
+	return userList
 }

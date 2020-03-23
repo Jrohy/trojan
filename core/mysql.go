@@ -3,6 +3,7 @@ package core
 import (
 	"crypto/sha256"
 	"database/sql"
+	"errors"
 	"fmt"
 	// mysql sql驱动
 	_ "github.com/go-sql-driver/mysql"
@@ -64,6 +65,9 @@ CREATE TABLE IF NOT EXISTS users (
 // CreateUser 创建Trojan用户
 func (mysql *Mysql) CreateUser(username string, password string) error {
 	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
 	defer db.Close()
 	encryPass := sha256.Sum224([]byte(password))
 	if _, err := db.Exec(fmt.Sprintf("INSERT INTO users(username, password, quota) VALUES ('%s', '%x', -1);", username, encryPass)); err != nil {
@@ -80,8 +84,14 @@ func (mysql *Mysql) CreateUser(username string, password string) error {
 // DeleteUser 删除用户
 func (mysql *Mysql) DeleteUser(id uint) error {
 	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
 	defer db.Close()
-	userList := *mysql.GetData(strconv.Itoa(int(id)))
+	userList := mysql.GetData(strconv.Itoa(int(id)))
+	if userList == nil {
+		return errors.New("can't connnect mysql")
+	}
 	if userList[0].Username != "admin" {
 		_ = DelValue(userList[0].Username + "_pass")
 	}
@@ -95,6 +105,9 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 // SetQuota 限制流量
 func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
 	defer db.Close()
 	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=%d WHERE id=%d;", quota, id)); err != nil {
 		fmt.Println(err)
@@ -106,6 +119,9 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 // CleanData 清空流量统计
 func (mysql *Mysql) CleanData(id uint) error {
 	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
 	defer db.Close()
 	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET download=0, upload=0 WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
@@ -115,10 +131,13 @@ func (mysql *Mysql) CleanData(id uint) error {
 }
 
 // GetData 获取用户记录
-func (mysql *Mysql) GetData(ids ...string) *[]User {
-	var dataList []User
+func (mysql *Mysql) GetData(ids ...string) []*User {
+	var dataList []*User
 	querySQL := "SELECT * FROM users"
 	db := mysql.GetDB()
+	if db == nil {
+		return nil
+	}
 	defer db.Close()
 	if len(ids) > 0 {
 		querySQL = querySQL + " WHERE id in (" + strings.Join(ids, ",") + ")"
@@ -146,7 +165,7 @@ func (mysql *Mysql) GetData(ids ...string) *[]User {
 		if err != nil {
 			password = ""
 		}
-		dataList = append(dataList, User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
 	}
-	return &dataList
+	return dataList
 }

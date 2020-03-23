@@ -176,7 +176,7 @@ func InstallMysql() {
 	mysql.Database = "trojan"
 	mysql.CreateTable()
 	core.WriterMysql(&mysql)
-	if len(*mysql.GetData()) == 0 {
+	if len(mysql.GetData()) == 0 {
 		AddUser()
 	}
 	fmt.Println()

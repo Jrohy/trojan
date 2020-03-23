@@ -11,7 +11,11 @@ func UserList() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
-	userList := *mysql.GetData()
+	userList := mysql.GetData()
+	if userList == nil {
+		responseBody.Msg = "连接mysql失败!"
+		return &responseBody
+	}
 	domain, err := core.GetValue("domain")
 	if err != nil {
 		domain = ""
