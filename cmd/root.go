@@ -52,7 +52,6 @@ exit:
 				fmt.Printf("%d.%-15s\n\n", i+1, menuList[i])
 			}
 		}
-		fmt.Println("\n")
 		switch util.LoopInput("请选择: ", menuList, false) {
 		case 1:
 			trojan.ControllMenu()

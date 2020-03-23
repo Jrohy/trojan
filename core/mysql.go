@@ -82,7 +82,9 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 	db := mysql.GetDB()
 	defer db.Close()
 	userList := *mysql.GetData(strconv.Itoa(int(id)))
-	_ = DelValue(userList[0].Username + "_pass")
+	if userList[0].Username != "admin" {
+		_ = DelValue(userList[0].Username + "_pass")
+	}
 	if _, err := db.Exec(fmt.Sprintf("DELETE FROM users WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
 		return err
