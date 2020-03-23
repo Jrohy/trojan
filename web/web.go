@@ -5,7 +5,6 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr/v2"
-	"github.com/unrolled/secure"
 	"net/http"
 	"strconv"
 	"trojan/core"
@@ -73,32 +72,9 @@ func staticRouter(router *gin.Engine) {
 	})
 }
 
-func sslRouter(router *gin.Engine, port int) {
-	domain, _ := core.GetValue("domain")
-	secureFunc := func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			secureMiddleware := secure.New(secure.Options{
-				SSLRedirect: true,
-				SSLHost:     fmt.Sprintf("%s:%d", domain, port),
-			})
-			err := secureMiddleware.Process(c.Writer, c.Request)
-			// If there was an error, do not continue.
-			if err != nil {
-				return
-			}
-
-			c.Next()
-		}
-	}()
-	router.Use(secureFunc)
-}
-
 // Start web启动入口
 func Start(port int, isSSL bool) {
 	router := gin.Default()
-	if isSSL {
-		sslRouter(router, port)
-	}
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
 	router.Use(Auth(router).MiddlewareFunc())
@@ -109,8 +85,6 @@ func Start(port int, isSSL bool) {
 	if isSSL {
 		config := core.Load("")
 		ssl := &config.SSl
-		util.OpenPort(80)
-		go router.Run(":80")
 		router.RunTLS(fmt.Sprintf(":%d", port), ssl.Cert, ssl.Key)
 	} else {
 		router.Run(fmt.Sprintf(":%d", port))

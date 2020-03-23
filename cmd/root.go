@@ -44,7 +44,7 @@ exit:
 		fmt.Println()
 		fmt.Println(util.Cyan("欢迎使用trojan管理程序"))
 		fmt.Println()
-		menuList := []string{"trojan管理", "用户管理", "安装管理", "查看配置", "生成客户端配置文件"}
+		menuList := []string{"trojan管理", "用户管理", "安装管理", "web管理", "查看配置", "生成客户端配置文件"}
 		for i := 0; i < len(menuList); i++ {
 			if i%2 == 0 {
 				fmt.Printf("%d.%-15s\t", i+1, menuList[i])
@@ -61,8 +61,10 @@ exit:
 		case 3:
 			trojan.InstallMenu()
 		case 4:
-			trojan.UserList()
+			trojan.WebMenu()
 		case 5:
+			trojan.UserList()
+		case 6:
 			trojan.GenClientJson()
 		default:
 			break exit

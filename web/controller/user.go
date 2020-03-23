@@ -27,6 +27,10 @@ func UserList() *ResponseBody {
 func CreateUser(username string, password string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
+	if username == "admin" {
+		responseBody.Msg = "不能创建用户名为admin的用户!"
+		return &responseBody
+	}
 	mysql := core.GetMysql()
 	pass, err := base64.StdEncoding.DecodeString(password)
 	if err != nil {

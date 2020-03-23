@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"trojan/web"
 )
@@ -16,11 +15,6 @@ var webCmd = &cobra.Command{
 	Use:   "web",
 	Short: "以web方式启动",
 	Run: func(cmd *cobra.Command, args []string) {
-		if ssl && port == 80 {
-			fmt.Println("启动web服务失败!")
-			fmt.Println("以https方式运行必须传参-p来指定https的运行端口(不能为80)")
-			return
-		}
 		web.Start(port, ssl)
 	},
 }
