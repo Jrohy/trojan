@@ -1,6 +1,10 @@
 package controller
 
 import (
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/mem"
 	"time"
 	"trojan/core"
 	"trojan/trojan"
@@ -40,6 +44,25 @@ func SetLoginInfo(title string) *ResponseBody {
 	err := core.SetValue("login_title", title)
 	if err != nil {
 		responseBody.Msg = err.Error()
+	}
+	return &responseBody
+}
+
+// ServerInfo 获取服务器信息
+func ServerInfo() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	cpuPercent, _ := cpu.Percent(time.Second, false)
+	vmInfo, _ := mem.VirtualMemory()
+	smInfo, _ := mem.SwapMemory()
+	diskInfo, _ := disk.Usage("/")
+	loadInfo, _ := load.Avg()
+	responseBody.Data = map[string]interface{}{
+		"cpu":    cpuPercent,
+		"memory": vmInfo,
+		"swap":   smInfo,
+		"disk":   diskInfo,
+		"load":   loadInfo,
 	}
 	return &responseBody
 }
