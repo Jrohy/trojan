@@ -52,7 +52,7 @@ func SetLoginInfo(title string) *ResponseBody {
 func ServerInfo() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	cpuPercent, _ := cpu.Percent(time.Second, false)
+	cpuPercent, _ := cpu.Percent(0, false)
 	vmInfo, _ := mem.VirtualMemory()
 	smInfo, _ := mem.SwapMemory()
 	diskInfo, _ := disk.Usage("/")
