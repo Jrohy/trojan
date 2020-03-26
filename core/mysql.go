@@ -5,6 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	mysqlDriver "github.com/go-sql-driver/mysql"
+	"io/ioutil"
+	"log"
+
 	// mysql sql驱动
 	_ "github.com/go-sql-driver/mysql"
 	"strconv"
@@ -33,6 +37,8 @@ type User struct {
 
 // GetDB 获取mysql数据库连接
 func (mysql *Mysql) GetDB() *sql.DB {
+	// 屏蔽mysql驱动包的日志输出
+	mysqlDriver.SetLogger(log.New(ioutil.Discard, "", 0))
 	conn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", mysql.Username, mysql.Password, mysql.ServerAddr, mysql.ServerPort, mysql.Database)
 	db, err := sql.Open("mysql", conn)
 	if err != nil {

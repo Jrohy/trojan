@@ -20,7 +20,9 @@ var (
 func InstallMenu() {
 	fmt.Println()
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
-	switch util.LoopInput("请选择: ", menu, true) {
+	choice := util.LoopInput("请选择: ", menu, true)
+	fmt.Println()
+	switch choice {
 	case 1:
 		InstallTrojan()
 	case 2:
@@ -30,7 +32,6 @@ func InstallMenu() {
 	default:
 		return
 	}
-	Restart()
 }
 
 // InstallDocker 安装docker
@@ -49,9 +50,9 @@ func InstallTrojan() {
 		fmt.Println(err)
 	}
 	util.ExecCommand(data)
+	util.OpenPort(443)
 	util.ExecCommand("systemctl restart trojan")
 	util.ExecCommand("systemctl enable trojan")
-	util.OpenPort(443)
 	fmt.Println()
 }
 
@@ -59,7 +60,9 @@ func InstallTrojan() {
 func InstallTls() {
 	domain := ""
 	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"}, true)
-	if choice == 1 {
+	if choice < 0 {
+		return
+	} else if choice == 1 {
 		localIP := util.GetLocalIP()
 		fmt.Printf("本机ip: %s\n", localIP)
 		for {
@@ -107,6 +110,7 @@ func InstallTls() {
 		}
 	}
 	core.SetValue("domain", domain)
+	Restart()
 	fmt.Println()
 }
 
@@ -132,9 +136,9 @@ func InstallMysql() {
 		}
 		util.OpenPort(mysql.ServerPort)
 		util.ExecCommand(fmt.Sprintf(mysqlDodkcerRun, mysql.ServerPort, mysql.Password))
-		fmt.Println("mysql启动中, 请稍等...")
+		db := mysql.GetDB()
 		for {
-			db := mysql.GetDB()
+			fmt.Printf("%s mysql启动中,请稍等...\n", time.Now().Format("2006-01-02 15:04:05"))
 			err := db.Ping()
 			if err == nil {
 				db.Close()
@@ -179,5 +183,6 @@ func InstallMysql() {
 	if len(mysql.GetData()) == 0 {
 		AddUser()
 	}
+	Restart()
 	fmt.Println()
 }
