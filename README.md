@@ -32,9 +32,6 @@ source <(curl -sL https://git.io/trojan-install) --remove
 浏览器访问 https://域名 可在线web页面管理trojan用户  
 前端页面源码地址: [trojan-web](https://github.com/Jrohy/trojan-web)
 
-web界面:
-![avatar](asset/web.png)
-
 ### b. docker运行
 1. 安装mysql
 ```
@@ -51,6 +48,10 @@ docker run -it -d --name trojan --net=host --restart=always --privileged jrohy/t
 启动web服务: `systemctl start trojan-web`   
 
 设置自启动: `systemctl enable trojan-web`
+
+## 运行截图
+![avatar](asset/1.png)
+![avatar](asset/2.png)
 
 ## 命令行
 ```
