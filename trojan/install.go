@@ -20,9 +20,7 @@ var (
 func InstallMenu() {
 	fmt.Println()
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
-	choice := util.LoopInput("请选择: ", menu, true)
-	fmt.Println()
-	switch choice {
+	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
 		InstallTrojan()
 	case 2:
@@ -44,6 +42,7 @@ func InstallDocker() {
 
 // InstallTrojan 安装trojan
 func InstallTrojan() {
+	fmt.Println()
 	box := packr.New("trojan-install", "../asset")
 	data, err := box.FindString("trojan-install.sh")
 	if err != nil {
@@ -53,12 +52,12 @@ func InstallTrojan() {
 	util.OpenPort(443)
 	util.ExecCommand("systemctl restart trojan")
 	util.ExecCommand("systemctl enable trojan")
-	fmt.Println()
 }
 
 // InstallTls 安装证书
 func InstallTls() {
 	domain := ""
+	fmt.Println()
 	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"}, true)
 	if choice < 0 {
 		return
@@ -120,6 +119,7 @@ func InstallMysql() {
 		mysql  core.Mysql
 		choice int
 	)
+	fmt.Println()
 	if util.IsExists("/.dockerenv") {
 		choice = 2
 	} else {
