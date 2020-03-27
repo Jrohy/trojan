@@ -136,6 +136,24 @@ installTrojan(){
         colorEcho $GREEN "更新trojan管理程序成功!\n"
     fi
     systemctl restart trojan-web
+    if [[ -z `crontab -l|grep trojan-web` ]]; then
+        #计算北京时间早上3点时VPS的实际时间
+        ORIGIN_TIME_ZONE=$(date -R|awk '{printf"%d",$6}')
+        LOCAL_TIME_ZONE=${ORIGIN_TIME_ZONE%00}
+        BEIJING_ZONE=8
+        BEIJING_UPDATE_TIME=3
+        DIFF_ZONE=$[$BEIJING_ZONE-$LOCAL_TIME_ZONE]
+        LOCAL_TIME=$[$BEIJING_UPDATE_TIME-$DIFF_ZONE]
+        if [ $LOCAL_TIME -lt 0 ];then
+            LOCAL_TIME=$[24+$LOCAL_TIME]
+        elif [ $LOCAL_TIME -ge 24 ];then
+            LOCAL_TIME=$[$LOCAL_TIME-24]
+        fi
+        crontab -l|sed '/acme.sh/d' > crontab.txt
+        echo "0 ${LOCAL_TIME}"' * * * systemctl stop trojan-web && "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" > /dev/null && systemctl start trojan-web' >> crontab.txt
+        crontab crontab.txt
+        rm -f crontab.txt
+    fi
     [[ $SHOW_TIP == 1 ]] && echo "浏览器访问'`colorEcho $BLUE https://域名`'可在线trojan多用户管理"
 }
 
