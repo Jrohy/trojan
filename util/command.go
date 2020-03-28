@@ -1,8 +1,8 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os/exec"
@@ -35,25 +35,6 @@ func RunWebShell(webShellPath string) {
 	ExecCommand(string(installShell))
 }
 
-func asyncLog(reader io.ReadCloser) error {
-	cache := "" //缓存不足一行的日志信息
-	buf := make([]byte, 1024)
-	for {
-		num, err := reader.Read(buf)
-		if err != nil && err != io.EOF {
-			return err
-		}
-		if num > 0 {
-			b := buf[:num]
-			s := strings.Split(string(b), "\n")
-			line := strings.Join(s[:len(s)-1], "\n") //取出整行的日志
-			fmt.Printf("%s%s\n", cache, line)
-			cache = s[len(s)-1]
-		}
-	}
-	return nil
-}
-
 // ExecCommand 运行命令并实时查看运行结果
 func ExecCommand(command string) error {
 	cmd := exec.Command("bash", "-c", command)
@@ -65,17 +46,33 @@ func ExecCommand(command string) error {
 		fmt.Println("Error:The command is err: ", err.Error())
 		return err
 	}
-
-	go asyncLog(stdout)
-	go asyncLog(stderr)
-
-	if err := cmd.Wait(); err != nil {
-		if !strings.Contains(err.Error(), "exit status") {
-			fmt.Println("wait:", err.Error())
+	ch := make(chan string, 100)
+	stdoutScan := bufio.NewScanner(stdout)
+	stderrScan := bufio.NewScanner(stderr)
+	go func() {
+		for stdoutScan.Scan() {
+			line := stdoutScan.Text()
+			ch <- line
 		}
-		return err
+	}()
+	go func() {
+		for stderrScan.Scan() {
+			line := stderrScan.Text()
+			ch <- line
+		}
+	}()
+	var err error
+	go func() {
+		err = cmd.Wait()
+		if err != nil {
+			fmt.Println("Error:The command is err: ", err.Error())
+		}
+		close(ch)
+	}()
+	for line := range ch {
+		fmt.Println(line)
 	}
-	return nil
+	return err
 }
 
 // ExecCommandWithResult 运行命令并获取结果
