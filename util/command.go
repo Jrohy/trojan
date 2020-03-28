@@ -64,8 +64,8 @@ func ExecCommand(command string) error {
 	var err error
 	go func() {
 		err = cmd.Wait()
-		if err != nil {
-			fmt.Println("Error:The command is err: ", err.Error())
+		if err != nil && !strings.Contains(err.Error(), "exit status") {
+			fmt.Println("wait:", err.Error())
 		}
 		close(ch)
 	}()
