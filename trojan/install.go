@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	dockerInstallUrl = "https://git.io/docker-install"
-	mysqlDodkcerRun  = "docker run --name trojan-mysql --restart=always -p %d:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7"
+	dockerInstallUrl1 = "https://get.docker.com"
+	dockerInstallUrl2 = "https://git.io/docker-install"
+	mysqlDodkcerRun   = "docker run --name trojan-mysql --restart=always -p %d:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7"
 )
 
 // InstallMenu 安装目录
@@ -35,7 +36,13 @@ func InstallMenu() {
 // InstallDocker 安装docker
 func InstallDocker() {
 	if !util.CheckCommandExists("docker") {
-		util.RunWebShell(dockerInstallUrl)
+		util.RunWebShell(dockerInstallUrl1)
+		if !util.CheckCommandExists("docker") {
+			util.RunWebShell(dockerInstallUrl2)
+		} else {
+			util.ExecCommand("systemctl enable docker")
+			util.ExecCommand("systemctl start docker")
+		}
 		fmt.Println()
 	}
 }
