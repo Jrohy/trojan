@@ -98,7 +98,7 @@ func init() {
 func updateUser(c *gin.Context) {
 	responseBody := controller.ResponseBody{Msg: "success"}
 	defer controller.TimeCost(time.Now(), &responseBody)
-	username := c.PostForm("username")
+	username := c.DefaultPostForm("username", "admin")
 	pass := c.PostForm("password")
 	err := core.SetValue(fmt.Sprintf("%s_pass", username), pass)
 	if err != nil {
