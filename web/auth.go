@@ -44,7 +44,10 @@ func init() {
 			}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
-			var loginVals Login
+			var (
+				password  string
+				loginVals Login
+			)
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
@@ -53,15 +56,25 @@ func init() {
 			if err != nil {
 				return nil, err
 			}
-			if value, err := core.GetValue(userID + "_pass"); err != nil {
-				return nil, err
-			} else if value == pass {
+			if userID != "admin" {
+				mysql := core.GetMysql()
+				user := mysql.GetUserByName(userID)
+				if user == nil {
+					return nil, jwt.ErrFailedAuthentication
+				}
+				password = user.Password
+			} else {
+				if password, err = core.GetValue(userID + "_pass"); err != nil {
+					return nil, err
+				}
+			}
+			if password == pass {
 				return &loginVals, nil
 			}
 			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*Login); ok && v.Username == "admin" {
+			if _, ok := data.(*Login); ok {
 				return true
 			}
 			return false
@@ -85,13 +98,19 @@ func init() {
 func updateUser(c *gin.Context) {
 	responseBody := controller.ResponseBody{Msg: "success"}
 	defer controller.TimeCost(time.Now(), &responseBody)
-	username := c.DefaultPostForm("username", "admin")
+	username := c.PostForm("username")
 	pass := c.PostForm("password")
 	err := core.SetValue(fmt.Sprintf("%s_pass", username), pass)
 	if err != nil {
 		responseBody.Msg = err.Error()
 	}
 	c.JSON(200, responseBody)
+}
+
+// RequestUsername 获取请求接口的用户名
+func RequestUsername(c *gin.Context) string {
+	claims := jwt.ExtractClaims(c)
+	return claims[identityKey].(string)
 }
 
 // Auth 权限router

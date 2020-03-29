@@ -136,6 +136,29 @@ func (mysql *Mysql) CleanData(id uint) error {
 	return nil
 }
 
+// GetUserByName 通过用户名来获取用户
+func (mysql *Mysql) GetUserByName(name string) *User {
+	db := mysql.GetDB()
+	if db == nil {
+		return nil
+	}
+	defer db.Close()
+	var (
+		username   string
+		originPass string
+		download   uint64
+		upload     uint64
+		quota      int64
+		id         uint
+	)
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
+	if err := row.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+}
+
 // GetData 获取用户记录
 func (mysql *Mysql) GetData(ids ...string) []*User {
 	var dataList []*User

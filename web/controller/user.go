@@ -7,11 +7,19 @@ import (
 )
 
 // UserList 获取用户列表
-func UserList() *ResponseBody {
+func UserList(findUser string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
 	userList := mysql.GetData()
+	if findUser != "" {
+		for _, user := range userList {
+			if user.Username == findUser {
+				userList = []*core.User{user}
+				break
+			}
+		}
+	}
 	if userList == nil {
 		responseBody.Msg = "连接mysql失败!"
 		return &responseBody
@@ -33,6 +41,10 @@ func CreateUser(username string, password string) *ResponseBody {
 	defer TimeCost(time.Now(), &responseBody)
 	if username == "admin" {
 		responseBody.Msg = "不能创建用户名为admin的用户!"
+		return &responseBody
+	}
+	if _, err := core.GetValue(username + "_pass"); err == nil {
+		responseBody.Msg = "已存在用户名为: " + username + " 的用户!"
 		return &responseBody
 	}
 	mysql := core.GetMysql()

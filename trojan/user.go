@@ -32,6 +32,10 @@ func AddUser() {
 		fmt.Println(util.Yellow("不能新建用户名为'admin'的用户!"))
 		return
 	}
+	if _, err := core.GetValue(inputUser + "_pass"); err == nil {
+		fmt.Println(util.Yellow("已存在用户名为: " + inputUser + " 的用户!"))
+		return
+	}
 	inputPass := util.Input(fmt.Sprintf("生成随机密码: %s, 使用直接回车, 否则输入自定义密码: ", randomPass), randomPass)
 	mysql := core.GetMysql()
 	if mysql.CreateUser(inputUser, inputPass) == nil {

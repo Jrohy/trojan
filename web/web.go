@@ -16,7 +16,12 @@ func userRouter(router *gin.Engine) {
 	user := router.Group("/trojan/user")
 	{
 		user.GET("", func(c *gin.Context) {
-			c.JSON(200, controller.UserList())
+			requestUser := RequestUsername(c)
+			if requestUser == "admin" {
+				c.JSON(200, controller.UserList(""))
+			} else {
+				c.JSON(200, controller.UserList(requestUser))
+			}
 		})
 		user.POST("", func(c *gin.Context) {
 			username := c.PostForm("username")
