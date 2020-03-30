@@ -50,6 +50,8 @@ docker run -it -d --name trojan --net=host --restart=always --privileged jrohy/t
 
 设置自启动: `systemctl enable trojan-web`
 
+更新管理程序: `source <(curl -sL https://git.io/trojan-install)`
+
 ## 运行截图
 ![avatar](asset/1.png)
 ![avatar](asset/2.png)
