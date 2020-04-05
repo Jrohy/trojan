@@ -115,7 +115,10 @@ installDependent(){
 
 installTrojan(){
     local SHOW_TIP=0
-    [[ $UPDATE == 1 ]] && systemctl stop trojan-web >/dev/null 2>&1
+    if [[ $UPDATE == 1 ]];then
+        systemctl stop trojan-web >/dev/null 2>&1
+        rm -f /usr/local/bin/trojan
+    fi
     LASTEST_VERSION=$(curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4)
     echo "正在下载管理程序`colorEcho $BLUE $LASTEST_VERSION`版本..."
     curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/trojan" -o /usr/local/bin/trojan
