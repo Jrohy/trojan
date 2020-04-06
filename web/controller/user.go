@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/base64"
+	"strconv"
 	"time"
 	"trojan/core"
 )
@@ -43,17 +44,51 @@ func CreateUser(username string, password string) *ResponseBody {
 		responseBody.Msg = "不能创建用户名为admin的用户!"
 		return &responseBody
 	}
-	if _, err := core.GetValue(username + "_pass"); err == nil {
+	mysql := core.GetMysql()
+	if user := mysql.GetUserByName(username); user != nil {
 		responseBody.Msg = "已存在用户名为: " + username + " 的用户!"
 		return &responseBody
 	}
-	mysql := core.GetMysql()
 	pass, err := base64.StdEncoding.DecodeString(password)
 	if err != nil {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
 	}
 	if err := mysql.CreateUser(username, string(pass)); err != nil {
+		responseBody.Msg = err.Error()
+	}
+	return &responseBody
+}
+
+// UpdateUser 更新用户
+func UpdateUser(id uint, username string, password string) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	if username == "admin" {
+		responseBody.Msg = "不能更改用户名为admin的用户!"
+		return &responseBody
+	}
+	mysql := core.GetMysql()
+	userList := mysql.GetData(strconv.Itoa(int(id)))
+	if userList == nil {
+		responseBody.Msg = "can't connect mysql"
+		return &responseBody
+	}
+	if userList[0].Username != username {
+		if user := mysql.GetUserByName(username); user != nil {
+			responseBody.Msg = "已存在用户名为: " + username + " 的用户!"
+			return &responseBody
+		}
+	}
+	if userList[0].Username != "admin" {
+		_ = core.DelValue(userList[0].Username + "_pass")
+	}
+	pass, err := base64.StdEncoding.DecodeString(password)
+	if err != nil {
+		responseBody.Msg = "Base64解码失败: " + err.Error()
+		return &responseBody
+	}
+	if err := mysql.UpdateUser(id, username, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
 	}
 	return &responseBody

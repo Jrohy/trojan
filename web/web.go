@@ -28,6 +28,13 @@ func userRouter(router *gin.Engine) {
 			password := c.PostForm("password")
 			c.JSON(200, controller.CreateUser(username, password))
 		})
+		user.POST("/update", func(c *gin.Context) {
+			sid := c.PostForm("id")
+			username := c.PostForm("username")
+			password := c.PostForm("password")
+			id, _ := strconv.Atoi(sid)
+			c.JSON(200, controller.UpdateUser(uint(id), username, password))
+		})
 		user.DELETE("", func(c *gin.Context) {
 			stringId := c.Query("id")
 			id, _ := strconv.Atoi(stringId)

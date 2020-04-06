@@ -87,6 +87,25 @@ func (mysql *Mysql) CreateUser(username string, password string) error {
 	return nil
 }
 
+// UpdateUser 更新Trojan用户名和密码
+func (mysql *Mysql) UpdateUser(id uint, username string, password string) error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	encryPass := sha256.Sum224([]byte(password))
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET username='%s', password='%x' WHERE id=%d;", username, encryPass, id)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	if err := SetValue(username+"_pass", password); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
 // DeleteUser 删除用户
 func (mysql *Mysql) DeleteUser(id uint) error {
 	db := mysql.GetDB()
