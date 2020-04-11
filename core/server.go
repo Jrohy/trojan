@@ -77,7 +77,6 @@ func GetMysql() *Mysql {
 // WriterMysql 写mysql配置
 func WriterMysql(mysql *Mysql) bool {
 	mysql.Enabled = true
-	mysql.Database = "trojan"
 	config := Load("")
 	config.Mysql = *mysql
 	return Save(config, "")

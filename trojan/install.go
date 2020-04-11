@@ -178,14 +178,14 @@ func InstallMysql() {
 			mysql.Password = util.Input(fmt.Sprintf("请输入mysql %s用户的密码: ", mysql.Username), "")
 			db := mysql.GetDB()
 			if db != nil && db.Ping() == nil {
-				db.Exec("CREATE DATABASE IF NOT EXISTS trojan;")
+				mysql.Database = util.Input("请输入使用的数据库名(不存在可自动创建, 回车使用trojan): ", "trojan")
+				db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Database))
 				break
 			} else {
 				fmt.Println("连接mysql失败, 请重新输入")
 			}
 		}
 	}
-	mysql.Database = "trojan"
 	mysql.CreateTable()
 	core.WriterMysql(&mysql)
 	if len(mysql.GetData()) == 0 {

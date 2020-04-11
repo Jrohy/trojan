@@ -20,9 +20,10 @@ type Mysql struct {
 	Enabled    bool   `json:"enabled"`
 	ServerAddr string `json:"server_addr"`
 	ServerPort int    `json:"server_port"`
-	Database   string `json:"db"`
+	Database   string `json:"database"`
 	Username   string `json:"username"`
 	Password   string `json:"password"`
+	Cafile     string `json:"cafile"`
 }
 
 // User 用户表记录结构体
