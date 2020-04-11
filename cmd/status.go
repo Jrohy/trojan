@@ -11,7 +11,7 @@ var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "查看trojan状态",
 	Run: func(cmd *cobra.Command, args []string) {
-		trojan.Status()
+		trojan.Status(true)
 	},
 }
 

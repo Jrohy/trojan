@@ -18,7 +18,7 @@ func ControllMenu() {
 	case 3:
 		Restart()
 	case 4:
-		Status()
+		Status(true)
 	}
 }
 
@@ -50,8 +50,12 @@ func Stop() {
 }
 
 // Status 获取trojan状态
-func Status() {
-	util.ExecCommand("systemctl status trojan")
+func Status(isPrint bool) string {
+	result := util.ExecCommandWithResult("systemctl status trojan")
+	if isPrint {
+		fmt.Println(result)
+	}
+	return result
 }
 
 // RunTime Trojan运行时间
