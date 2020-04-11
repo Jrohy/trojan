@@ -32,12 +32,12 @@ func AddUser() {
 		fmt.Println(util.Yellow("不能新建用户名为'admin'的用户!"))
 		return
 	}
-	if _, err := core.GetValue(inputUser + "_pass"); err == nil {
+	mysql := core.GetMysql()
+	if user := mysql.GetUserByName(inputUser); user != nil {
 		fmt.Println(util.Yellow("已存在用户名为: " + inputUser + " 的用户!"))
 		return
 	}
 	inputPass := util.Input(fmt.Sprintf("生成随机密码: %s, 使用直接回车, 否则输入自定义密码: ", randomPass), randomPass)
-	mysql := core.GetMysql()
 	if mysql.CreateUser(inputUser, inputPass) == nil {
 		fmt.Println("新增用户成功!")
 	}
@@ -48,6 +48,9 @@ func DelUser() {
 	userList := UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要删除的用户序号: ", userList, true)
+	if choice == -1 {
+		return
+	}
 	if mysql.DeleteUser(userList[choice-1].ID) == nil {
 		fmt.Println("删除用户成功!")
 	}
@@ -84,6 +87,9 @@ func CleanData() {
 	userList := UserList()
 	mysql := core.GetMysql()
 	choice := util.LoopInput("请选择要清空流量的用户序号: ", userList, true)
+	if choice == -1 {
+		return
+	}
 	if mysql.CleanData(userList[choice-1].ID) == nil {
 		fmt.Println("清空流量成功!")
 	}
