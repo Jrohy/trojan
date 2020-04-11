@@ -156,7 +156,7 @@ func InstallMysql() {
 		}
 		fmt.Println("mysql启动成功!")
 	} else if choice == 2 {
-		mysql = core.Mysql{Username: "root"}
+		mysql = core.Mysql{}
 		for {
 			for {
 				mysqlUrl := util.Input("请输入mysql连接地址(格式: host:port), 默认连接地址为127.0.0.1:3306, 使用直接回车, 否则输入自定义连接地址: ",
@@ -174,7 +174,8 @@ func InstallMysql() {
 				mysql.ServerAddr, mysql.ServerPort = urlInfo[0], port
 				break
 			}
-			mysql.Password = util.Input("请输入mysql root用户的密码: ", "")
+			mysql.Username = util.Input("请输入mysql的用户名(回车使用root): ", "root")
+			mysql.Password = util.Input(fmt.Sprintf("请输入mysql %s用户的密码: ", mysql.Username), "")
 			db := mysql.GetDB()
 			if db != nil && db.Ping() == nil {
 				db.Exec("CREATE DATABASE IF NOT EXISTS trojan;")
