@@ -68,6 +68,7 @@ Available Commands:
   del         删除用户
   help        Help about any command
   info        用户信息列表
+  log         查看trojan日志
   restart     重启trojan
   start       启动trojan
   status      查看trojan状态
