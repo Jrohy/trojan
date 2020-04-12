@@ -53,8 +53,8 @@ func trojanRouter(router *gin.Engine) {
 	router.POST("/trojan/restart", func(c *gin.Context) {
 		c.JSON(200, controller.Restart())
 	})
-	router.GET("/trojan/status", func(c *gin.Context) {
-		c.JSON(200, controller.Status())
+	router.GET("/trojan/loglevel", func(c *gin.Context) {
+		c.JSON(200, controller.GetLogLevel())
 	})
 	router.POST("/trojan/update", func(c *gin.Context) {
 		c.JSON(200, controller.Update())
@@ -62,7 +62,7 @@ func trojanRouter(router *gin.Engine) {
 	router.POST("/trojan/loglevel", func(c *gin.Context) {
 		slevel := c.DefaultPostForm("level", "1")
 		level, _ := strconv.Atoi(slevel)
-		c.JSON(200, controller.LogLevel(level))
+		c.JSON(200, controller.SetLogLevel(level))
 	})
 	router.GET("/trojan/log", func(c *gin.Context) {
 		controller.Log(c)

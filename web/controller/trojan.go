@@ -35,19 +35,6 @@ func Restart() *ResponseBody {
 	return &responseBody
 }
 
-// Status trojan状态
-func Status() *ResponseBody {
-	responseBody := ResponseBody{Msg: "success"}
-	defer TimeCost(time.Now(), &responseBody)
-	config := core.Load("")
-	responseBody.Data = map[string]interface{}{
-		"status":   trojan.Status(false),
-		"version":  trojan.Version(),
-		"loglevel": config.LogLevel,
-	}
-	return &responseBody
-}
-
 // Update trojan更新
 func Update() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
@@ -56,12 +43,23 @@ func Update() *ResponseBody {
 	return &responseBody
 }
 
-// LogLevel 修改trojan日志等级
-func LogLevel(level int) *ResponseBody {
+// SetLogLevel 修改trojan日志等级
+func SetLogLevel(level int) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	core.WriteLogLevel(level)
 	trojan.Restart()
+	return &responseBody
+}
+
+// GetLogLevel 获取trojan日志等级
+func GetLogLevel() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	config := core.Load("")
+	responseBody.Data = map[string]interface{}{
+		"loglevel": config.LogLevel,
+	}
 	return &responseBody
 }
 
