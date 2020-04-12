@@ -1,8 +1,13 @@
 package controller
 
 import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	ws "github.com/gorilla/websocket"
+	"log"
 	"time"
 	"trojan/trojan"
+	websocket "trojan/util"
 )
 
 // Start 启动trojan
@@ -46,4 +51,35 @@ func Update() *ResponseBody {
 	defer TimeCost(time.Now(), &responseBody)
 	trojan.InstallTrojan()
 	return &responseBody
+}
+
+// LogChan 通过ws查看trojan实时日志
+func Log(c *gin.Context) {
+	var (
+		wsConn *websocket.WsConnection
+		err    error
+	)
+	if wsConn, err = websocket.InitWebsocket(c.Writer, c.Request); err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer wsConn.WsClose()
+	param := c.DefaultQuery("line", "300")
+	if param == "-1" {
+		param = "--no-tail"
+	} else {
+		param = "-n " + param
+	}
+	result, err := trojan.LogChan(param)
+	if err != nil {
+		fmt.Println(err)
+		wsConn.WsClose()
+		return
+	}
+	for line := range *result {
+		if err := wsConn.WsWrite(ws.TextMessage, []byte(line)); err != nil {
+			log.Println("can't send: ", line)
+			break
+		}
+	}
 }
