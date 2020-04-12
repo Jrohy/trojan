@@ -39,9 +39,11 @@ func Restart() *ResponseBody {
 func Status() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
+	config := core.Load("")
 	responseBody.Data = map[string]interface{}{
-		"status":  trojan.Status(false),
-		"version": trojan.Version(),
+		"status":   trojan.Status(false),
+		"version":  trojan.Version(),
+		"loglevel": config.LogLevel,
 	}
 	return &responseBody
 }
@@ -87,7 +89,7 @@ func Log(c *gin.Context) {
 		return
 	}
 	for line := range *result {
-		if err := wsConn.WsWrite(ws.TextMessage, []byte(line)); err != nil {
+		if err := wsConn.WsWrite(ws.TextMessage, []byte(line+"\n")); err != nil {
 			log.Println("can't send: ", line)
 			break
 		}
