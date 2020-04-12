@@ -100,7 +100,7 @@ func InstallTls() {
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
-		core.WriterTls(crtFile, keyFile)
+		core.WriteTls(crtFile, keyFile)
 	} else if choice == 2 {
 		crtFile := util.Input("请输入证书的cert文件路径: ", "")
 		keyFile := util.Input("请输入证书的key文件路径: ", "")
@@ -112,7 +112,7 @@ func InstallTls() {
 				fmt.Println("输入域名为空!")
 				return
 			}
-			core.WriterTls(crtFile, keyFile)
+			core.WriteTls(crtFile, keyFile)
 		}
 	}
 	core.SetValue("domain", domain)
@@ -187,7 +187,7 @@ func InstallMysql() {
 		}
 	}
 	mysql.CreateTable()
-	core.WriterMysql(&mysql)
+	core.WriteMysql(&mysql)
 	if len(mysql.GetData()) == 0 {
 		AddUser()
 	}

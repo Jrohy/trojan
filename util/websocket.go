@@ -16,13 +16,13 @@ var wsUpgrader = websocket.Upgrader{
 	},
 }
 
-// websocket消息
+// WsMessage websocket消息
 type WsMessage struct {
 	MessageType int
 	Data        []byte
 }
 
-// 封装websocket连接
+// WsConnection 封装websocket连接
 type WsConnection struct {
 	wsSocket *websocket.Conn // 底层websocket
 	inChan   chan *WsMessage // 读取队列
@@ -89,7 +89,7 @@ CLOSED:
 }
 
 /************** 并发安全 API **************/
-
+// InitWebsocket 初始化ws
 func InitWebsocket(resp http.ResponseWriter, req *http.Request) (wsConn *WsConnection, err error) {
 	var (
 		wsSocket *websocket.Conn
@@ -114,7 +114,7 @@ func InitWebsocket(resp http.ResponseWriter, req *http.Request) (wsConn *WsConne
 	return
 }
 
-// 发送消息
+// WsWrite 发送消息
 func (wsConn *WsConnection) WsWrite(messageType int, data []byte) (err error) {
 	select {
 	case wsConn.outChan <- &WsMessage{messageType, data}:
@@ -124,7 +124,7 @@ func (wsConn *WsConnection) WsWrite(messageType int, data []byte) (err error) {
 	return
 }
 
-// 读取消息
+// WsRead 读取消息
 func (wsConn *WsConnection) WsRead() (msg *WsMessage, err error) {
 	select {
 	case msg = <-wsConn.inChan:
@@ -135,7 +135,7 @@ func (wsConn *WsConnection) WsRead() (msg *WsMessage, err error) {
 	return
 }
 
-// 关闭连接
+// WsClose 关闭连接
 func (wsConn *WsConnection) WsClose() {
 	wsConn.wsSocket.Close()
 

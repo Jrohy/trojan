@@ -8,7 +8,7 @@ type Config struct {
 	RemoteAddr string   `json:"remote_addr"`
 	RemotePort int      `json:"remote_port"`
 	Password   []string `json:"password"`
-	LogLevel   int8     `json:"log_level"`
+	LogLevel   int      `json:"log_level"`
 }
 
 // SSL 结构体

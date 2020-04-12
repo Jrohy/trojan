@@ -6,6 +6,7 @@ import (
 	ws "github.com/gorilla/websocket"
 	"log"
 	"time"
+	"trojan/core"
 	"trojan/trojan"
 	websocket "trojan/util"
 )
@@ -53,7 +54,16 @@ func Update() *ResponseBody {
 	return &responseBody
 }
 
-// LogChan 通过ws查看trojan实时日志
+// LogLevel 修改trojan日志等级
+func LogLevel(level int) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	core.WriteLogLevel(level)
+	trojan.Restart()
+	return &responseBody
+}
+
+// Log 通过ws查看trojan实时日志
 func Log(c *gin.Context) {
 	var (
 		wsConn *websocket.WsConnection

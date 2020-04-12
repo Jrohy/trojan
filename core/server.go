@@ -74,25 +74,32 @@ func GetMysql() *Mysql {
 	return &config.Mysql
 }
 
-// WriterMysql 写mysql配置
-func WriterMysql(mysql *Mysql) bool {
+// WriteMysql 写mysql配置
+func WriteMysql(mysql *Mysql) bool {
 	mysql.Enabled = true
 	config := Load("")
 	config.Mysql = *mysql
 	return Save(config, "")
 }
 
-// WriterTls 写tls配置
-func WriterTls(cert string, key string) bool {
+// WriteTls 写tls配置
+func WriteTls(cert string, key string) bool {
 	config := Load("")
 	config.SSl.Cert = cert
 	config.SSl.Key = key
 	return Save(config, "")
 }
 
-// WriterPassword 写密码
-func WriterPassword(pass []string) bool {
+// WritePassword 写密码
+func WritePassword(pass []string) bool {
 	config := Load("")
 	config.Password = pass
+	return Save(config, "")
+}
+
+// WriteLogLevel 写日志等级
+func WriteLogLevel(level int) bool {
+	config := Load("")
+	config.LogLevel = level
 	return Save(config, "")
 }
