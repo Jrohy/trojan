@@ -88,7 +88,6 @@ CLOSED:
 	wsConn.WsClose()
 }
 
-/************** 并发安全 API **************/
 // InitWebsocket 初始化ws
 func InitWebsocket(resp http.ResponseWriter, req *http.Request) (wsConn *WsConnection, err error) {
 	var (
