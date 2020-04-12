@@ -30,7 +30,7 @@ type WsConnection struct {
 
 	mutex     sync.Mutex // 避免重复关闭管道
 	isClosed  bool
-	closeChan chan byte // 关闭通知
+	CloseChan chan byte // 关闭通知
 }
 
 // 读取协程
@@ -57,7 +57,7 @@ func (wsConn *WsConnection) wsReadLoop() {
 			if string(data) == "exit" {
 				goto CLOSED
 			}
-		case <-wsConn.closeChan:
+		case <-wsConn.CloseChan:
 			goto CLOSED
 		}
 	}
@@ -80,7 +80,7 @@ func (wsConn *WsConnection) wsWriteLoop() {
 				fmt.Println(err)
 				goto CLOSED
 			}
-		case <-wsConn.closeChan:
+		case <-wsConn.CloseChan:
 			goto CLOSED
 		}
 	}
@@ -101,7 +101,7 @@ func InitWebsocket(resp http.ResponseWriter, req *http.Request) (wsConn *WsConne
 		wsSocket:  wsSocket,
 		inChan:    make(chan *WsMessage, 1000),
 		outChan:   make(chan *WsMessage, 1000),
-		closeChan: make(chan byte),
+		CloseChan: make(chan byte),
 		isClosed:  false,
 	}
 
@@ -117,7 +117,7 @@ func InitWebsocket(resp http.ResponseWriter, req *http.Request) (wsConn *WsConne
 func (wsConn *WsConnection) WsWrite(messageType int, data []byte) (err error) {
 	select {
 	case wsConn.outChan <- &WsMessage{messageType, data}:
-	case <-wsConn.closeChan:
+	case <-wsConn.CloseChan:
 		err = errors.New("websocket closed")
 	}
 	return
@@ -128,7 +128,7 @@ func (wsConn *WsConnection) WsRead() (msg *WsMessage, err error) {
 	select {
 	case msg = <-wsConn.inChan:
 		return
-	case <-wsConn.closeChan:
+	case <-wsConn.CloseChan:
 		err = errors.New("websocket closed")
 	}
 	return
@@ -137,11 +137,10 @@ func (wsConn *WsConnection) WsRead() (msg *WsMessage, err error) {
 // WsClose 关闭连接
 func (wsConn *WsConnection) WsClose() {
 	wsConn.wsSocket.Close()
-
 	wsConn.mutex.Lock()
 	defer wsConn.mutex.Unlock()
 	if !wsConn.isClosed {
 		wsConn.isClosed = true
-		close(wsConn.closeChan)
+		close(wsConn.CloseChan)
 	}
 }

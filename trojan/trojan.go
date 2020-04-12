@@ -92,18 +92,17 @@ func Version() string {
 
 // Log 实时打印trojan日志
 func Log(line int) {
-	result, _ := LogChan("-n " + strconv.Itoa(line))
-	for line := range *result {
+	result, _ := LogChan("-n "+strconv.Itoa(line), make(chan byte))
+	for line := range result {
 		fmt.Println(line)
 	}
 }
 
 // LogChan trojan实时日志, 返回chan
-func LogChan(param string) (*chan string, error) {
+func LogChan(param string, closeChan chan byte) (chan string, error) {
 	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan "+param)
 
 	stdout, _ := cmd.StdoutPipe()
-	stderr, _ := cmd.StderrPipe()
 
 	if err := cmd.Start(); err != nil {
 		fmt.Println("Error:The command is err: ", err.Error())
@@ -111,23 +110,16 @@ func LogChan(param string) (*chan string, error) {
 	}
 	ch := make(chan string, 100)
 	stdoutScan := bufio.NewScanner(stdout)
-	stderrScan := bufio.NewScanner(stderr)
 	go func() {
 		for stdoutScan.Scan() {
-			line := stdoutScan.Text()
-			ch <- line
+			select {
+			case <-closeChan:
+				stdout.Close()
+				return
+			default:
+				ch <- stdoutScan.Text()
+			}
 		}
 	}()
-	go func() {
-		for stderrScan.Scan() {
-			line := stderrScan.Text()
-			ch <- line
-		}
-	}()
-	var err error
-	go func() {
-		err = cmd.Wait()
-		close(ch)
-	}()
-	return &ch, err
+	return ch, nil
 }

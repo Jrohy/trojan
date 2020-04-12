@@ -82,13 +82,13 @@ func Log(c *gin.Context) {
 	} else {
 		param = "-n " + param
 	}
-	result, err := trojan.LogChan(param)
+	result, err := trojan.LogChan(param, wsConn.CloseChan)
 	if err != nil {
 		fmt.Println(err)
 		wsConn.WsClose()
 		return
 	}
-	for line := range *result {
+	for line := range result {
 		if err := wsConn.WsWrite(ws.TextMessage, []byte(line+"\n")); err != nil {
 			log.Println("can't send: ", line)
 			break
