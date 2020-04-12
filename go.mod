@@ -11,6 +11,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/packr/v2 v2.7.1
+	github.com/gorilla/websocket v1.4.0
 	github.com/shirou/gopsutil v2.20.2+incompatible
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/pflag v1.0.5 // indirect
