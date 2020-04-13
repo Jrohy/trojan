@@ -173,7 +173,6 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	)
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
 	if err := row.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
