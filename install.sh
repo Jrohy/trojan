@@ -109,7 +109,7 @@ installDependent(){
         ${PACKAGE_MANAGER} install socat bash-completion -y
     else
         ${PACKAGE_MANAGER} update
-        ${PACKAGE_MANAGER} install socat bash-completion -y
+        ${PACKAGE_MANAGER} install socat bash-completion xz-utils -y
     fi
 }
 
