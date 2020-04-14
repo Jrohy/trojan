@@ -14,7 +14,7 @@ import (
 var (
 	dockerInstallUrl1 = "https://get.docker.com"
 	dockerInstallUrl2 = "https://git.io/docker-install"
-	mysqlDodkcerRun   = "docker run --name trojan-mysql --restart=always -p %d:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7"
+	dbDockerRun       = "docker run --name trojan-mariadb --restart=always -p %d:3306 -v /home/mariadb:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mariadb:10.2"
 )
 
 // InstallMenu 安装目录
@@ -130,22 +130,22 @@ func InstallMysql() {
 	if util.IsExists("/.dockerenv") {
 		choice = 2
 	} else {
-		choice = util.LoopInput("请选择: ", []string{"安装docker版mysql", "输入自定义mysql连接"}, true)
+		choice = util.LoopInput("请选择: ", []string{"安装docker版mysql(mariadb)", "输入自定义mysql连接"}, true)
 	}
 	if choice < 0 {
 		return
 	} else if choice == 1 {
 		mysql = core.Mysql{ServerAddr: "127.0.0.1", ServerPort: util.RandomPort(), Password: util.RandString(5), Username: "root", Database: "trojan"}
 		InstallDocker()
-		fmt.Println(fmt.Sprintf(mysqlDodkcerRun, mysql.ServerPort, mysql.Password))
+		fmt.Println(fmt.Sprintf(dbDockerRun, mysql.ServerPort, mysql.Password))
 		if util.CheckCommandExists("setenforce") {
 			util.ExecCommand("setenforce 0")
 		}
 		util.OpenPort(mysql.ServerPort)
-		util.ExecCommand(fmt.Sprintf(mysqlDodkcerRun, mysql.ServerPort, mysql.Password))
+		util.ExecCommand(fmt.Sprintf(dbDockerRun, mysql.ServerPort, mysql.Password))
 		db := mysql.GetDB()
 		for {
-			fmt.Printf("%s mysql启动中,请稍等...\n", time.Now().Format("2006-01-02 15:04:05"))
+			fmt.Printf("%s mariadb启动中,请稍等...\n", time.Now().Format("2006-01-02 15:04:05"))
 			err := db.Ping()
 			if err == nil {
 				db.Close()
@@ -154,7 +154,7 @@ func InstallMysql() {
 				time.Sleep(2 * time.Second)
 			}
 		}
-		fmt.Println("mysql启动成功!")
+		fmt.Println("mariadb启动成功!")
 	} else if choice == 2 {
 		mysql = core.Mysql{}
 		for {

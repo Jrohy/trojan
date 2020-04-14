@@ -35,9 +35,11 @@ source <(curl -sL https://git.io/trojan-install) --remove
 前端页面源码地址: [trojan-web](https://github.com/Jrohy/trojan-web)
 
 ### b. docker运行
-1. 安装mysql
+1. 安装mysql  
+
+因为mariadb内存使用比mysql至少减少一半, 所以项目采取mariadb数据库
 ```
-docker run --name trojan-mysql --restart=always -p 3306:3306 -v /home/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=trojan -e MYSQL_ROOT_HOST=% -e MYSQL_DATABASE=trojan -d mysql/mysql-server:5.7
+docker run --name trojan-mariadb --restart=always -p 3306:3306 -v /home/mariadb:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=trojan -e MYSQL_ROOT_HOST=% -e MYSQL_DATABASE=trojan -d mariadb:10.2
 ```
 端口和root密码以及持久化目录都可以改成其他的
 
