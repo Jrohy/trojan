@@ -72,9 +72,9 @@ removeTrojan() {
 
     systemctl daemon-reload
 
-    #移除trojan的专用mysql
-    docker rm -f trojan-mysql
-    rm -rf /home/mysql >/dev/null 2>&1
+    #移除trojan的专用db
+    docker rm -f trojan-mysql trojan-mariadb >/dev/null 2>&1
+    rm -rf /home/mysql /home/mariadb >/dev/null 2>&1
     
     #移除环境变量
     sed -i '/trojan/d' ~/.${SHELL_WAY}rc
