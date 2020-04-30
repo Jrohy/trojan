@@ -187,8 +187,8 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
 }
 
-// PageQuery 通过分页获取用户记录
-func (mysql *Mysql) PageQuery(curPage int, pageSize int) *PageQuery {
+// PageQueryList 通过分页获取用户记录
+func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 	var (
 		total    int
 		dataList []*User
@@ -199,7 +199,8 @@ func (mysql *Mysql) PageQuery(curPage int, pageSize int) *PageQuery {
 		return nil
 	}
 	defer db.Close()
-	querySQL := "SELECT * FROM users LIMIT(curPage - 1) * pageSize, pageSize"
+	offset := (curPage - 1) * pageSize
+	querySQL := fmt.Sprintf("SELECT * FROM users LIMIT %d, %d", offset, pageSize)
 	rows, err := db.Query(querySQL)
 	if err != nil {
 		fmt.Println(err)
@@ -226,12 +227,11 @@ func (mysql *Mysql) PageQuery(curPage int, pageSize int) *PageQuery {
 		dataList = append(dataList, &User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
 	}
 	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
-
 	return &PageQuery{
 		curPage:  curPage,
 		pageSize: pageSize,
-		dataList: dataList,
 		total:    total,
+		dataList: dataList,
 		pageNum:  (total + pageSize - 1) / pageSize,
 	}
 }
