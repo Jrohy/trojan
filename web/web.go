@@ -23,6 +23,13 @@ func userRouter(router *gin.Engine) {
 				c.JSON(200, controller.UserList(requestUser))
 			}
 		})
+		user.GET("/page", func(c *gin.Context) {
+			curPageStr := c.DefaultQuery("curPage", "1")
+			pageSizeStr := c.DefaultQuery("pageSize", "10")
+			curPage, _ := strconv.Atoi(curPageStr)
+			pageSize, _ := strconv.Atoi(pageSizeStr)
+			c.JSON(200, controller.PageUserList(curPage, pageSize))
+		})
 		user.POST("", func(c *gin.Context) {
 			username := c.PostForm("username")
 			password := c.PostForm("password")

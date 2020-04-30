@@ -36,6 +36,15 @@ type User struct {
 	Upload   uint64
 }
 
+// PageQuery 分页查询的结构体
+type PageQuery struct {
+	pageNum  int
+	curPage  int
+	total    int
+	pageSize int
+	dataList []*User
+}
+
 // GetDB 获取mysql数据库连接
 func (mysql *Mysql) GetDB() *sql.DB {
 	// 屏蔽mysql驱动包的日志输出
@@ -176,6 +185,55 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 		return nil
 	}
 	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+}
+
+// PageQuery 通过分页获取用户记录
+func (mysql *Mysql) PageQuery(curPage int, pageSize int) *PageQuery {
+	var (
+		total    int
+		dataList []*User
+	)
+
+	db := mysql.GetDB()
+	if db == nil {
+		return nil
+	}
+	defer db.Close()
+	querySQL := "SELECT * FROM users LIMIT(curPage - 1) * pageSize, pageSize"
+	rows, err := db.Query(querySQL)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			username   string
+			originPass string
+			download   uint64
+			upload     uint64
+			quota      int64
+			id         uint
+		)
+		if err := rows.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
+			fmt.Println(err)
+			return nil
+		}
+		password, err := GetValue(username + "_pass")
+		if err != nil {
+			password = ""
+		}
+		dataList = append(dataList, &User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
+	}
+	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
+
+	return &PageQuery{
+		curPage:  curPage,
+		pageSize: pageSize,
+		dataList: dataList,
+		total:    total,
+		pageNum:  (total + pageSize - 1) / pageSize,
+	}
 }
 
 // GetData 获取用户记录
