@@ -28,12 +28,13 @@ type Mysql struct {
 
 // User 用户表记录结构体
 type User struct {
-	ID       uint
-	Username string
-	Password string
-	Quota    int64
-	Download uint64
-	Upload   uint64
+	ID           uint
+	Username     string
+	Password     string
+	PasswordShow string
+	Quota        int64
+	Download     uint64
+	Upload       uint64
 }
 
 // PageQuery 分页查询的结构体
@@ -67,6 +68,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     username VARCHAR(64) NOT NULL,
     password CHAR(56) NOT NULL,
+    passwordShow VARCHAR(255) NOT NULL,
     quota BIGINT NOT NULL DEFAULT 0,
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
@@ -175,16 +177,17 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	var (
 		username   string
 		originPass string
+		passShow   string
 		download   uint64
 		upload     uint64
 		quota      int64
 		id         uint
 	)
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
-	if err := row.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
+	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+	return &User{ID: id, Username: username, Password: originPass, PasswordShow: passShow, Download: download, Upload: upload, Quota: quota}
 }
 
 // PageQueryList 通过分页获取用户记录
@@ -211,12 +214,13 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 		var (
 			username   string
 			originPass string
+			passShow   string
 			download   uint64
 			upload     uint64
 			quota      int64
 			id         uint
 		)
-		if err := rows.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
+		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 			fmt.Println(err)
 			return nil
 		}
@@ -224,7 +228,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 		if err != nil {
 			password = ""
 		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: password, PasswordShow: passShow, Download: download, Upload: upload, Quota: quota})
 	}
 	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
 	return &PageQuery{
@@ -258,12 +262,13 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 		var (
 			username   string
 			originPass string
+			passShow   string
 			download   uint64
 			upload     uint64
 			quota      int64
 			id         uint
 		)
-		if err := rows.Scan(&id, &username, &originPass, &quota, &download, &upload); err != nil {
+		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 			fmt.Println(err)
 			return nil
 		}
@@ -271,7 +276,7 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 		if err != nil {
 			password = ""
 		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: password, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: password, PasswordShow: passShow, Download: download, Upload: upload, Quota: quota})
 	}
 	return dataList
 }
