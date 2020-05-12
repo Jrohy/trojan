@@ -153,7 +153,7 @@ func (mysql *Mysql) UpgradeDB() error {
 	error := db.QueryRow("SHOW COLUMNS FROM users LIKE 'passwordShow';").Scan(&field)
 	if error == sql.ErrNoRows {
 		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
-		if _, err := db.Exec("ALTER TABLE users ADD COLUMN passwordShow VARCHAR(255) NOT NULL;"); err != nil {
+		if _, err := db.Exec("ALTER TABLE users ADD COLUMN passwordShow VARCHAR(255) NOT NULL AFTER password;"); err != nil {
 			fmt.Println(err)
 			return err
 		}
