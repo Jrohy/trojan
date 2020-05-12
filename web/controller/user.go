@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/base64"
-	"fmt"
 	"strconv"
 	"time"
 	"trojan/core"
@@ -51,7 +50,6 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 	if err != nil {
 		domain = ""
 	}
-	fmt.Printf("%+v\n", pageData)
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
 		"pageData": pageData,

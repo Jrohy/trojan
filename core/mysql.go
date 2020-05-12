@@ -40,11 +40,11 @@ type User struct {
 
 // PageQuery 分页查询的结构体
 type PageQuery struct {
-	pageNum  int
-	curPage  int
-	total    int
-	pageSize int
-	dataList []*User
+	PageNum  int
+	CurPage  int
+	Total    int
+	PageSize int
+	DataList []*User
 }
 
 // GetDB 获取mysql数据库连接
@@ -248,11 +248,11 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 	}
 	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
 	return &PageQuery{
-		curPage:  curPage,
-		pageSize: pageSize,
-		total:    total,
-		dataList: dataList,
-		pageNum:  (total + pageSize - 1) / pageSize,
+		CurPage:  curPage,
+		PageSize: pageSize,
+		Total:    total,
+		DataList: dataList,
+		PageNum:  (total + pageSize - 1) / pageSize,
 	}
 }
 
