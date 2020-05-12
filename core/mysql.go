@@ -3,11 +3,13 @@ package core
 import (
 	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
+	"trojan/util"
 
 	// mysql sql驱动
 	_ "github.com/go-sql-driver/mysql"
@@ -28,13 +30,12 @@ type Mysql struct {
 
 // User 用户表记录结构体
 type User struct {
-	ID           uint
-	Username     string
-	Password     string
-	PasswordShow string
-	Quota        int64
-	Download     uint64
-	Upload       uint64
+	ID       uint
+	Username string
+	Password string
+	Quota    int64
+	Download uint64
+	Upload   uint64
 }
 
 // PageQuery 分页查询的结构体
@@ -81,18 +82,14 @@ CREATE TABLE IF NOT EXISTS users (
 }
 
 // CreateUser 创建Trojan用户
-func (mysql *Mysql) CreateUser(username string, password string) error {
+func (mysql *Mysql) CreateUser(username string, base64Pass string, originPass string) error {
 	db := mysql.GetDB()
 	if db == nil {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	encryPass := sha256.Sum224([]byte(password))
-	if _, err := db.Exec(fmt.Sprintf("INSERT INTO users(username, password, quota) VALUES ('%s', '%x', -1);", username, encryPass)); err != nil {
-		fmt.Println(err)
-		return err
-	}
-	if err := SetValue(username+"_pass", password); err != nil {
+	encryPass := sha256.Sum224([]byte(originPass))
+	if _, err := db.Exec(fmt.Sprintf("INSERT INTO users(username, password, passwordShow, quota) VALUES ('%s', '%x', '%s', -1);", username, encryPass, base64Pass)); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -100,18 +97,14 @@ func (mysql *Mysql) CreateUser(username string, password string) error {
 }
 
 // UpdateUser 更新Trojan用户名和密码
-func (mysql *Mysql) UpdateUser(id uint, username string, password string) error {
+func (mysql *Mysql) UpdateUser(id uint, username string, base64Pass string, originPass string) error {
 	db := mysql.GetDB()
 	if db == nil {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	encryPass := sha256.Sum224([]byte(password))
-	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET username='%s', password='%x' WHERE id=%d;", username, encryPass, id)); err != nil {
-		fmt.Println(err)
-		return err
-	}
-	if err := SetValue(username+"_pass", password); err != nil {
+	encryPass := sha256.Sum224([]byte(originPass))
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET username='%s', password='%x', passwordShow='%s' WHERE id=%d;", username, encryPass, base64Pass, id)); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -128,9 +121,6 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 	userList := mysql.GetData(strconv.Itoa(int(id)))
 	if userList == nil {
 		return errors.New("can't connnect mysql")
-	}
-	if userList[0].Username != "admin" {
-		_ = DelValue(userList[0].Username + "_pass")
 	}
 	if _, err := db.Exec(fmt.Sprintf("DELETE FROM users WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
@@ -149,6 +139,36 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=%d WHERE id=%d;", quota, id)); err != nil {
 		fmt.Println(err)
 		return err
+	}
+	return nil
+}
+
+// UpgradeDB 升级数据库表结构以及迁移数据
+func (mysql *Mysql) UpgradeDB() error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	var field string
+	error := db.QueryRow("SHOW COLUMNS FROM users LIKE 'passwordShow';").Scan(&field)
+	if error == sql.ErrNoRows {
+		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
+		if _, err := db.Exec("ALTER TABLE users ADD COLUMN passwordShow VARCHAR(255) NOT NULL;"); err != nil {
+			fmt.Println(err)
+			return err
+		}
+		userList := mysql.GetData()
+		for _, user := range userList {
+			pass, _ := GetValue(fmt.Sprintf("%s_pass", user.Username))
+			if pass != "" {
+				base64Pass := base64.StdEncoding.EncodeToString([]byte(pass))
+				if _, err := db.Exec(fmt.Sprintf("UPDATE users SET passwordShow='%s' WHERE id=%d;", base64Pass, user.ID)); err != nil {
+					fmt.Println(err)
+					return err
+				}
+				DelValue(fmt.Sprintf("%s_pass", user.Username))
+			}
+		}
 	}
 	return nil
 }
@@ -187,7 +207,7 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: originPass, PasswordShow: passShow, Download: download, Upload: upload, Quota: quota}
+	return &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota}
 }
 
 // PageQueryList 通过分页获取用户记录
@@ -224,11 +244,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 			fmt.Println(err)
 			return nil
 		}
-		password, err := GetValue(username + "_pass")
-		if err != nil {
-			password = ""
-		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: password, PasswordShow: passShow, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
 	}
 	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
 	return &PageQuery{
@@ -272,11 +288,7 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 			fmt.Println(err)
 			return nil
 		}
-		password, err := GetValue(username + "_pass")
-		if err != nil {
-			password = ""
-		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: password, PasswordShow: passShow, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
 	}
 	return dataList
 }

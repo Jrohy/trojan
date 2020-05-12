@@ -1,6 +1,7 @@
 package trojan
 
 import (
+	"encoding/base64"
 	"fmt"
 	"trojan/core"
 	"trojan/util"
@@ -33,12 +34,12 @@ func GenClientJson() {
 		}
 		user = *userList[choice-1]
 	}
-	password, err := core.GetValue(user.Username + "_pass")
+	pass, err := base64.StdEncoding.DecodeString(user.Password)
 	if err != nil {
-		fmt.Println(util.Red("无法获取选择用户的原始密码, 生成配置文件失败!"))
+		fmt.Println(util.Red("Base64解码失败: " + err.Error()))
 		return
 	}
-	if !core.WriteClient(password, domain, clientPath) {
+	if !core.WriteClient(string(pass), domain, clientPath) {
 		fmt.Println(util.Red("生成配置文件失败!"))
 	} else {
 		fmt.Println("成功生成配置文件: " + util.Green(clientPath))

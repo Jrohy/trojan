@@ -2,18 +2,18 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"trojan/trojan"
+	"trojan/core"
 )
 
 // upgradeCmd represents the update command
-var updateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "更新trojan",
+var upgradeCmd = &cobra.Command{
+	Use:   "upgrade",
+	Short: "升级数据库",
 	Run: func(cmd *cobra.Command, args []string) {
-		trojan.InstallTrojan()
+		core.GetMysql().UpgradeDB()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(upgradeCmd)
 }

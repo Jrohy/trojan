@@ -77,7 +77,7 @@ func CreateUser(username string, password string) *ResponseBody {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
 	}
-	if err := mysql.CreateUser(username, string(pass)); err != nil {
+	if err := mysql.CreateUser(username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
 	}
 	return &responseBody
@@ -111,7 +111,7 @@ func UpdateUser(id uint, username string, password string) *ResponseBody {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
 	}
-	if err := mysql.UpdateUser(id, username, string(pass)); err != nil {
+	if err := mysql.UpdateUser(id, username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
 	}
 	return &responseBody
