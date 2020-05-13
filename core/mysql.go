@@ -207,7 +207,7 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota}
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
 }
 
 // PageQueryList 通过分页获取用户记录
