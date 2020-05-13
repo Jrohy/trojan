@@ -164,6 +164,7 @@ installTrojan(){
             sed -i "s/\"db\"/\"database\"/g" /usr/local/etc/trojan/config.json
             systemctl restart trojan
         fi
+        /usr/local/bin/trojan upgrade
         colorEcho $GREEN "更新trojan管理程序成功!\n"
     fi
     setupCron
