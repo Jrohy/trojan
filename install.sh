@@ -101,6 +101,9 @@ checkSys() {
         colorEcho $RED "Not support OS!"
         exit 1
     fi
+
+    # 缺失/usr/local/bin路径时自动添加
+    [[ -z `echo $PATH|grep /usr/local/bin` ]] && { echo 'export PATH=$PATH:/usr/local/bin' >> /etc/profile; source /etc/profile; }
 }
 
 #安装依赖
