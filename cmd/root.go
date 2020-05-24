@@ -33,6 +33,7 @@ func check() {
 		core.WritePassword(nil)
 		trojan.InstallTls()
 		trojan.InstallMysql()
+		util.ExecCommand("systemctl restart trojan-web")
 	}
 }
 

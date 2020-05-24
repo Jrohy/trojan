@@ -75,6 +75,10 @@ func CreateUser(username string, password string) *ResponseBody {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
 	}
+	if user := mysql.GetUserByPass(password); user != nil {
+		responseBody.Msg = "已存在密码为: " + string(pass) + " 的用户!"
+		return &responseBody
+	}
 	if err := mysql.CreateUser(username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
 	}
@@ -101,13 +105,16 @@ func UpdateUser(id uint, username string, password string) *ResponseBody {
 			return &responseBody
 		}
 	}
-	if userList[0].Username != "admin" {
-		_ = core.DelValue(userList[0].Username + "_pass")
-	}
 	pass, err := base64.StdEncoding.DecodeString(password)
 	if err != nil {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
+	}
+	if userList[0].Password != password {
+		if user := mysql.GetUserByPass(password); user != nil {
+			responseBody.Msg = "已存在密码为: " + string(pass) + " 的用户!"
+			return &responseBody
+		}
 	}
 	if err := mysql.UpdateUser(id, username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()

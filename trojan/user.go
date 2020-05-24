@@ -40,6 +40,10 @@ func AddUser() {
 	}
 	inputPass := util.Input(fmt.Sprintf("生成随机密码: %s, 使用直接回车, 否则输入自定义密码: ", randomPass), randomPass)
 	base64Pass := base64.StdEncoding.EncodeToString([]byte(inputPass))
+	if user := mysql.GetUserByPass(base64Pass); user != nil {
+		fmt.Println(util.Yellow("已存在密码为: " + inputPass + " 的用户!"))
+		return
+	}
 	if mysql.CreateUser(inputUser, base64Pass, inputPass) == nil {
 		fmt.Println("新增用户成功!")
 	}

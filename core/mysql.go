@@ -210,6 +210,29 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
 }
 
+// GetUserByPass 通过密码来获取用户
+func (mysql *Mysql) GetUserByPass(pass string) *User {
+	db := mysql.GetDB()
+	if db == nil {
+		return nil
+	}
+	defer db.Close()
+	var (
+		username   string
+		originPass string
+		passShow   string
+		download   uint64
+		upload     uint64
+		quota      int64
+		id         uint
+	)
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE passwordShow='%s'", pass))
+	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+		return nil
+	}
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+}
+
 // PageQueryList 通过分页获取用户记录
 func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 	var (
