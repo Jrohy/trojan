@@ -168,10 +168,10 @@ installTrojan(){
             systemctl restart trojan
         fi
         /usr/local/bin/trojan upgrade
+        systemctl restart trojan-web
         colorEcho $GREEN "更新trojan管理程序成功!\n"
     fi
     setupCron
-    systemctl restart trojan-web
     [[ $SHOW_TIP == 1 ]] && echo "浏览器访问'`colorEcho $BLUE https://域名`'可在线trojan多用户管理"
 }
 
