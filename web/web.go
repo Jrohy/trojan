@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/gobuffalo/packr/v2"
 	"net/http"
 	"strconv"
+	"time"
 	"trojan/core"
 	"trojan/util"
 	"trojan/web/controller"
@@ -86,10 +86,24 @@ func dataRouter(router *gin.Engine) {
 			quota, _ := strconv.Atoi(sQuota)
 			c.JSON(200, controller.SetData(uint(id), quota))
 		})
+
 		data.DELETE("", func(c *gin.Context) {
 			sID := c.Query("id")
 			id, _ := strconv.Atoi(sID)
 			c.JSON(200, controller.CleanData(uint(id)))
+		})
+	}
+}
+
+func dateRouter(router *gin.Engine) {
+	data := router.Group("/trojan/enddate")
+	{
+		data.POST("", func(c *gin.Context) {
+			sID := c.PostForm("id")
+			sEnddate := c.PostForm("enddate")
+			id, _ := strconv.Atoi(sID)
+			enddata, _ := time.Parse("2006-01-02", sEnddate)
+			c.JSON(200, controller.EndDate(uint(id), enddata))
 		})
 	}
 }
@@ -129,6 +143,7 @@ func Start(port int, isSSL bool) {
 	trojanRouter(router)
 	userRouter(router)
 	dataRouter(router)
+	dateRouter(router)
 	commonRouter(router)
 	util.OpenPort(port)
 	if isSSL {

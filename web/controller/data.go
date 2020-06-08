@@ -16,6 +16,16 @@ func SetData(id uint, quota int) *ResponseBody {
 	return &responseBody
 }
 
+func EndDate(id uint, enddate time.Time) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	mysql := core.GetMysql()
+	if err := mysql.SetEnddate(id, enddate); err != nil {
+		responseBody.Msg = err.Error()
+	}
+	return &responseBody
+}
+
 // CleanData 清空流量
 func CleanData(id uint) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}

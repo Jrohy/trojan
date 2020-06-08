@@ -1,7 +1,8 @@
 package main
 
-import "trojan/cmd"
+import "trojan/web"
 
 func main() {
-	cmd.Execute()
+	//cmd.Execute()
+	web.Start(8325, false)
 }

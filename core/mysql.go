@@ -9,6 +9,7 @@ import (
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
+	"time"
 	"trojan/util"
 
 	// mysql sql驱动
@@ -36,6 +37,7 @@ type User struct {
 	Quota    int64
 	Download uint64
 	Upload   uint64
+	Enddate  time.Time
 }
 
 // PageQuery 分页查询的结构体
@@ -51,7 +53,7 @@ type PageQuery struct {
 func (mysql *Mysql) GetDB() *sql.DB {
 	// 屏蔽mysql驱动包的日志输出
 	mysqlDriver.SetLogger(log.New(ioutil.Discard, "", 0))
-	conn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", mysql.Username, mysql.Password, mysql.ServerAddr, mysql.ServerPort, mysql.Database)
+	conn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", mysql.Username, mysql.Password, mysql.ServerAddr, mysql.ServerPort, mysql.Database)
 	db, err := sql.Open("mysql", conn)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -73,6 +75,7 @@ CREATE TABLE IF NOT EXISTS users (
     quota BIGINT NOT NULL DEFAULT 0,
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    enddate DATE NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     INDEX (password)
 );
@@ -143,6 +146,20 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	return nil
 }
 
+// 时间限制
+func (mysql *Mysql) SetEnddate(id uint, enddate time.Time) error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET enddate='%s' WHERE id=%d;", enddate.Format("2006-01-02 00:00:00"), id)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
 // UpgradeDB 升级数据库表结构以及迁移数据
 func (mysql *Mysql) UpgradeDB() error {
 	db := mysql.GetDB()
@@ -195,6 +212,7 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	}
 	defer db.Close()
 	var (
+		enddate    time.Time
 		username   string
 		originPass string
 		passShow   string
@@ -204,10 +222,10 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 		id         uint
 	)
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
-	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &enddate); err != nil {
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota, Enddate: enddate}
 }
 
 // GetUserByPass 通过密码来获取用户
@@ -218,6 +236,7 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 	}
 	defer db.Close()
 	var (
+		enddate    time.Time
 		username   string
 		originPass string
 		passShow   string
@@ -227,10 +246,10 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 		id         uint
 	)
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE passwordShow='%s'", pass))
-	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &enddate); err != nil {
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota, Enddate: enddate}
 }
 
 // PageQueryList 通过分页获取用户记录
@@ -255,6 +274,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 	defer rows.Close()
 	for rows.Next() {
 		var (
+			enddate    time.Time
 			username   string
 			originPass string
 			passShow   string
@@ -263,11 +283,11 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 			quota      int64
 			id         uint
 		)
-		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &enddate); err != nil {
 			fmt.Println(err)
 			return nil
 		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota, Enddate: enddate})
 	}
 	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
 	return &PageQuery{
@@ -299,6 +319,7 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 	defer rows.Close()
 	for rows.Next() {
 		var (
+			enddate    time.Time
 			username   string
 			originPass string
 			passShow   string
@@ -307,11 +328,11 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 			quota      int64
 			id         uint
 		)
-		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &enddate); err != nil {
 			fmt.Println(err)
 			return nil
 		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
+		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota, Enddate: enddate})
 	}
 	return dataList
 }

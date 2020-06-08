@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 )
 
-var configPath = "/usr/local/etc/trojan/config.json"
+//var configPath = "/usr/local/etc/trojan/config.json"
+var configPath = "C:\\Users\\chase\\config.json"
 
 // ServerConfig 结构体
 type ServerConfig struct {
