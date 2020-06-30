@@ -1,6 +1,6 @@
 #!/bin/bash
 # source: https://github.com/trojan-gfw/trojan-quickstart
-set -euo pipefail
+set -eo pipefail
 
 # trojan: 0, trojan-go: 1
 TYPE=0
@@ -62,6 +62,7 @@ curl -LO --progress-bar "$DOWNLOADURL" || wget -q --show-progress "$DOWNLOADURL"
 echo Unpacking $NAME $VERSION...
 if [[ $TYPE == 0 ]];then
     tar xf "$TARBALL"
+    cd "$NAME"
 else
     if [[ -z `command -v unzip` ]];then
         if [[ `command -v dnf` ]];then
@@ -73,9 +74,8 @@ else
         fi
     fi
     unzip "$TARBALL"
+    mv trojan-go trojan
 fi
-
-cd "$NAME"
 
 echo Installing $NAME $VERSION to $BINARYPATH...
 install -Dm755 "$NAME" "$BINARYPATH"
@@ -93,8 +93,8 @@ fi
 
 if [[ -d "$SYSTEMDPREFIX" ]]; then
     echo Installing $NAME systemd service to $SYSTEMDPATH...
-    if ! [[ -f "$SYSTEMDPATH" ]] || prompt "The systemd service already exists in $SYSTEMDPATH, overwrite?"; then
-        cat > "$SYSTEMDPATH" << EOF
+    [[ $TYPE == 1 ]] && { NAME="trojan-go"; FLAG="-config"; }
+    cat > "$SYSTEMDPATH" << EOF
 [Unit]
 Description=$NAME
 After=network.target network-online.target nss-lookup.target mysql.service mariadb.service mysqld.service
@@ -102,7 +102,7 @@ After=network.target network-online.target nss-lookup.target mysql.service maria
 [Service]
 Type=simple
 StandardError=journal
-ExecStart="$BINARYPATH" "$CONFIGPATH"
+ExecStart=$BINARYPATH $FLAG $CONFIGPATH
 ExecReload=/bin/kill -HUP \$MAINPID
 Restart=on-failure
 RestartSec=3s
@@ -110,12 +110,8 @@ RestartSec=3s
 [Install]
 WantedBy=multi-user.target
 EOF
-
-        echo Reloading systemd daemon...
-        systemctl daemon-reload
-    else
-        echo Skipping installing $NAME systemd service...
-    fi
+    echo Reloading systemd daemon...
+    systemctl daemon-reload
 fi
 
 echo Deleting temp directory $TMPDIR...
