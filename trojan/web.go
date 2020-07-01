@@ -10,10 +10,12 @@ import (
 // WebMenu web管理菜单
 func WebMenu() {
 	fmt.Println()
-	menu := []string{"重置web管理员密码"}
+	menu := []string{"重置web管理员密码", "修改显示的域名(非申请证书)"}
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
 		ResetAdminPass()
+	case 2:
+		SetDomain("")
 	}
 }
 
@@ -30,5 +32,17 @@ func ResetAdminPass() {
 		} else {
 			fmt.Println(err)
 		}
+	}
+}
+
+// SetDomain 设置显示的域名
+func SetDomain(domain string) {
+	if domain == "" {
+		domain = util.Input("请输入要显示的域名地址: ", "")
+	}
+	if domain == "" {
+		fmt.Println("撤销更改!")
+	} else {
+		_ = core.SetValue("domain", domain)
 	}
 }

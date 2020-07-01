@@ -75,6 +75,9 @@ func trojanRouter(router *gin.Engine) {
 		level, _ := strconv.Atoi(slevel)
 		c.JSON(200, controller.SetLogLevel(level))
 	})
+	router.POST("/trojan/domain", func(c *gin.Context) {
+		c.JSON(200, controller.SetDomain(c.PostForm("domain")))
+	})
 	router.GET("/trojan/log", func(c *gin.Context) {
 		controller.Log(c)
 	})

@@ -49,6 +49,14 @@ func SetLoginInfo(title string) *ResponseBody {
 	return &responseBody
 }
 
+// SetDomain 设置域名
+func SetDomain(domain string) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	trojan.SetDomain(domain)
+	return &responseBody
+}
+
 // SetTrojanType 设置trojan类型
 func SetTrojanType(tType string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}

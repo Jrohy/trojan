@@ -233,7 +233,7 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
 }
 
-// PageQueryList 通过分页获取用户记录
+// PageList 通过分页获取用户记录
 func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 	var (
 		total    int
