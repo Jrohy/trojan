@@ -25,10 +25,7 @@ func UserList(findUser string) *ResponseBody {
 		responseBody.Msg = "连接mysql失败!"
 		return &responseBody
 	}
-	domain, err := core.GetValue("domain")
-	if err != nil {
-		domain = ""
-	}
+	domain, _ := core.GetValue("domain")
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
 		"userList": userList,

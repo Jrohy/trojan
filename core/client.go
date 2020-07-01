@@ -17,9 +17,8 @@ type ClientConfig struct {
 // ClientSSL 结构体
 type ClientSSL struct {
 	SSL
-	Verify         bool   `json:"verify"`
-	VerifyHostname bool   `json:"verify_hostname"`
-	Sni            string `json:"sni"`
+	Verify         bool `json:"verify"`
+	VerifyHostname bool `json:"verify_hostname"`
 }
 
 // ClientTCP 结构体

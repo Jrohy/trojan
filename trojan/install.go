@@ -55,6 +55,9 @@ func InstallTrojan() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	if util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service") != "" && Type() == "trojan-go" {
+		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
+	}
 	util.ExecCommand(data)
 	util.OpenPort(443)
 	util.ExecCommand("systemctl restart trojan")
@@ -100,7 +103,7 @@ func InstallTls() {
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
-		core.WriteTls(crtFile, keyFile)
+		core.WriteTls(crtFile, keyFile, domain)
 	} else if choice == 2 {
 		crtFile := util.Input("请输入证书的cert文件路径: ", "")
 		keyFile := util.Input("请输入证书的key文件路径: ", "")
@@ -112,7 +115,7 @@ func InstallTls() {
 				fmt.Println("输入域名为空!")
 				return
 			}
-			core.WriteTls(crtFile, keyFile)
+			core.WriteTls(crtFile, keyFile, domain)
 		}
 	}
 	core.SetValue("domain", domain)

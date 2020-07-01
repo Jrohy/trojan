@@ -20,6 +20,7 @@ type SSL struct {
 	ReuseSession  bool     `json:"reuse_session"`
 	SessionTicket bool     `json:"session_ticket"`
 	Curves        string   `json:"curves"`
+	Sni           string   `json:"sni"`
 }
 
 // TCP 结构体

@@ -66,6 +66,10 @@ func trojanRouter(router *gin.Engine) {
 	router.POST("/trojan/update", func(c *gin.Context) {
 		c.JSON(200, controller.Update())
 	})
+	router.POST("/trojan/switch", func(c *gin.Context) {
+		tType := c.DefaultPostForm("type", "trojan")
+		c.JSON(200, controller.SetTrojanType(tType))
+	})
 	router.POST("/trojan/loglevel", func(c *gin.Context) {
 		slevel := c.DefaultPostForm("level", "1")
 		level, _ := strconv.Atoi(slevel)
