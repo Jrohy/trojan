@@ -16,6 +16,7 @@ trojan多用户管理部署程序
 - 集成acme.sh证书申请
 - 生成客户端配置文件
 - 在线实时查看trojan日志
+- 在线trojan和trojan-go随时切换
 - 支持trojan://分享链接和二维码分享(二维码仅限web页面)
 
 ## 安装方式
