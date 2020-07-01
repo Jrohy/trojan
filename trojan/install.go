@@ -118,7 +118,6 @@ func InstallTls() {
 			core.WriteTls(crtFile, keyFile, domain)
 		}
 	}
-	core.SetValue("domain", domain)
 	Restart()
 	fmt.Println()
 }

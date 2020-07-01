@@ -13,11 +13,7 @@ var clientPath = "/root/config.json"
 func GenClientJson() {
 	fmt.Println()
 	var user core.User
-	domain, err := core.GetValue("domain")
-	if err != nil {
-		fmt.Println(util.Yellow("无域名记录, 生成的配置文件需手填域名字段(ssl.sni)"))
-		domain = ""
-	}
+	domain := GetDomain()
 	mysql := core.GetMysql()
 	userList := mysql.GetData()
 	if userList == nil {

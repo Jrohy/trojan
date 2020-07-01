@@ -15,6 +15,9 @@ var upgradeCmd = &cobra.Command{
 
 func upgradeConfig() {
 	domain, _ := core.GetValue("domain")
+	if domain == "" {
+		return
+	}
 	config := core.Load("")
 	config.SSl.Sni = domain
 	core.Save(config, "")

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 	"trojan/core"
+	"trojan/trojan"
 )
 
 // UserList 获取用户列表
@@ -25,7 +26,7 @@ func UserList(findUser string) *ResponseBody {
 		responseBody.Msg = "连接mysql失败!"
 		return &responseBody
 	}
-	domain, _ := core.GetValue("domain")
+	domain := trojan.GetDomain()
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
 		"userList": userList,
@@ -43,10 +44,7 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 		responseBody.Msg = "连接mysql失败!"
 		return &responseBody
 	}
-	domain, err := core.GetValue("domain")
-	if err != nil {
-		domain = ""
-	}
+	domain := trojan.GetDomain()
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
 		"pageData": pageData,

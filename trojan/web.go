@@ -34,15 +34,3 @@ func ResetAdminPass() {
 		}
 	}
 }
-
-// SetDomain 设置显示的域名
-func SetDomain(domain string) {
-	if domain == "" {
-		domain = util.Input("请输入要显示的域名地址: ", "")
-	}
-	if domain == "" {
-		fmt.Println("撤销更改!")
-	} else {
-		_ = core.SetValue("domain", domain)
-	}
-}

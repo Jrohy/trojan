@@ -109,10 +109,7 @@ func UserList(ids ...string) []*core.User {
 		fmt.Println("连接mysql失败!")
 		return nil
 	}
-	domain, err := core.GetValue("domain")
-	if err != nil {
-		domain = ""
-	}
+	domain := GetDomain()
 	for i, k := range userList {
 		pass, err := base64.StdEncoding.DecodeString(k.Password)
 		if err != nil {

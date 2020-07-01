@@ -91,6 +91,13 @@ func WriteTls(cert, key, domain string) bool {
 	return Save(config, "")
 }
 
+// WriteDomain 写域名
+func WriteDomain(domain string) bool {
+	config := Load("")
+	config.SSl.Sni = domain
+	return Save(config, "")
+}
+
 // WritePassword 写密码
 func WritePassword(pass []string) bool {
 	config := Load("")

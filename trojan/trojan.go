@@ -142,3 +142,22 @@ func LogChan(param string, closeChan chan byte) (chan string, error) {
 	}()
 	return ch, nil
 }
+
+// SetDomain 设置显示的域名
+func SetDomain(domain string) {
+	if domain == "" {
+		domain = util.Input("请输入要显示的域名地址: ", "")
+	}
+	if domain == "" {
+		fmt.Println("撤销更改!")
+	} else {
+		core.WriteDomain(domain)
+		Restart()
+		fmt.Println("修改domain成功!")
+	}
+}
+
+// GetDomain 获取域名
+func GetDomain() string {
+	return core.Load("").SSl.Sni
+}
