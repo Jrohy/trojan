@@ -157,7 +157,8 @@ func SetDomain(domain string) {
 	}
 }
 
-// GetDomain 获取域名
-func GetDomain() string {
-	return core.Load("").SSl.Sni
+// GetDomainAndPort 获取域名和端口
+func GetDomainAndPort() (string, int) {
+	config := core.Load("")
+	return config.SSl.Sni, config.LocalPort
 }

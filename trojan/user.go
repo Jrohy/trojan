@@ -109,7 +109,7 @@ func UserList(ids ...string) []*core.User {
 		fmt.Println("连接mysql失败!")
 		return nil
 	}
-	domain := GetDomain()
+	domain, port := GetDomainAndPort()
 	for i, k := range userList {
 		pass, err := base64.StdEncoding.DecodeString(k.Password)
 		if err != nil {
@@ -125,7 +125,7 @@ func UserList(ids ...string) []*core.User {
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
 		}
-		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:443", string(pass), domain)))
+		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:%d", string(pass), domain, port)))
 		fmt.Println()
 	}
 	return userList

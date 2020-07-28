@@ -26,9 +26,10 @@ func UserList(findUser string) *ResponseBody {
 		responseBody.Msg = "连接mysql失败!"
 		return &responseBody
 	}
-	domain := trojan.GetDomain()
+	domain, port := trojan.GetDomainAndPort()
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
+		"port":     port,
 		"userList": userList,
 	}
 	return &responseBody
@@ -44,9 +45,10 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 		responseBody.Msg = "连接mysql失败!"
 		return &responseBody
 	}
-	domain := trojan.GetDomain()
+	domain, port := trojan.GetDomainAndPort()
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
+		"port":     port,
 		"pageData": pageData,
 	}
 	return &responseBody
