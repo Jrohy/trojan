@@ -104,9 +104,9 @@ func CleanData() {
 // UserList 获取用户列表并打印显示
 func UserList(ids ...string) []*core.User {
 	mysql := core.GetMysql()
-	userList := mysql.GetData(ids...)
-	if userList == nil {
-		fmt.Println("连接mysql失败!")
+	userList, err := mysql.GetData(ids...)
+	if err != nil {
+		fmt.Println(err.Error())
 		return nil
 	}
 	domain, port := GetDomainAndPort()

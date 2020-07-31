@@ -118,9 +118,10 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	userList := mysql.GetData(strconv.Itoa(int(id)))
-	if userList == nil {
-		return errors.New("can't connnect mysql")
+	if userList, err := mysql.GetData(strconv.Itoa(int(id))); err != nil {
+		return err
+	} else if userList != nil && len(userList) == 0 {
+		return errors.New(fmt.Sprintf("不存在id为%d的用户", id))
 	}
 	if _, err := db.Exec(fmt.Sprintf("DELETE FROM users WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
@@ -157,7 +158,11 @@ func (mysql *Mysql) UpgradeDB() error {
 			fmt.Println(err)
 			return err
 		}
-		userList := mysql.GetData()
+		userList, err := mysql.GetData()
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 		for _, user := range userList {
 			pass, _ := GetValue(fmt.Sprintf("%s_pass", user.Username))
 			if pass != "" {
@@ -280,12 +285,12 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 }
 
 // GetData 获取用户记录
-func (mysql *Mysql) GetData(ids ...string) []*User {
+func (mysql *Mysql) GetData(ids ...string) ([]*User, error) {
 	var dataList []*User
 	querySQL := "SELECT * FROM users"
 	db := mysql.GetDB()
 	if db == nil {
-		return nil
+		return nil, errors.New("连接mysql失败")
 	}
 	defer db.Close()
 	if len(ids) > 0 {
@@ -294,7 +299,7 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 	rows, err := db.Query(querySQL)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -309,9 +314,9 @@ func (mysql *Mysql) GetData(ids ...string) []*User {
 		)
 		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 			fmt.Println(err)
-			return nil
+			return nil, err
 		}
 		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
 	}
-	return dataList
+	return dataList, nil
 }

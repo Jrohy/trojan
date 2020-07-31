@@ -13,7 +13,7 @@ func UserList(findUser string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
-	userList := mysql.GetData()
+	userList, err := mysql.GetData()
 	if findUser != "" {
 		for _, user := range userList {
 			if user.Username == findUser {
@@ -22,8 +22,8 @@ func UserList(findUser string) *ResponseBody {
 			}
 		}
 	}
-	if userList == nil {
-		responseBody.Msg = "连接mysql失败!"
+	if err != nil {
+		responseBody.Msg = err.Error()
 		return &responseBody
 	}
 	domain, port := trojan.GetDomainAndPort()
@@ -91,9 +91,9 @@ func UpdateUser(id uint, username string, password string) *ResponseBody {
 		return &responseBody
 	}
 	mysql := core.GetMysql()
-	userList := mysql.GetData(strconv.Itoa(int(id)))
-	if userList == nil {
-		responseBody.Msg = "can't connect mysql"
+	userList, err := mysql.GetData(strconv.Itoa(int(id)))
+	if err != nil {
+		responseBody.Msg = err.Error()
 		return &responseBody
 	}
 	if userList[0].Username != username {
