@@ -239,7 +239,7 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 }
 
 // PageList 通过分页获取用户记录
-func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
+func (mysql *Mysql) PageList(curPage int, pageSize int) (*PageQuery, error) {
 	var (
 		total    int
 		dataList []*User
@@ -247,7 +247,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 
 	db := mysql.GetDB()
 	if db == nil {
-		return nil
+		return nil, errors.New("连接mysql失败")
 	}
 	defer db.Close()
 	offset := (curPage - 1) * pageSize
@@ -255,7 +255,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 	rows, err := db.Query(querySQL)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -270,7 +270,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 		)
 		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
 			fmt.Println(err)
-			return nil
+			return nil, err
 		}
 		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
 	}
@@ -281,7 +281,7 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) *PageQuery {
 		Total:    total,
 		DataList: dataList,
 		PageNum:  (total + pageSize - 1) / pageSize,
-	}
+	}, nil
 }
 
 // GetData 获取用户记录

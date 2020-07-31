@@ -40,9 +40,9 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
-	pageData := mysql.PageList(curPage, pageSize)
-	if pageData == nil {
-		responseBody.Msg = "连接mysql失败!"
+	pageData, err := mysql.PageList(curPage, pageSize)
+	if err != nil {
+		responseBody.Msg = err.Error()
 		return &responseBody
 	}
 	domain, port := trojan.GetDomainAndPort()
