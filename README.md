@@ -79,6 +79,7 @@ Available Commands:
   stop        停止trojan
   tls         证书安装
   update      更新trojan
+  updateWeb   更新trojan管理程序
   version     显示版本号
   web         以web方式启动
 
