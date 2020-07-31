@@ -190,7 +190,7 @@ func InstallMysql() {
 	}
 	mysql.CreateTable()
 	core.WriteMysql(&mysql)
-	if len(mysql.GetData()) == 0 {
+	if userList, _ := mysql.GetData(); len(userList) == 0 {
 		AddUser()
 	}
 	Restart()

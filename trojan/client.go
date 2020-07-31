@@ -15,9 +15,9 @@ func GenClientJson() {
 	var user core.User
 	domain, port := GetDomainAndPort()
 	mysql := core.GetMysql()
-	userList := mysql.GetData()
-	if userList == nil {
-		fmt.Println("连接mysql失败!")
+	userList, err := mysql.GetData()
+	if err != nil {
+		fmt.Println(err.Error())
 		return
 	}
 	if len(userList) == 1 {
