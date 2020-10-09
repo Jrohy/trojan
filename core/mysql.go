@@ -121,7 +121,7 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 	if userList, err := mysql.GetData(strconv.Itoa(int(id))); err != nil {
 		return err
 	} else if userList != nil && len(userList) == 0 {
-		return errors.New(fmt.Sprintf("不存在id为%d的用户", id))
+		return fmt.Errorf("不存在id为%d的用户", id)
 	}
 	if _, err := db.Exec(fmt.Sprintf("DELETE FROM users WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
