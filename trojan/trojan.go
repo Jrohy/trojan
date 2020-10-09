@@ -15,7 +15,14 @@ import (
 // ControllMenu Trojan控制菜单
 func ControllMenu() {
 	fmt.Println()
+	tType := Type()
+	if tType == "trojan" {
+		tType = "trojan-go"
+	} else {
+		tType = "trojan"
+	}
 	menu := []string{"启动trojan", "停止trojan", "重启trojan", "查看trojan状态", "查看trojan日志"}
+	menu = append(menu, "切换为"+tType)
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
 		Start()
@@ -31,6 +38,9 @@ func ControllMenu() {
 		signal.Notify(c, os.Interrupt, os.Kill)
 		//阻塞
 		<-c
+	case 6:
+		_ = core.SetValue("trojanType", tType)
+		InstallTrojan()
 	}
 }
 
