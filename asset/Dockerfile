@@ -1,12 +1,12 @@
 FROM centos:7
 
-LABEL maintainer "Jrohy <euvkzx@Jrohy.com>"
+LABEL maintainer="Jrohy <euvkzx@Jrohy.com>"
 
-ENV VERSION_CHECK "https://api.github.com/repos/Jrohy/trojan/releases/latest"
+ARG VERSION_CHECK="https://api.github.com/repos/Jrohy/trojan/releases/latest"
 
-ENV DOWNLAOD_URL "https://github.com/Jrohy/trojan/releases/download/"
+ARG DOWNLAOD_URL="https://github.com/Jrohy/trojan/releases/download/"
 
-ENV SERVICE_URL "https://raw.githubusercontent.com/Jrohy/trojan/master/asset/trojan-web.service"
+ARG SERVICE_URL="https://raw.githubusercontent.com/Jrohy/trojan/master/asset/trojan-web.service"
 
 RUN yum install socat bash-completion crontabs iptables openssl unzip -y && \
     LATEST_VERSION=`curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4` && \
