@@ -115,8 +115,6 @@ func UpdateUser(id uint, username string, password string) *ResponseBody {
 	}
 	if err := mysql.UpdateUser(id, username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
-	} else {
-		Restart()
 	}
 	return &responseBody
 }
