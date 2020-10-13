@@ -33,7 +33,7 @@ cd $SHELL_PATH
 
 packr2
 
-go build -ldflags "-s -w -X 'trojan/trojan.MVersion=`git tag|awk 'END {print}'`' -X 'trojan/trojan.BuildDate=`date "+%Y%m%d-%H%M"`' -X 'trojan/trojan.GoVersion=`go version|awk '{print $3,$4}'`' -X 'trojan/trojan.GitVersion=`git rev-parse HEAD`'" -o "result/trojan" .
+go build -ldflags "-s -w -X 'trojan/trojan.MVersion=`git describe --tags`' -X 'trojan/trojan.BuildDate=`date "+%Y%m%d-%H%M"`' -X 'trojan/trojan.GoVersion=`go version|awk '{print $3,$4}'`' -X 'trojan/trojan.GitVersion=`git rev-parse HEAD`'" -o "result/trojan" .
 
 cd result
 
