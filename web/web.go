@@ -128,7 +128,7 @@ func staticRouter(router *gin.Engine) {
 }
 
 // Start web启动入口
-func Start(port int, isSSL bool) {
+func Start(host string, port int, isSSL bool) {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
@@ -141,8 +141,8 @@ func Start(port int, isSSL bool) {
 	if isSSL {
 		config := core.Load("")
 		ssl := &config.SSl
-		router.RunTLS(fmt.Sprintf(":%d", port), ssl.Cert, ssl.Key)
+		router.RunTLS(fmt.Sprintf("%s:%d", host, port), ssl.Cert, ssl.Key)
 	} else {
-		router.Run(fmt.Sprintf(":%d", port))
+		router.Run(fmt.Sprintf("%s:%d", host, port))
 	}
 }
