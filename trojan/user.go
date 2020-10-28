@@ -14,7 +14,7 @@ func UserMenu() {
 	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量"}
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
-		AddUser()
+		AddUser([]string{""})
 	case 2:
 		DelUser()
 	case 3:
@@ -25,10 +25,18 @@ func UserMenu() {
 }
 
 // AddUser 添加用户
-func AddUser() {
-	randomUser := util.RandString(4)
-	randomPass := util.RandString(8)
-	inputUser := util.Input(fmt.Sprintf("生成随机用户名: %s, 使用直接回车, 否则输入自定义用户名: ", randomUser), randomUser)
+func AddUser(args []string) {
+	var inputUser string
+	var inputPass string
+	if len(args) == 2 {
+		inputUser = args[0]
+		inputPass = args[1]
+	} else {
+		randomUser := util.RandString(4)
+		randomPass := util.RandString(8)
+		inputUser = util.Input(fmt.Sprintf("生成随机用户名: %s, 使用直接回车, 否则输入自定义用户名: ", randomUser), randomUser)
+		inputPass = util.Input(fmt.Sprintf("生成随机密码: %s, 使用直接回车, 否则输入自定义密码: ", randomPass), randomPass)
+	}
 	if inputUser == "admin" {
 		fmt.Println(util.Yellow("不能新建用户名为'admin'的用户!"))
 		return
@@ -38,7 +46,6 @@ func AddUser() {
 		fmt.Println(util.Yellow("已存在用户名为: " + inputUser + " 的用户!"))
 		return
 	}
-	inputPass := util.Input(fmt.Sprintf("生成随机密码: %s, 使用直接回车, 否则输入自定义密码: ", randomPass), randomPass)
 	base64Pass := base64.StdEncoding.EncodeToString([]byte(inputPass))
 	if user := mysql.GetUserByPass(base64Pass); user != nil {
 		fmt.Println(util.Yellow("已存在密码为: " + inputPass + " 的用户!"))
