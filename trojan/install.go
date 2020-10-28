@@ -193,7 +193,7 @@ func InstallMysql() {
 	mysql.CreateTable()
 	core.WriteMysql(&mysql)
 	if userList, _ := mysql.GetData(); len(userList) == 0 {
-		AddUser()
+		AddUser([]string{""})
 	}
 	Restart()
 	fmt.Println()
