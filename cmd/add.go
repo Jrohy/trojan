@@ -10,7 +10,7 @@ var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "添加用户",
 	Run: func(cmd *cobra.Command, args []string) {
-		trojan.AddUser()
+		trojan.AddUser(args)
 	},
 }
 
