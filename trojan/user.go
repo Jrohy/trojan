@@ -106,6 +106,8 @@ func CleanDataByName(usernames []string) {
 	mysql := core.GetMysql()
 	if err := mysql.CleanDataByName(usernames); err != nil {
 		fmt.Println(err.Error())
+	} else {
+		fmt.Println("清空流量成功!")
 	}
 }
 

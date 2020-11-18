@@ -12,10 +12,10 @@ import (
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
 
-	// mysql sql驱动
 	"strconv"
 	"strings"
 
+	// mysql sql驱动
 	_ "github.com/go-sql-driver/mysql"
 )
 
