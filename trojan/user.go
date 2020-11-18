@@ -101,6 +101,14 @@ func CleanData() {
 	}
 }
 
+// CleanDataByName 清空指定用户流量
+func CleanDataByName(usernames []string) {
+	mysql := core.GetMysql()
+	if err := mysql.CleanDataByName(usernames); err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
 // UserList 获取用户列表并打印显示
 func UserList(ids ...string) []*core.User {
 	mysql := core.GetMysql()

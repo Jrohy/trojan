@@ -6,15 +6,17 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	mysqlDriver "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
 	"trojan/util"
 
+	mysqlDriver "github.com/go-sql-driver/mysql"
+
 	// mysql sql驱动
-	_ "github.com/go-sql-driver/mysql"
 	"strconv"
 	"strings"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Mysql 结构体
@@ -186,6 +188,29 @@ func (mysql *Mysql) CleanData(id uint) error {
 	}
 	defer db.Close()
 	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET download=0, upload=0 WHERE id=%d;", id)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+// CleanDataByName 清空指定用户名流量统计数据
+func (mysql *Mysql) CleanDataByName(usernames []string) error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	runSql := "UPDATE users SET download=0, upload=0 WHERE username in ("
+	for i, name := range usernames {
+		runSql = runSql + "'" + name + "'"
+		if i == len(usernames)-1 {
+			runSql = runSql + ")"
+		} else {
+			runSql = runSql + ","
+		}
+	}
+	if _, err := db.Exec(runSql); err != nil {
 		fmt.Println(err)
 		return err
 	}
