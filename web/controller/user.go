@@ -28,10 +28,9 @@ func UserList(findUser string) *ResponseBody {
 	}
 	domain, port := trojan.GetDomainAndPort()
 	responseBody.Data = map[string]interface{}{
-		"domain":     domain,
-		"port":       port,
-		"trojanType": trojan.Type(),
-		"userList":   userList,
+		"domain":   domain,
+		"port":     port,
+		"userList": userList,
 	}
 	return &responseBody
 }
@@ -48,10 +47,9 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 	}
 	domain, port := trojan.GetDomainAndPort()
 	responseBody.Data = map[string]interface{}{
-		"domain":     domain,
-		"port":       port,
-		"trojanType": trojan.Type(),
-		"pageData":   pageData,
+		"domain":   domain,
+		"port":     port,
+		"pageData": pageData,
 	}
 	return &responseBody
 }

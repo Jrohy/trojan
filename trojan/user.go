@@ -135,7 +135,7 @@ func UserList(ids ...string) []*core.User {
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
 		}
-		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("%s://%s@%s:%d", Type(), string(pass), domain, port)))
+		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:%d", string(pass), domain, port)))
 		fmt.Println()
 	}
 	return userList
