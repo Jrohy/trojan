@@ -68,6 +68,7 @@ Usage:
 
 Available Commands:
   add         添加用户
+  clean       清空指定用户流量
   completion  自动命令补全(支持bash和zsh)
   del         删除用户
   help        Help about any command
