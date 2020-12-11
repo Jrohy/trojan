@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 	"trojan/util"
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
@@ -32,12 +33,14 @@ type Mysql struct {
 
 // User 用户表记录结构体
 type User struct {
-	ID       uint
-	Username string
-	Password string
-	Quota    int64
-	Download uint64
-	Upload   uint64
+	ID          uint
+	Username    string
+	Password    string
+	Quota       int64
+	Download    uint64
+	Upload      uint64
+	UseDays     uint
+	ExpiredDate string
 }
 
 // PageQuery 分页查询的结构体
@@ -75,12 +78,69 @@ CREATE TABLE IF NOT EXISTS users (
     quota BIGINT NOT NULL DEFAULT 0,
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    useDays int(10) DEFAULT NULL,
+    expiredDate char(10) DEFAULT NULL,
     PRIMARY KEY (id),
     INDEX (password)
 );
     `); err != nil {
 		fmt.Println(err)
 	}
+}
+
+func queryUserList(db *sql.DB, sql string) ([]*User, error) {
+	var (
+		username    string
+		originPass  string
+		passShow    string
+		download    uint64
+		upload      uint64
+		quota       int64
+		id          uint
+		useDays     uint
+		expiredDate string
+	)
+	var userList []*User
+	rows, err := db.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiredDate); err != nil {
+			return nil, err
+		}
+		userList = append(userList, &User{
+			ID:          id,
+			Username:    username,
+			Password:    passShow,
+			Download:    download,
+			Upload:      upload,
+			Quota:       quota,
+			UseDays:     useDays,
+			ExpiredDate: expiredDate,
+		})
+	}
+	return userList, nil
+}
+
+func queryUser(db *sql.DB, sql string) (*User, error) {
+	var (
+		username    string
+		originPass  string
+		passShow    string
+		download    uint64
+		upload      uint64
+		quota       int64
+		id          uint
+		useDays     uint
+		expiredDate string
+	)
+	row := db.QueryRow(sql)
+	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiredDate); err != nil {
+		return nil, err
+	}
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiredDate: expiredDate}, nil
 }
 
 // CreateUser 创建Trojan用户
@@ -132,6 +192,94 @@ func (mysql *Mysql) DeleteUser(id uint) error {
 	return nil
 }
 
+// MonthlyResetData 设置了过期时间的用户，每月定时清空使用流量
+func (mysql *Mysql) MonthlyResetData() error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays is NOT NULL AND quota != 0")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	for _, user := range userList {
+		if _, err := db.Exec(fmt.Sprintf("UPDATE users SET download=0, upload=0 WHERE id=%d;", user.ID)); err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+
+// DailyCheckExpire 检查是否有过期，过期了设置流量上限为0
+func (mysql *Mysql) DailyCheckExpire() error {
+	now := time.Now()
+	utc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	todayDay := now.In(utc).Format("2006-01-02")
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays is NOT NULL AND quota != 0")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	for _, user := range userList {
+		if user.ExpiredDate == todayDay {
+			if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=0 WHERE id=%d;", user.ID)); err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// CancelExpire 取消过期时间
+func (mysql *Mysql) CancelExpire(id uint) error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=NULL, expiredDate=NULL WHERE id=%d;", id)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+// SetExpire 设置过期时间
+func (mysql *Mysql) SetExpire(id uint, useDays uint) error {
+	now := time.Now()
+	utc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	addDay, _ := time.ParseDuration(strconv.Itoa(int(24*(useDays+1))) + "h")
+	expiredDate := now.Add(addDay).In(utc).Format("2006-01-02")
+
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=%d, expiredDate='%s' WHERE id=%d;", addDay, expiredDate, id)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
 // SetQuota 限制流量
 func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	db := mysql.GetDB()
@@ -175,6 +323,18 @@ func (mysql *Mysql) UpgradeDB() error {
 				}
 				DelValue(fmt.Sprintf("%s_pass", user.Username))
 			}
+		}
+	}
+	error = db.QueryRow("SHOW COLUMNS FROM users LIKE 'useDays';").Scan(&field)
+	if error == sql.ErrNoRows {
+		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
+		if _, err := db.Exec(`
+ALTER TABLE users
+ADD COLUMN useDays int(10) DEFAULT NULL,
+ADD COLUMN expiredDate char(10) DEFAULT NULL;
+`); err != nil {
+			fmt.Println(err)
+			return err
 		}
 	}
 	return nil
@@ -224,20 +384,12 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 		return nil
 	}
 	defer db.Close()
-	var (
-		username   string
-		originPass string
-		passShow   string
-		download   uint64
-		upload     uint64
-		quota      int64
-		id         uint
-	)
-	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
-	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
+	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+	return user
 }
 
 // GetUserByPass 通过密码来获取用户
@@ -247,27 +399,18 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 		return nil
 	}
 	defer db.Close()
-	var (
-		username   string
-		originPass string
-		passShow   string
-		download   uint64
-		upload     uint64
-		quota      int64
-		id         uint
-	)
-	row := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE passwordShow='%s'", pass))
-	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
+	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE passwordShow='%s'", pass))
+	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota}
+	return user
 }
 
 // PageList 通过分页获取用户记录
 func (mysql *Mysql) PageList(curPage int, pageSize int) (*PageQuery, error) {
 	var (
-		total    int
-		dataList []*User
+		total int
 	)
 
 	db := mysql.GetDB()
@@ -277,41 +420,23 @@ func (mysql *Mysql) PageList(curPage int, pageSize int) (*PageQuery, error) {
 	defer db.Close()
 	offset := (curPage - 1) * pageSize
 	querySQL := fmt.Sprintf("SELECT * FROM users LIMIT %d, %d", offset, pageSize)
-	rows, err := db.Query(querySQL)
+	userList, err := queryUserList(db, querySQL)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var (
-			username   string
-			originPass string
-			passShow   string
-			download   uint64
-			upload     uint64
-			quota      int64
-			id         uint
-		)
-		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
 	}
 	db.QueryRow("SELECT COUNT(id) FROM users").Scan(&total)
 	return &PageQuery{
 		CurPage:  curPage,
 		PageSize: pageSize,
 		Total:    total,
-		DataList: dataList,
+		DataList: userList,
 		PageNum:  (total + pageSize - 1) / pageSize,
 	}, nil
 }
 
 // GetData 获取用户记录
 func (mysql *Mysql) GetData(ids ...string) ([]*User, error) {
-	var dataList []*User
 	querySQL := "SELECT * FROM users"
 	db := mysql.GetDB()
 	if db == nil {
@@ -321,27 +446,10 @@ func (mysql *Mysql) GetData(ids ...string) ([]*User, error) {
 	if len(ids) > 0 {
 		querySQL = querySQL + " WHERE id in (" + strings.Join(ids, ",") + ")"
 	}
-	rows, err := db.Query(querySQL)
+	userList, err := queryUserList(db, querySQL)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var (
-			username   string
-			originPass string
-			passShow   string
-			download   uint64
-			upload     uint64
-			quota      int64
-			id         uint
-		)
-		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload); err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-		dataList = append(dataList, &User{ID: id, Username: username, Password: passShow, Download: download, Upload: upload, Quota: quota})
-	}
-	return dataList, nil
+	return userList, nil
 }
