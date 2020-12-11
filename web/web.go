@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr/v2"
+	"github.com/robfig/cron/v3"
 	"net/http"
 	"strconv"
 	"trojan/core"
@@ -127,6 +128,19 @@ func staticRouter(router *gin.Engine) {
 	})
 }
 
+func sheduleTask() {
+	c := cron.New()
+	c.AddFunc("CRON_TZ=Asia/Shanghai @monthly", func() {
+		mysql := core.GetMysql()
+		mysql.MonthlyResetData()
+	})
+	c.AddFunc("CRON_TZ=Asia/Shanghai @daily", func() {
+		mysql := core.GetMysql()
+		mysql.DailyCheckExpire()
+	})
+	c.Start()
+}
+
 // Start web启动入口
 func Start(host string, port int, isSSL bool) {
 	router := gin.Default()
@@ -137,6 +151,7 @@ func Start(host string, port int, isSSL bool) {
 	userRouter(router)
 	dataRouter(router)
 	commonRouter(router)
+	sheduleTask()
 	util.OpenPort(port)
 	if isSSL {
 		config := core.Load("")
