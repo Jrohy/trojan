@@ -43,6 +43,18 @@ func userRouter(router *gin.Engine) {
 			id, _ := strconv.Atoi(sid)
 			c.JSON(200, controller.UpdateUser(uint(id), username, password))
 		})
+		user.POST("/expire", func(c *gin.Context) {
+			sid := c.PostForm("id")
+			sDays := c.PostForm("useDays")
+			id, _ := strconv.Atoi(sid)
+			useDays, _ := strconv.Atoi(sDays)
+			c.JSON(200, controller.SetExpire(uint(id), uint(useDays)))
+		})
+		user.DELETE("/expire", func(c *gin.Context) {
+			sid := c.PostForm("id")
+			id, _ := strconv.Atoi(sid)
+			c.JSON(200, controller.CancelExpire(uint(id)))
+		})
 		user.DELETE("", func(c *gin.Context) {
 			stringId := c.Query("id")
 			id, _ := strconv.Atoi(stringId)

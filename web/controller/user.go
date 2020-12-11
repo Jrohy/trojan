@@ -129,3 +129,25 @@ func DelUser(id uint) *ResponseBody {
 	}
 	return &responseBody
 }
+
+// SetExpire 设置用户过期
+func SetExpire(id uint, useDays uint) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	mysql := core.GetMysql()
+	if err := mysql.SetExpire(id, useDays); err != nil {
+		responseBody.Msg = err.Error()
+	}
+	return &responseBody
+}
+
+// CancelExpire 取消设置用户过期
+func CancelExpire(id uint) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	mysql := core.GetMysql()
+	if err := mysql.CancelExpire(id); err != nil {
+		responseBody.Msg = err.Error()
+	}
+	return &responseBody
+}
