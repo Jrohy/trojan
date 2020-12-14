@@ -221,7 +221,8 @@ func (mysql *Mysql) DailyCheckExpire() error {
 		fmt.Println(err)
 		return err
 	}
-	todayDay := now.In(utc).Format("2006-01-02")
+	addDay, _ := time.ParseDuration("-24h")
+	todayDay := now.Add(addDay).In(utc).Format("2006-01-02")
 	db := mysql.GetDB()
 	if db == nil {
 		return errors.New("can't connect mysql")
@@ -265,7 +266,7 @@ func (mysql *Mysql) SetExpire(id uint, useDays uint) error {
 		fmt.Println(err)
 		return err
 	}
-	addDay, _ := time.ParseDuration(strconv.Itoa(int(24*(useDays+1))) + "h")
+	addDay, _ := time.ParseDuration(strconv.Itoa(int(24*useDays)) + "h")
 	expiryDate := now.Add(addDay).In(utc).Format("2006-01-02")
 
 	db := mysql.GetDB()
@@ -273,7 +274,7 @@ func (mysql *Mysql) SetExpire(id uint, useDays uint) error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=%d, expiryDate='%s' WHERE id=%d;", addDay, expiryDate, id)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=%d, expiryDate='%s' WHERE id=%d;", useDays, expiryDate, id)); err != nil {
 		fmt.Println(err)
 		return err
 	}
