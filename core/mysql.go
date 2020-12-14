@@ -78,8 +78,8 @@ CREATE TABLE IF NOT EXISTS users (
     quota BIGINT NOT NULL DEFAULT 0,
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    useDays int(10) DEFAULT NULL,
-    expiredDate char(10) DEFAULT NULL,
+    useDays int(10) DEFAULT 0,
+    expiredDate char(10) DEFAULT '',
     PRIMARY KEY (id),
     INDEX (password)
 );
@@ -199,7 +199,7 @@ func (mysql *Mysql) MonthlyResetData() error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays is NOT NULL AND quota != 0")
+	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays != 0 AND quota != 0")
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -227,7 +227,7 @@ func (mysql *Mysql) DailyCheckExpire() error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays is NOT NULL AND quota != 0")
+	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays != 0 AND quota != 0")
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -250,7 +250,7 @@ func (mysql *Mysql) CancelExpire(id uint) error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=NULL, expiredDate=NULL WHERE id=%d;", id)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=0, expiredDate='' WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -330,8 +330,8 @@ func (mysql *Mysql) UpgradeDB() error {
 		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
 		if _, err := db.Exec(`
 ALTER TABLE users
-ADD COLUMN useDays int(10) DEFAULT NULL,
-ADD COLUMN expiredDate char(10) DEFAULT NULL;
+ADD COLUMN useDays int(10) DEFAULT 0,
+ADD COLUMN expiredDate char(10) DEFAULT '';
 `); err != nil {
 			fmt.Println(err)
 			return err
