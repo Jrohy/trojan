@@ -51,7 +51,7 @@ func userRouter(router *gin.Engine) {
 			c.JSON(200, controller.SetExpire(uint(id), uint(useDays)))
 		})
 		user.DELETE("/expire", func(c *gin.Context) {
-			sid := c.PostForm("id")
+			sid := c.Query("id")
 			id, _ := strconv.Atoi(sid)
 			c.JSON(200, controller.CancelExpire(uint(id)))
 		})
