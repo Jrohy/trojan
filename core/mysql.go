@@ -33,14 +33,14 @@ type Mysql struct {
 
 // User 用户表记录结构体
 type User struct {
-	ID          uint
-	Username    string
-	Password    string
-	Quota       int64
-	Download    uint64
-	Upload      uint64
-	UseDays     uint
-	ExpiredDate string
+	ID         uint
+	Username   string
+	Password   string
+	Quota      int64
+	Download   uint64
+	Upload     uint64
+	UseDays    uint
+	ExpiryDate string
 }
 
 // PageQuery 分页查询的结构体
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS users (
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
     useDays int(10) DEFAULT 0,
-    expiredDate char(10) DEFAULT '',
+    expiryDate char(10) DEFAULT '',
     PRIMARY KEY (id),
     INDEX (password)
 );
@@ -90,15 +90,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 	var (
-		username    string
-		originPass  string
-		passShow    string
-		download    uint64
-		upload      uint64
-		quota       int64
-		id          uint
-		useDays     uint
-		expiredDate string
+		username   string
+		originPass string
+		passShow   string
+		download   uint64
+		upload     uint64
+		quota      int64
+		id         uint
+		useDays    uint
+		expiryDate string
 	)
 	var userList []*User
 	rows, err := db.Query(sql)
@@ -107,18 +107,18 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiredDate); err != nil {
+		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
 			return nil, err
 		}
 		userList = append(userList, &User{
-			ID:          id,
-			Username:    username,
-			Password:    passShow,
-			Download:    download,
-			Upload:      upload,
-			Quota:       quota,
-			UseDays:     useDays,
-			ExpiredDate: expiredDate,
+			ID:         id,
+			Username:   username,
+			Password:   passShow,
+			Download:   download,
+			Upload:     upload,
+			Quota:      quota,
+			UseDays:    useDays,
+			ExpiryDate: expiryDate,
 		})
 	}
 	return userList, nil
@@ -126,21 +126,21 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 
 func queryUser(db *sql.DB, sql string) (*User, error) {
 	var (
-		username    string
-		originPass  string
-		passShow    string
-		download    uint64
-		upload      uint64
-		quota       int64
-		id          uint
-		useDays     uint
-		expiredDate string
+		username   string
+		originPass string
+		passShow   string
+		download   uint64
+		upload     uint64
+		quota      int64
+		id         uint
+		useDays    uint
+		expiryDate string
 	)
 	row := db.QueryRow(sql)
-	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiredDate); err != nil {
+	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
 		return nil, err
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiredDate: expiredDate}, nil
+	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiryDate: expiryDate}, nil
 }
 
 // CreateUser 创建Trojan用户
@@ -233,7 +233,7 @@ func (mysql *Mysql) DailyCheckExpire() error {
 		return err
 	}
 	for _, user := range userList {
-		if user.ExpiredDate == todayDay {
+		if user.ExpiryDate == todayDay {
 			if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=0 WHERE id=%d;", user.ID)); err != nil {
 				fmt.Println(err)
 				return err
@@ -250,7 +250,7 @@ func (mysql *Mysql) CancelExpire(id uint) error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=0, expiredDate='' WHERE id=%d;", id)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=0, expiryDate='' WHERE id=%d;", id)); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -266,14 +266,14 @@ func (mysql *Mysql) SetExpire(id uint, useDays uint) error {
 		return err
 	}
 	addDay, _ := time.ParseDuration(strconv.Itoa(int(24*(useDays+1))) + "h")
-	expiredDate := now.Add(addDay).In(utc).Format("2006-01-02")
+	expiryDate := now.Add(addDay).In(utc).Format("2006-01-02")
 
 	db := mysql.GetDB()
 	if db == nil {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=%d, expiredDate='%s' WHERE id=%d;", addDay, expiredDate, id)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET useDays=%d, expiryDate='%s' WHERE id=%d;", addDay, expiryDate, id)); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -331,7 +331,7 @@ func (mysql *Mysql) UpgradeDB() error {
 		if _, err := db.Exec(`
 ALTER TABLE users
 ADD COLUMN useDays int(10) DEFAULT 0,
-ADD COLUMN expiredDate char(10) DEFAULT '';
+ADD COLUMN expiryDate char(10) DEFAULT '';
 `); err != nil {
 			fmt.Println(err)
 			return err
