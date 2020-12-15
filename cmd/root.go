@@ -45,13 +45,6 @@ exit:
 		fmt.Println(util.Cyan("欢迎使用trojan管理程序"))
 		fmt.Println()
 		menuList := []string{"trojan管理", "用户管理", "安装管理", "web管理", "查看配置", "生成json"}
-		for i := 0; i < len(menuList); i++ {
-			if i%2 == 0 {
-				fmt.Printf("%d.%-15s\t", i+1, menuList[i])
-			} else {
-				fmt.Printf("%d.%-15s\n\n", i+1, menuList[i])
-			}
-		}
 		switch util.LoopInput("请选择: ", menuList, false) {
 		case 1:
 			trojan.ControllMenu()

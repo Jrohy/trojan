@@ -61,16 +61,26 @@ func getChar(str string) string {
 }
 
 // LoopInput 循环输入选择, 或者直接回车退出
-func LoopInput(tip string, choices interface{}, print bool) int {
+func LoopInput(tip string, choices interface{}, singleRowPrint bool) int {
 	reflectValue := reflect.ValueOf(choices)
 	if reflectValue.Kind() != reflect.Slice && reflectValue.Kind() != reflect.Array {
 		fmt.Println("only support slice or array type!")
 		return -1
 	}
 	length := reflectValue.Len()
-	if print && reflectValue.Type().String() == "[]string" {
-		for i := 0; i < length; i++ {
-			fmt.Printf("%d.%s\n\n", i+1, reflectValue.Index(i).Interface())
+	if reflectValue.Type().String() == "[]string" {
+		if singleRowPrint {
+			for i := 0; i < length; i++ {
+				fmt.Printf("%d.%s\n\n", i+1, reflectValue.Index(i).Interface())
+			}
+		} else {
+			for i := 0; i < length; i++ {
+				if i%2 == 0 {
+					fmt.Printf("%d.%-15s\t", i+1, reflectValue.Index(i).Interface())
+				} else {
+					fmt.Printf("%d.%-15s\n\n", i+1, reflectValue.Index(i).Interface())
+				}
+			}
 		}
 	}
 	for {
