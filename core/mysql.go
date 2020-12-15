@@ -387,7 +387,6 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 	defer db.Close()
 	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	return user
@@ -402,7 +401,6 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 	defer db.Close()
 	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE passwordShow='%s'", pass))
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	return user
