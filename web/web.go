@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"trojan/core"
+	"trojan/trojan"
 	"trojan/util"
 	"trojan/web/controller"
 )
@@ -144,11 +145,17 @@ func sheduleTask() {
 	c := cron.New()
 	c.AddFunc("CRON_TZ=Asia/Shanghai @monthly", func() {
 		mysql := core.GetMysql()
-		mysql.MonthlyResetData()
+		if err := mysql.MonthlyResetData(); err != nil {
+			fmt.Println("MonthlyResetError: " + err.Error())
+		}
 	})
 	c.AddFunc("CRON_TZ=Asia/Shanghai @daily", func() {
 		mysql := core.GetMysql()
-		mysql.DailyCheckExpire()
+		if needRestart, err := mysql.DailyCheckExpire(); err != nil {
+			fmt.Println("DailyCheckError: " + err.Error())
+		} else if needRestart {
+			trojan.Restart()
+		}
 	})
 	c.Start()
 }

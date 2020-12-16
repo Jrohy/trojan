@@ -201,12 +201,10 @@ func (mysql *Mysql) MonthlyResetData() error {
 	defer db.Close()
 	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays != 0 AND quota != 0")
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	for _, user := range userList {
 		if _, err := db.Exec(fmt.Sprintf("UPDATE users SET download=0, upload=0 WHERE id=%d;", user.ID)); err != nil {
-			fmt.Println(err)
 			return err
 		}
 	}
@@ -214,34 +212,35 @@ func (mysql *Mysql) MonthlyResetData() error {
 }
 
 // DailyCheckExpire 检查是否有过期，过期了设置流量上限为0
-func (mysql *Mysql) DailyCheckExpire() error {
+func (mysql *Mysql) DailyCheckExpire() (bool, error) {
+	needRestart := false
 	now := time.Now()
 	utc, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return false, err
 	}
 	addDay, _ := time.ParseDuration("-24h")
 	todayDay := now.Add(addDay).In(utc).Format("2006-01-02")
 	db := mysql.GetDB()
 	if db == nil {
-		return errors.New("can't connect mysql")
+		return false, errors.New("can't connect mysql")
 	}
 	defer db.Close()
 	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays != 0 AND quota != 0")
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return false, err
 	}
 	for _, user := range userList {
 		if user.ExpiryDate == todayDay {
 			if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=0 WHERE id=%d;", user.ID)); err != nil {
-				fmt.Println(err)
-				return err
+				return false, err
+			}
+			if !needRestart {
+				needRestart = true
 			}
 		}
 	}
-	return nil
+	return needRestart, nil
 }
 
 // CancelExpire 取消过期时间
