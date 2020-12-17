@@ -70,10 +70,6 @@ func UpdateResetDay(day uint) *ResponseBody {
 		monthlyResetJob()
 	})
 	core.SetValue("reset_day", strconv.Itoa(int(day)))
-	fmt.Println("Updated schedule task: ")
-	for _, t := range c.Entries() {
-		fmt.Printf("%+v\n", t)
-	}
 	return &responseBody
 }
 
