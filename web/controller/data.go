@@ -60,6 +60,11 @@ func UpdateResetDay(day uint) *ResponseBody {
 		responseBody.Msg = fmt.Sprintf("%d为非正常日期", day)
 		return &responseBody
 	}
+	dayStr, _ := core.GetValue("reset_day")
+	oldDay, _ := strconv.Atoi(dayStr)
+	if day == uint(oldDay) {
+		return &responseBody
+	}
 	c.Remove(c.Entries()[len(c.Entries())-1].ID)
 	c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
 		monthlyResetJob()
