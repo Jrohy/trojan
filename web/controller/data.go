@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/robfig/cron/v3"
+	"strconv"
 	"time"
 	"trojan/core"
 	"trojan/trojan"
@@ -43,8 +44,10 @@ func monthlyResetJob() {
 func GetResetDay() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
+	dayStr, _ := core.GetValue("reset_day")
+	day, _ := strconv.Atoi(dayStr)
 	responseBody.Data = map[string]interface{}{
-		"resetDay": c.Entries()[len(c.Entries())-1].Next.Day(),
+		"resetDay": day,
 	}
 	return &responseBody
 }
@@ -61,6 +64,7 @@ func UpdateResetDay(day uint) *ResponseBody {
 	c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
 		monthlyResetJob()
 	})
+	core.SetValue("reset_day", strconv.Itoa(int(day)))
 	fmt.Println("Updated schedule task: ")
 	for _, t := range c.Entries() {
 		fmt.Printf("%+v\n", t)
@@ -80,7 +84,14 @@ func SheduleTask() {
 			trojan.Restart()
 		}
 	})
-	c.AddFunc("@monthly", func() {
+
+	dayStr, _ := core.GetValue("reset_day")
+	if dayStr == "" {
+		dayStr = "1"
+		core.SetValue("reset_day", dayStr)
+	}
+	day, _ := strconv.Atoi(dayStr)
+	c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
 		monthlyResetJob()
 	})
 	c.Start()

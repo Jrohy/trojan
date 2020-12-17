@@ -133,9 +133,6 @@ func commonRouter(router *gin.Engine) {
 		common.POST("/loginInfo", func(c *gin.Context) {
 			c.JSON(200, controller.SetLoginInfo(c.PostForm("title")))
 		})
-		common.POST("/resetDay", func(c *gin.Context) {
-			c.JSON(200, controller.SetLoginInfo(c.PostForm("title")))
-		})
 	}
 }
 
