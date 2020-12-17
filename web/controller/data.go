@@ -39,6 +39,16 @@ func monthlyResetJob() {
 	}
 }
 
+// GetResetDay 获取重置日
+func GetResetDay() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	responseBody.Data = map[string]interface{}{
+		"resetDay": c.Entries()[len(c.Entries())-1].Next.Day(),
+	}
+	return &responseBody
+}
+
 // UpdateResetDay 更新重置流量日
 func UpdateResetDay(day uint) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}

@@ -115,6 +115,9 @@ func dataRouter(router *gin.Engine) {
 			day, _ := strconv.Atoi(dayStr)
 			c.JSON(200, controller.UpdateResetDay(uint(day)))
 		})
+		data.GET("/resetDay", func(c *gin.Context) {
+			c.JSON(200, controller.GetResetDay())
+		})
 	}
 }
 
