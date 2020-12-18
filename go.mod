@@ -15,7 +15,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil v3.20.11+incompatible
 	github.com/spf13/cobra v1.1.1
-	github.com/syndtr/goleveldb v1.0.0
+	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
