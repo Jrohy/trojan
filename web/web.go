@@ -158,6 +158,7 @@ func Start(host string, port int, isSSL bool) {
 	dataRouter(router)
 	commonRouter(router)
 	controller.SheduleTask()
+	controller.CollectTask()
 	util.OpenPort(port)
 	if isSSL {
 		config := core.Load("")
