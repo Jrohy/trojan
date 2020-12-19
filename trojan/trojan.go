@@ -129,7 +129,7 @@ func Log(line int) {
 
 // LogChan trojan实时日志, 返回chan
 func LogChan(param string, closeChan chan byte) (chan string, error) {
-	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan "+param)
+	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan -o cat "+param)
 
 	stdout, _ := cmd.StdoutPipe()
 
