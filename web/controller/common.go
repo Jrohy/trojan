@@ -114,13 +114,20 @@ func ServerInfo() *ResponseBody {
 	smInfo, _ := mem.SwapMemory()
 	diskInfo, _ := disk.Usage("/")
 	loadInfo, _ := load.Avg()
+	tcpCon, _ := net.Connections("tcp")
+	udpCon, _ := net.Connections("udp")
+	netCount := map[string]int{
+		"tcp": len(tcpCon),
+		"udp": len(udpCon),
+	}
 	responseBody.Data = map[string]interface{}{
-		"cpu":    cpuPercent,
-		"memory": vmInfo,
-		"swap":   smInfo,
-		"disk":   diskInfo,
-		"load":   loadInfo,
-		"speed":  si,
+		"cpu":      cpuPercent,
+		"memory":   vmInfo,
+		"swap":     smInfo,
+		"disk":     diskInfo,
+		"load":     loadInfo,
+		"speed":    si,
+		"netCount": netCount,
 	}
 	return &responseBody
 }
