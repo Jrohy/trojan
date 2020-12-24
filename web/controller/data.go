@@ -56,7 +56,7 @@ func GetResetDay() *ResponseBody {
 func UpdateResetDay(day uint) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	if day > 31 || day < 1 {
+	if day > 31 || day < 0 {
 		responseBody.Msg = fmt.Sprintf("%d为非正常日期", day)
 		return &responseBody
 	}
@@ -65,10 +65,14 @@ func UpdateResetDay(day uint) *ResponseBody {
 	if day == uint(oldDay) {
 		return &responseBody
 	}
-	c.Remove(c.Entries()[len(c.Entries())-1].ID)
-	c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
-		monthlyResetJob()
-	})
+	if len(c.Entries()) > 1 {
+		c.Remove(c.Entries()[len(c.Entries())-1].ID)
+	}
+	if day != 0 {
+		c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
+			monthlyResetJob()
+		})
+	}
 	core.SetValue("reset_day", strconv.Itoa(int(day)))
 	return &responseBody
 }
@@ -92,8 +96,10 @@ func SheduleTask() {
 		core.SetValue("reset_day", dayStr)
 	}
 	day, _ := strconv.Atoi(dayStr)
-	c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
-		monthlyResetJob()
-	})
+	if day != 0 {
+		c.AddFunc(fmt.Sprintf("0 0 %d * *", day), func() {
+			monthlyResetJob()
+		})
+	}
 	c.Start()
 }
