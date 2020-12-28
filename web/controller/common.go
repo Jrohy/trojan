@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"github.com/robfig/cron/v3"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/net"
 	"time"
 	"trojan/core"
 	"trojan/trojan"
@@ -16,6 +18,13 @@ type ResponseBody struct {
 	Data     interface{}
 	Msg      string
 }
+
+type speedInfo struct {
+	Up   uint64
+	Down uint64
+}
+
+var si *speedInfo
 
 // TimeCost web函数执行用时统计方法
 func TimeCost(start time.Time, body *ResponseBody) {
@@ -69,6 +78,33 @@ func SetTrojanType(tType string) *ResponseBody {
 	return &responseBody
 }
 
+// CollectTask 启动收集主机信息任务
+func CollectTask() {
+	var recvCount, sentCount uint64
+	c := cron.New()
+	lastIO, _ := net.IOCounters(true)
+	var lastRecvCount, lastSentCount uint64
+	for _, k := range lastIO {
+		lastRecvCount = lastRecvCount + k.BytesRecv
+		lastSentCount = lastSentCount + k.BytesSent
+	}
+	si = &speedInfo{}
+	c.AddFunc("@every 2s", func() {
+		result, _ := net.IOCounters(true)
+		recvCount, sentCount = 0, 0
+		for _, k := range result {
+			recvCount = recvCount + k.BytesRecv
+			sentCount = sentCount + k.BytesSent
+		}
+		si.Up = (sentCount - lastSentCount) / 2
+		si.Down = (recvCount - lastRecvCount) / 2
+		lastSentCount = sentCount
+		lastRecvCount = recvCount
+		lastIO = result
+	})
+	c.Start()
+}
+
 // ServerInfo 获取服务器信息
 func ServerInfo() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
@@ -78,12 +114,20 @@ func ServerInfo() *ResponseBody {
 	smInfo, _ := mem.SwapMemory()
 	diskInfo, _ := disk.Usage("/")
 	loadInfo, _ := load.Avg()
+	tcpCon, _ := net.Connections("tcp")
+	udpCon, _ := net.Connections("udp")
+	netCount := map[string]int{
+		"tcp": len(tcpCon),
+		"udp": len(udpCon),
+	}
 	responseBody.Data = map[string]interface{}{
-		"cpu":    cpuPercent,
-		"memory": vmInfo,
-		"swap":   smInfo,
-		"disk":   diskInfo,
-		"load":   loadInfo,
+		"cpu":      cpuPercent,
+		"memory":   vmInfo,
+		"swap":     smInfo,
+		"disk":     diskInfo,
+		"load":     loadInfo,
+		"speed":    si,
+		"netCount": netCount,
 	}
 	return &responseBody
 }

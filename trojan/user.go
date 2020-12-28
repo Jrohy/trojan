@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strconv"
+	"strings"
 	"trojan/core"
 	"trojan/util"
 )
@@ -11,8 +12,8 @@ import (
 // UserMenu 用户管理菜单
 func UserMenu() {
 	fmt.Println()
-	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量"}
-	switch util.LoopInput("请选择: ", menu, true) {
+	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量", "设置限期", "取消限期"}
+	switch util.LoopInput("请选择: ", menu, false) {
 	case 1:
 		AddUser()
 	case 2:
@@ -21,6 +22,10 @@ func UserMenu() {
 		SetUserQuota()
 	case 4:
 		CleanData()
+	case 5:
+		SetupExpire()
+	case 6:
+		CancelExpire()
 	}
 }
 
@@ -101,6 +106,47 @@ func CleanData() {
 	}
 }
 
+// CancelExpire 取消限期
+func CancelExpire() {
+	userList := UserList()
+	mysql := core.GetMysql()
+	choice := util.LoopInput("请选择要取消限期的用户序号: ", userList, true)
+	if choice == -1 {
+		return
+	}
+	if userList[choice-1].UseDays == 0 {
+		fmt.Println(util.Yellow("选择的用户未设置限期!"))
+		return
+	}
+	if mysql.CancelExpire(userList[choice-1].ID) == nil {
+		fmt.Println("取消限期成功!")
+	}
+}
+
+// SetupExpire 设置限期
+func SetupExpire() {
+	userList := UserList()
+	mysql := core.GetMysql()
+	choice := util.LoopInput("请选择要设置限期的用户序号: ", userList, true)
+	if choice == -1 {
+		return
+	}
+	useDayStr := util.Input("请输入要限制使用的天数: ", "")
+	if useDayStr == "" {
+		return
+	} else if strings.Contains(useDayStr, "-") {
+		fmt.Println(util.Yellow("天数不能为负数"))
+		return
+	} else if !util.IsInteger(useDayStr) {
+		fmt.Println(util.Yellow("输入为非整数!"))
+		return
+	}
+	useDays, _ := strconv.Atoi(useDayStr)
+	if mysql.SetExpire(userList[choice-1].ID, uint(useDays)) == nil {
+		fmt.Println("设置限期成功!")
+	}
+}
+
 // CleanDataByName 清空指定用户流量
 func CleanDataByName(usernames []string) {
 	mysql := core.GetMysql()
@@ -134,6 +180,11 @@ func UserList(ids ...string) []*core.User {
 			fmt.Println("流量限额: " + util.Cyan("无限制"))
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
+		}
+		if k.UseDays == 0 {
+			fmt.Println("到期日期: " + util.Cyan("无限制"))
+		} else {
+			fmt.Println("到期日期: " + util.Cyan(k.ExpiryDate))
 		}
 		fmt.Println("分享链接: " + util.Green(fmt.Sprintf("trojan://%s@%s:%d", string(pass), domain, port)))
 		fmt.Println()

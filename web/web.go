@@ -42,6 +42,18 @@ func userRouter(router *gin.Engine) {
 			id, _ := strconv.Atoi(sid)
 			c.JSON(200, controller.UpdateUser(uint(id), username, password))
 		})
+		user.POST("/expire", func(c *gin.Context) {
+			sid := c.PostForm("id")
+			sDays := c.PostForm("useDays")
+			id, _ := strconv.Atoi(sid)
+			useDays, _ := strconv.Atoi(sDays)
+			c.JSON(200, controller.SetExpire(uint(id), uint(useDays)))
+		})
+		user.DELETE("/expire", func(c *gin.Context) {
+			sid := c.Query("id")
+			id, _ := strconv.Atoi(sid)
+			c.JSON(200, controller.CancelExpire(uint(id)))
+		})
 		user.DELETE("", func(c *gin.Context) {
 			stringId := c.Query("id")
 			id, _ := strconv.Atoi(stringId)
@@ -98,6 +110,14 @@ func dataRouter(router *gin.Engine) {
 			id, _ := strconv.Atoi(sID)
 			c.JSON(200, controller.CleanData(uint(id)))
 		})
+		data.POST("/resetDay", func(c *gin.Context) {
+			dayStr := c.DefaultPostForm("day", "1")
+			day, _ := strconv.Atoi(dayStr)
+			c.JSON(200, controller.UpdateResetDay(uint(day)))
+		})
+		data.GET("/resetDay", func(c *gin.Context) {
+			c.JSON(200, controller.GetResetDay())
+		})
 	}
 }
 
@@ -137,6 +157,8 @@ func Start(host string, port int, isSSL bool) {
 	userRouter(router)
 	dataRouter(router)
 	commonRouter(router)
+	controller.SheduleTask()
+	controller.CollectTask()
 	util.OpenPort(port)
 	if isSSL {
 		config := core.Load("")
