@@ -67,7 +67,7 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	defer file.Close()
 	writer := bufio.NewWriter(file)
 	writer.WriteString("DROP TABLE IF EXISTS users;")
-	writer.WriteString(createTableSql + "\n")
+	writer.WriteString(createTableSql)
 	db := mysql.GetDB()
 	userList, err := queryUserList(db, "SELECT * FROM users;")
 	if err != nil {
