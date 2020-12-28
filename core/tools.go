@@ -69,14 +69,14 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	writer.WriteString("DROP TABLE IF EXISTS users;\n")
 	writer.WriteString(createTableSql + "\n")
 	db := mysql.GetDB()
-	if userList, err := queryUserList(db, "SELECT * FROM users;"); err != nil {
+	userList, err := queryUserList(db, "SELECT * FROM users;")
+	if err != nil {
 		return err
-	} else {
-		for _, user := range userList {
-			writer.WriteString(fmt.Sprintf(`
+	}
+	for _, user := range userList {
+		writer.WriteString(fmt.Sprintf(`
 INSERT INTO users(id, username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES (%d, '%s','%s','%s', %d, %d, %d, %d, '%s');\n
 `, user.ID, user.Username, user.OriginPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate))
-		}
 	}
 	writer.Flush()
 	return nil
