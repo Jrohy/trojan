@@ -66,7 +66,7 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	}
 	defer file.Close()
 	writer := bufio.NewWriter(file)
-	writer.WriteString("DROP TABLE IF EXISTS users;\n")
+	writer.WriteString("DROP TABLE IF EXISTS users;")
 	writer.WriteString(createTableSql + "\n")
 	db := mysql.GetDB()
 	userList, err := queryUserList(db, "SELECT * FROM users;")
@@ -76,7 +76,7 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	for _, user := range userList {
 		writer.WriteString(fmt.Sprintf(`
 INSERT INTO users(id, username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES (%d, '%s','%s','%s', %d, %d, %d, %d, '%s');
-`, user.ID, user.Username, user.OriginPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate) + "\n")
+`, user.ID, user.Username, user.OriginPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate))
 	}
 	writer.Flush()
 	return nil
