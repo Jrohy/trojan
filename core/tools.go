@@ -75,8 +75,8 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	}
 	for _, user := range userList {
 		writer.WriteString(fmt.Sprintf(`
-INSERT INTO users(id, username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES (%d, '%s','%s','%s', %d, %d, %d, %d, '%s');\n
-`, user.ID, user.Username, user.OriginPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate))
+INSERT INTO users(id, username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES (%d, '%s','%s','%s', %d, %d, %d, %d, '%s');
+`, user.ID, user.Username, user.OriginPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate) + "\n")
 	}
 	writer.Flush()
 	return nil
