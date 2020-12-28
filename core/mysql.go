@@ -3,15 +3,12 @@ package core
 import (
 	"crypto/sha256"
 	"database/sql"
-	"encoding/base64"
 	"errors"
 	"fmt"
+	mysqlDriver "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
 	"time"
-	"trojan/util"
-
-	mysqlDriver "github.com/go-sql-driver/mysql"
 
 	"strconv"
 	"strings"
@@ -36,6 +33,7 @@ type User struct {
 	ID         uint
 	Username   string
 	Password   string
+	OriginPass string
 	Quota      int64
 	Download   uint64
 	Upload     uint64
@@ -51,6 +49,22 @@ type PageQuery struct {
 	PageSize int
 	DataList []*User
 }
+
+var createTableSql = `
+CREATE TABLE IF NOT EXISTS users (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    username VARCHAR(64) NOT NULL,
+    password CHAR(56) NOT NULL,
+    passwordShow VARCHAR(255) NOT NULL,
+    quota BIGINT NOT NULL DEFAULT 0,
+    download BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    useDays int(10) DEFAULT 0,
+    expiryDate char(10) DEFAULT '',
+    PRIMARY KEY (id),
+    INDEX (password)
+);
+`
 
 // GetDB 获取mysql数据库连接
 func (mysql *Mysql) GetDB() *sql.DB {
@@ -69,21 +83,7 @@ func (mysql *Mysql) GetDB() *sql.DB {
 func (mysql *Mysql) CreateTable() {
 	db := mysql.GetDB()
 	defer db.Close()
-	if _, err := db.Exec(`
-CREATE TABLE IF NOT EXISTS users (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    username VARCHAR(64) NOT NULL,
-    password CHAR(56) NOT NULL,
-    passwordShow VARCHAR(255) NOT NULL,
-    quota BIGINT NOT NULL DEFAULT 0,
-    download BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    useDays int(10) DEFAULT 0,
-    expiryDate char(10) DEFAULT '',
-    PRIMARY KEY (id),
-    INDEX (password)
-);
-    `); err != nil {
+	if _, err := db.Exec(createTableSql); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -114,6 +114,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 			ID:         id,
 			Username:   username,
 			Password:   passShow,
+			OriginPass: originPass,
 			Download:   download,
 			Upload:     upload,
 			Quota:      quota,
@@ -140,7 +141,7 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
 		return nil, err
 	}
-	return &User{ID: id, Username: username, Password: originPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiryDate: expiryDate}, nil
+	return &User{ID: id, Username: username, Password: passShow, OriginPass: originPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiryDate: expiryDate}, nil
 }
 
 // CreateUser 创建Trojan用户
@@ -290,52 +291,6 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=%d WHERE id=%d;", quota, id)); err != nil {
 		fmt.Println(err)
 		return err
-	}
-	return nil
-}
-
-// UpgradeDB 升级数据库表结构以及迁移数据
-func (mysql *Mysql) UpgradeDB() error {
-	db := mysql.GetDB()
-	if db == nil {
-		return errors.New("can't connect mysql")
-	}
-	var field string
-	error := db.QueryRow("SHOW COLUMNS FROM users LIKE 'passwordShow';").Scan(&field)
-	if error == sql.ErrNoRows {
-		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
-		if _, err := db.Exec("ALTER TABLE users ADD COLUMN passwordShow VARCHAR(255) NOT NULL AFTER password;"); err != nil {
-			fmt.Println(err)
-			return err
-		}
-		userList, err := mysql.GetData()
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		for _, user := range userList {
-			pass, _ := GetValue(fmt.Sprintf("%s_pass", user.Username))
-			if pass != "" {
-				base64Pass := base64.StdEncoding.EncodeToString([]byte(pass))
-				if _, err := db.Exec(fmt.Sprintf("UPDATE users SET passwordShow='%s' WHERE id=%d;", base64Pass, user.ID)); err != nil {
-					fmt.Println(err)
-					return err
-				}
-				DelValue(fmt.Sprintf("%s_pass", user.Username))
-			}
-		}
-	}
-	error = db.QueryRow("SHOW COLUMNS FROM users LIKE 'useDays';").Scan(&field)
-	if error == sql.ErrNoRows {
-		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
-		if _, err := db.Exec(`
-ALTER TABLE users
-ADD COLUMN useDays int(10) DEFAULT 0,
-ADD COLUMN expiryDate char(10) DEFAULT '';
-`); err != nil {
-			fmt.Println(err)
-			return err
-		}
 	}
 	return nil
 }
