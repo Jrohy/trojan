@@ -14,7 +14,7 @@ var importCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		mysql := core.GetMysql()
-		if err := mysql.ExecSql(args[1]); err != nil {
+		if err := mysql.ExecSql(args[0]); err != nil {
 			fmt.Println(util.Red(err.Error()))
 		} else {
 			fmt.Println(util.Green("导入sql成功!"))
