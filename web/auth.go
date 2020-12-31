@@ -62,7 +62,7 @@ func init() {
 				if user == nil {
 					return nil, jwt.ErrFailedAuthentication
 				}
-				password = user.Password
+				password = user.EncryptPass
 			} else {
 				if password, err = core.GetValue(userID + "_pass"); err != nil {
 					return nil, err

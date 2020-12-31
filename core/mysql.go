@@ -30,15 +30,15 @@ type Mysql struct {
 
 // User 用户表记录结构体
 type User struct {
-	ID         uint
-	Username   string
-	Password   string
-	OriginPass string
-	Quota      int64
-	Download   uint64
-	Upload     uint64
-	UseDays    uint
-	ExpiryDate string
+	ID          uint
+	Username    string
+	Password    string
+	EncryptPass string
+	Quota       int64
+	Download    uint64
+	Upload      uint64
+	UseDays     uint
+	ExpiryDate  string
 }
 
 // PageQuery 分页查询的结构体
@@ -90,15 +90,15 @@ func (mysql *Mysql) CreateTable() {
 
 func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 	var (
-		username   string
-		originPass string
-		passShow   string
-		download   uint64
-		upload     uint64
-		quota      int64
-		id         uint
-		useDays    uint
-		expiryDate string
+		username    string
+		encryptPass string
+		passShow    string
+		download    uint64
+		upload      uint64
+		quota       int64
+		id          uint
+		useDays     uint
+		expiryDate  string
 	)
 	var userList []*User
 	rows, err := db.Query(sql)
@@ -107,19 +107,19 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		if err := rows.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
+		if err := rows.Scan(&id, &username, &encryptPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
 			return nil, err
 		}
 		userList = append(userList, &User{
-			ID:         id,
-			Username:   username,
-			Password:   passShow,
-			OriginPass: originPass,
-			Download:   download,
-			Upload:     upload,
-			Quota:      quota,
-			UseDays:    useDays,
-			ExpiryDate: expiryDate,
+			ID:          id,
+			Username:    username,
+			Password:    passShow,
+			EncryptPass: encryptPass,
+			Download:    download,
+			Upload:      upload,
+			Quota:       quota,
+			UseDays:     useDays,
+			ExpiryDate:  expiryDate,
 		})
 	}
 	return userList, nil
@@ -127,21 +127,21 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 
 func queryUser(db *sql.DB, sql string) (*User, error) {
 	var (
-		username   string
-		originPass string
-		passShow   string
-		download   uint64
-		upload     uint64
-		quota      int64
-		id         uint
-		useDays    uint
-		expiryDate string
+		username    string
+		encryptPass string
+		passShow    string
+		download    uint64
+		upload      uint64
+		quota       int64
+		id          uint
+		useDays     uint
+		expiryDate  string
 	)
 	row := db.QueryRow(sql)
-	if err := row.Scan(&id, &username, &originPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
+	if err := row.Scan(&id, &username, &encryptPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
 		return nil, err
 	}
-	return &User{ID: id, Username: username, Password: passShow, OriginPass: originPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiryDate: expiryDate}, nil
+	return &User{ID: id, Username: username, Password: passShow, EncryptPass: encryptPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiryDate: expiryDate}, nil
 }
 
 // CreateUser 创建Trojan用户
