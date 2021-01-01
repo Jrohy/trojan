@@ -60,7 +60,7 @@ ADD COLUMN expiryDate char(10) DEFAULT '';
 
 // DumpSql 导出sql
 func (mysql *Mysql) DumpSql(filePath string) error {
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
@@ -75,8 +75,8 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	}
 	for _, user := range userList {
 		writer.WriteString(fmt.Sprintf(`
-INSERT INTO users(id, username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES (%d, '%s','%s','%s', %d, %d, %d, %d, '%s');`,
-			user.ID, user.Username, user.EncryptPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate))
+INSERT INTO users(username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES ('%s','%s','%s', %d, %d, %d, %d, '%s');`,
+			user.Username, user.EncryptPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate))
 	}
 	writer.WriteString("\n")
 	writer.Flush()
