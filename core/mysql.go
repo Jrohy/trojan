@@ -316,7 +316,7 @@ func (mysql *Mysql) CleanDataByName(usernames []string) error {
 		return errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	runSql := "UPDATE users SET download=0, upload=0 WHERE username in ("
+	runSql := "UPDATE users SET download=0, upload=0 WHERE BINARY username in ("
 	for i, name := range usernames {
 		runSql = runSql + "'" + name + "'"
 		if i == len(usernames)-1 {
@@ -339,7 +339,7 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 		return nil
 	}
 	defer db.Close()
-	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE username='%s'", name))
+	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE BINARY username='%s'", name))
 	if err != nil {
 		return nil
 	}
@@ -353,7 +353,7 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 		return nil
 	}
 	defer db.Close()
-	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE passwordShow='%s'", pass))
+	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE BINARY passwordShow='%s'", pass))
 	if err != nil {
 		return nil
 	}
