@@ -9,22 +9,27 @@ import (
 )
 
 // UserList 获取用户列表
-func UserList(findUser string) *ResponseBody {
+func UserList(requestUser string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
 	userList, err := mysql.GetData()
-	if findUser != "" {
-		for _, user := range userList {
-			if user.Username == findUser {
-				userList = []*core.User{user}
-				break
-			}
-		}
-	}
 	if err != nil {
 		responseBody.Msg = err.Error()
 		return &responseBody
+	}
+	if requestUser != "admin" {
+		findUser := false
+		for _, user := range userList {
+			if user.Username == requestUser {
+				userList = []*core.User{user}
+				findUser = true
+				break
+			}
+		}
+		if !findUser {
+			userList = []*core.User{}
+		}
 	}
 	domain, port := trojan.GetDomainAndPort()
 	responseBody.Data = map[string]interface{}{

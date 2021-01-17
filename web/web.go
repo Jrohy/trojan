@@ -17,11 +17,7 @@ func userRouter(router *gin.Engine) {
 	{
 		user.GET("", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
-			if requestUser == "admin" {
-				c.JSON(200, controller.UserList(""))
-			} else {
-				c.JSON(200, controller.UserList(requestUser))
-			}
+			c.JSON(200, controller.UserList(requestUser))
 		})
 		user.GET("/page", func(c *gin.Context) {
 			curPageStr := c.DefaultQuery("curPage", "1")
