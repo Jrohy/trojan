@@ -62,7 +62,7 @@ func init() {
 				if user == nil {
 					return nil, jwt.ErrFailedAuthentication
 				}
-				password = user.Password
+				password = user.EncryptPass
 			} else {
 				if password, err = core.GetValue(userID + "_pass"); err != nil {
 					return nil, err
@@ -143,6 +143,15 @@ func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
 	authO := r.Group("/auth")
 	authO.Use(authMiddleware.MiddlewareFunc())
 	{
+		authO.GET("/loginUser", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"code":    200,
+				"message": "success",
+				"data": map[string]string{
+					"username": RequestUsername(c),
+				},
+			})
+		})
 		authO.POST("/reset_pass", updateUser)
 		authO.POST("/logout", authMiddleware.LogoutHandler)
 		authO.POST("/refresh_token", authMiddleware.RefreshHandler)

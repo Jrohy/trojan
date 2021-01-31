@@ -99,7 +99,7 @@ func InstallTls() {
 		if !util.IsExists("/root/.acme.sh/acme.sh") {
 			util.RunWebShell("https://get.acme.sh")
 		}
-		Stop()
+		util.ExecCommand("systemctl stop trojan-web")
 		util.OpenPort(80)
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
@@ -120,6 +120,7 @@ func InstallTls() {
 		}
 	}
 	Restart()
+	util.ExecCommand("systemctl restart trojan-web")
 	fmt.Println()
 }
 
