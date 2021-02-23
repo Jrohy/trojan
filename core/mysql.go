@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS users (
     expiryDate char(10) DEFAULT '',
     PRIMARY KEY (id),
     INDEX (password)
-);
+) DEFAULT CHARSET=utf8mb4;
 `
 
 // GetDB 获取mysql数据库连接

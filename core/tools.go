@@ -55,6 +55,15 @@ ADD COLUMN expiryDate char(10) DEFAULT '';
 			return err
 		}
 	}
+	result := db.QueryRow(fmt.Sprintf(
+		"SELECT * FROM information_schema.TABLES WHERE TABLE_NAME = 'users' AND TABLE_SCHEMA = '%s' ",
+		mysql.Database) + " AND TABLE_COLLATION LIKE 'utf8%';")
+	if result.Err() == sql.ErrNoRows {
+		tempFile := "temp.sql"
+		mysql.DumpSql(tempFile)
+		mysql.ExecSql(tempFile)
+		os.Remove(tempFile)
+	}
 	return nil
 }
 
