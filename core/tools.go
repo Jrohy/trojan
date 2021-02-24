@@ -55,10 +55,11 @@ ADD COLUMN expiryDate char(10) DEFAULT '';
 			return err
 		}
 	}
-	result := db.QueryRow(fmt.Sprintf(
+	var tableName string
+	error = db.QueryRow(fmt.Sprintf(
 		"SELECT * FROM information_schema.TABLES WHERE TABLE_NAME = 'users' AND TABLE_SCHEMA = '%s' ",
-		mysql.Database) + " AND TABLE_COLLATION LIKE 'utf8%';")
-	if result.Err() == sql.ErrNoRows {
+		mysql.Database) + " AND TABLE_COLLATION LIKE 'utf8%';").Scan(&tableName)
+	if error == sql.ErrNoRows {
 		tempFile := "temp.sql"
 		mysql.DumpSql(tempFile)
 		mysql.ExecSql(tempFile)
