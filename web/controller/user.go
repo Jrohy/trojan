@@ -131,6 +131,8 @@ func DelUser(id uint) *ResponseBody {
 	mysql := core.GetMysql()
 	if err := mysql.DeleteUser(id); err != nil {
 		responseBody.Msg = err.Error()
+	} else {
+		trojan.Restart()
 	}
 	return &responseBody
 }
