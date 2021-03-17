@@ -3,6 +3,8 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tidwall/pretty"
+	"github.com/tidwall/sjson"
 	"io/ioutil"
 )
 
@@ -34,7 +36,7 @@ type ServerTCP struct {
 }
 
 // Load 加载服务端配置文件
-func Load(path string) *ServerConfig {
+func Load(path string) []byte {
 	if path == "" {
 		path = configPath
 	}
@@ -43,6 +45,24 @@ func Load(path string) *ServerConfig {
 		fmt.Println(err)
 		return nil
 	}
+	return data
+}
+
+// Save 保存服务端配置文件
+func Save(data []byte, path string) bool {
+	if path == "" {
+		path = configPath
+	}
+	if err := ioutil.WriteFile(path, pretty.Pretty(data), 0644); err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+// GetConfig 获取config配置
+func GetConfig() *ServerConfig {
+	data := Load("")
 	config := ServerConfig{}
 	if err := json.Unmarshal(data, &config); err != nil {
 		fmt.Println(err)
@@ -51,63 +71,45 @@ func Load(path string) *ServerConfig {
 	return &config
 }
 
-// Save 保存服务端配置文件
-func Save(config *ServerConfig, path string) bool {
-	if path == "" {
-		path = configPath
-	}
-	data, err := json.MarshalIndent(config, "", "    ")
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	if err = ioutil.WriteFile(path, data, 0644); err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
 // GetMysql 获取mysql连接
 func GetMysql() *Mysql {
-	config := Load("")
-	return &config.Mysql
+	return &GetConfig().Mysql
 }
 
 // WriteMysql 写mysql配置
 func WriteMysql(mysql *Mysql) bool {
 	mysql.Enabled = true
-	config := Load("")
-	config.Mysql = *mysql
-	return Save(config, "")
+	data := Load("")
+	result, _ := sjson.SetBytes(data, "mysql", mysql)
+	return Save(result, "")
 }
 
 // WriteTls 写tls配置
 func WriteTls(cert, key, domain string) bool {
-	config := Load("")
-	config.SSl.Cert = cert
-	config.SSl.Key = key
-	config.SSl.Sni = domain
-	return Save(config, "")
+	data := Load("")
+	data, _ = sjson.SetBytes(data, "ssl.cert", cert)
+	data, _ = sjson.SetBytes(data, "ssl.key", key)
+	data, _ = sjson.SetBytes(data, "ssl.sni", domain)
+	return Save(data, "")
 }
 
 // WriteDomain 写域名
 func WriteDomain(domain string) bool {
-	config := Load("")
-	config.SSl.Sni = domain
-	return Save(config, "")
+	data := Load("")
+	data, _ = sjson.SetBytes(data, "ssl.sni", domain)
+	return Save(data, "")
 }
 
 // WritePassword 写密码
 func WritePassword(pass []string) bool {
-	config := Load("")
-	config.Password = pass
-	return Save(config, "")
+	data := Load("")
+	data, _ = sjson.SetBytes(data, "password", pass)
+	return Save(data, "")
 }
 
 // WriteLogLevel 写日志等级
 func WriteLogLevel(level int) bool {
-	config := Load("")
-	config.LogLevel = level
-	return Save(config, "")
+	data := Load("")
+	data, _ = sjson.SetBytes(data, "log_level", level)
+	return Save(data, "")
 }

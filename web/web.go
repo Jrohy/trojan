@@ -157,7 +157,7 @@ func Start(host string, port int, isSSL bool) {
 	controller.CollectTask()
 	util.OpenPort(port)
 	if isSSL {
-		config := core.Load("")
+		config := core.GetConfig()
 		ssl := &config.SSl
 		router.RunTLS(fmt.Sprintf("%s:%d", host, port), ssl.Cert, ssl.Key)
 	} else {

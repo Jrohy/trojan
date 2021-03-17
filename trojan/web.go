@@ -51,6 +51,6 @@ func SetDomain(domain string) {
 
 // GetDomainAndPort 获取域名和端口
 func GetDomainAndPort() (string, int) {
-	config := core.Load("")
+	config := core.GetConfig()
 	return config.SSl.Sni, config.LocalPort
 }

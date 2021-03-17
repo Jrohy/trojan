@@ -18,9 +18,7 @@ func upgradeConfig() {
 	if domain == "" {
 		return
 	}
-	config := core.Load("")
-	config.SSl.Sni = domain
-	core.Save(config, "")
+	core.WriteDomain(domain)
 	trojan.Restart()
 }
 

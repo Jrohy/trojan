@@ -56,9 +56,9 @@ func SetLogLevel(level int) *ResponseBody {
 func GetLogLevel() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	config := core.Load("")
+	config := core.GetConfig()
 	responseBody.Data = map[string]interface{}{
-		"loglevel": config.LogLevel,
+		"loglevel": &config.LogLevel,
 	}
 	return &responseBody
 }

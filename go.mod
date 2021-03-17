@@ -16,5 +16,7 @@ require (
 	github.com/shirou/gopsutil v3.21.2+incompatible
 	github.com/spf13/cobra v1.1.3
 	github.com/syndtr/goleveldb v1.0.1-0.20210305035536-64b5b1c73954
+	github.com/tidwall/pretty v1.0.2
+	github.com/tidwall/sjson v1.1.5
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 )
