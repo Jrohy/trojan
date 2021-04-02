@@ -1,19 +1,12 @@
 package asset
 
-import _ "embed"
+import "embed"
 
-//go:embed trojan-install.sh
-var installF string
+//go:embed trojan-install.sh client.json
+var f embed.FS
 
-//go:embed client.json
-var clientF string
-
-// GetAssetStr 获取资源字符串
-func GetAssetStr(ftype int) string {
-	if ftype == 0 {
-		return installF
-	} else if ftype == 1 {
-		return clientF
-	}
-	return ""
+// GetAsset 获取资源字符串
+func GetAsset(name string) []byte {
+	data, _ := f.ReadFile(name)
+	return data
 }

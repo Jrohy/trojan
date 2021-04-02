@@ -50,7 +50,7 @@ func InstallDocker() {
 // InstallTrojan 安装trojan
 func InstallTrojan() {
 	fmt.Println()
-	data := asset.GetAssetStr(0)
+	data := string(asset.GetAsset("trojan-install.sh"))
 	if util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service") != "" && Type() == "trojan-go" {
 		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
 	}

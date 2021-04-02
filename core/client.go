@@ -28,9 +28,9 @@ type ClientTCP struct {
 
 // WriteClient 生成客户端json
 func WriteClient(port int, password, domain, writePath string) bool {
-	data := asset.GetAssetStr(1)
+	data := asset.GetAsset("client.json")
 	config := ClientConfig{}
-	if err := json.Unmarshal([]byte(data), &config); err != nil {
+	if err := json.Unmarshal(data, &config); err != nil {
 		fmt.Println(err)
 		return false
 	}
