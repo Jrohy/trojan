@@ -1,8 +1,10 @@
 package asset
 
 import _ "embed"
+
 //go:embed trojan-install.sh
 var installF string
+
 //go:embed client.json
 var clientF string
 
