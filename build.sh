@@ -31,8 +31,6 @@ function upload() {
 
 cd $SHELL_PATH
 
-packr2
-
 go build -ldflags "-s -w -X 'trojan/trojan.MVersion=`git describe --tags $(git rev-list --tags --max-count=1)`' -X 'trojan/trojan.BuildDate=`TZ=Asia/Shanghai date "+%Y%m%d-%H%M"`' -X 'trojan/trojan.GoVersion=`go version|awk '{print $3,$4}'`' -X 'trojan/trojan.GitVersion=`git rev-parse HEAD`'" -o "result/trojan" .
 
 cd result
@@ -47,7 +45,5 @@ done
 echo "upload completed!"
 
 cd $SHELL_PATH
-
-packr2 clean
 
 rm -rf result
