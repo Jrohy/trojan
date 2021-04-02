@@ -1,16 +1,20 @@
 package web
 
 import (
+	"embed"
 	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/gobuffalo/packr/v2"
+	"io/fs"
 	"net/http"
 	"strconv"
 	"trojan/core"
 	"trojan/util"
 	"trojan/web/controller"
 )
+
+//go:embed templates/*
+var f embed.FS
 
 func userRouter(router *gin.Engine) {
 	user := router.Group("/trojan/user")
@@ -133,13 +137,16 @@ func commonRouter(router *gin.Engine) {
 }
 
 func staticRouter(router *gin.Engine) {
-	box := packr.New("trojanBox", "./templates")
-	router.Use(func(c *gin.Context) {
-		requestUrl := c.Request.URL.Path
-		if box.Has(requestUrl) || requestUrl == "/" {
-			http.FileServer(box).ServeHTTP(c.Writer, c.Request)
-			c.Abort()
-		}
+	// 设置静态资源
+	staticFs, _ := fs.Sub(f, "templates/static")
+	router.StaticFS("/static", http.FS(staticFs))
+
+	router.GET("/", func(c *gin.Context) {
+		c.Writer.WriteHeader(http.StatusOK)
+		indexHTML, _ := f.ReadFile("templates/" + "index.html")
+		c.Writer.Write(indexHTML)
+		c.Writer.Header().Add("Accept", "text/html")
+		c.Writer.Flush()
 	})
 }
 

@@ -10,7 +10,6 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil v3.21.2+incompatible
