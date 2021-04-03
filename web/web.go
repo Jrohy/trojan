@@ -137,16 +137,12 @@ func commonRouter(router *gin.Engine) {
 }
 
 func staticRouter(router *gin.Engine) {
-	// 设置静态资源
 	staticFs, _ := fs.Sub(f, "templates/static")
 	router.StaticFS("/static", http.FS(staticFs))
 
 	router.GET("/", func(c *gin.Context) {
-		c.Writer.WriteHeader(http.StatusOK)
 		indexHTML, _ := f.ReadFile("templates/" + "index.html")
 		c.Writer.Write(indexHTML)
-		c.Writer.Header().Add("Accept", "text/html")
-		c.Writer.Flush()
 	})
 }
 
