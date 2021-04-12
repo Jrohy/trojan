@@ -75,6 +75,12 @@ func trojanRouter(router *gin.Engine) {
 	router.GET("/trojan/loglevel", func(c *gin.Context) {
 		c.JSON(200, controller.GetLogLevel())
 	})
+	router.GET("/trojan/export", func(c *gin.Context) {
+		result := controller.ExportCsv(c)
+		if result != nil {
+			c.JSON(200, result)
+		}
+	})
 	router.POST("/trojan/update", func(c *gin.Context) {
 		c.JSON(200, controller.Update())
 	})

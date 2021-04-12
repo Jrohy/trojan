@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	ws "github.com/gorilla/websocket"
 	"log"
+	"strconv"
 	"time"
 	"trojan/core"
 	"trojan/trojan"
@@ -92,4 +95,39 @@ func Log(c *gin.Context) {
 			break
 		}
 	}
+}
+
+// ExportCsv 导出trojan表数据到csv文件
+func ExportCsv(c *gin.Context) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	var dataBytes = new(bytes.Buffer)
+	//设置UTF-8 BOM, 防止中文乱码
+	dataBytes.WriteString("\xEF\xBB\xBF")
+	mysql := core.GetMysql()
+	userList, err := mysql.GetData()
+	if err != nil {
+		responseBody.Msg = err.Error()
+		return &responseBody
+	}
+	wr := csv.NewWriter(dataBytes)
+	for _, user := range userList {
+		singleUser := []string{
+			strconv.Itoa(int(user.ID)),
+			user.Username,
+			user.Password,
+			user.EncryptPass,
+			strconv.Itoa(int(user.Quota)),
+			strconv.Itoa(int(user.Download)),
+			strconv.Itoa(int(user.Upload)),
+			strconv.Itoa(int(user.UseDays)),
+			user.ExpiryDate,
+		}
+		wr.Write(singleUser)
+	}
+	wr.Flush()
+	c.Writer.Header().Set("Content-type", "application/octet-stream")
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=%s", fmt.Sprintf("%s.csv", mysql.Database)))
+	c.String(200, dataBytes.String())
+	return nil
 }
