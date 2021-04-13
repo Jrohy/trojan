@@ -1,13 +1,16 @@
 package controller
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	ws "github.com/gorilla/websocket"
+	"io"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 	"trojan/core"
 	"trojan/trojan"
@@ -95,6 +98,68 @@ func Log(c *gin.Context) {
 			break
 		}
 	}
+}
+
+// ImportCsv 导入csv文件到trojan数据库
+func ImportCsv(c *gin.Context) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		responseBody.Msg = err.Error()
+		return &responseBody
+	}
+	defer file.Close()
+	filename := header.Filename
+	if !strings.Contains(filename, ".csv") {
+		responseBody.Msg = "仅支持导入csv格式的文件"
+		return &responseBody
+	}
+	reader := csv.NewReader(bufio.NewReader(file))
+	var userList []*core.User
+	for {
+		line, err2 := reader.Read()
+		if err2 == io.EOF {
+			break
+		} else if err2 != nil {
+			responseBody.Msg = err.Error()
+			return &responseBody
+		}
+		quota, _ := strconv.Atoi(line[4])
+		download, _ := strconv.Atoi(line[5])
+		upload, _ := strconv.Atoi(line[6])
+		useDays, _ := strconv.Atoi(line[7])
+		userList = append(userList, &core.User{
+			Username:    line[1],
+			Password:    line[2],
+			EncryptPass: line[3],
+			Quota:       int64(quota),
+			Download:    uint64(download),
+			Upload:      uint64(upload),
+			UseDays:     uint(useDays),
+			ExpiryDate:  line[8],
+		})
+	}
+	mysql := core.GetMysql()
+	db := mysql.GetDB()
+	if _, err = db.Exec("DROP TABLE IF EXISTS users;"); err != nil {
+		responseBody.Msg = err.Error()
+		return &responseBody
+	}
+	if _, err = db.Exec(core.CreateTableSql); err != nil {
+		responseBody.Msg = err.Error()
+		return &responseBody
+	}
+	for _, user := range userList {
+		if _, err = db.Exec(fmt.Sprintf(`
+INSERT INTO users(username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES ('%s','%s','%s', %d, %d, %d, %d, '%s');`,
+			user.Username, user.EncryptPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate)); err != nil {
+			responseBody.Msg = err.Error()
+			return &responseBody
+		}
+	}
+	return nil
 }
 
 // ExportCsv 导出trojan表数据到csv文件

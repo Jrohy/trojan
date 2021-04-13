@@ -50,7 +50,8 @@ type PageQuery struct {
 	DataList []*User
 }
 
-var createTableSql = `
+// CreateTableSql 创表sql
+var CreateTableSql = `
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     username VARCHAR(64) NOT NULL,
@@ -83,7 +84,7 @@ func (mysql *Mysql) GetDB() *sql.DB {
 func (mysql *Mysql) CreateTable() {
 	db := mysql.GetDB()
 	defer db.Close()
-	if _, err := db.Exec(createTableSql); err != nil {
+	if _, err := db.Exec(CreateTableSql); err != nil {
 		fmt.Println(err)
 	}
 }
