@@ -82,10 +82,7 @@ func trojanRouter(router *gin.Engine) {
 		}
 	})
 	router.POST("/trojan/import", func(c *gin.Context) {
-		result := controller.ImportCsv(c)
-		if result != nil {
-			c.JSON(200, result)
-		}
+		c.JSON(200, controller.ImportCsv(c))
 	})
 	router.POST("/trojan/update", func(c *gin.Context) {
 		c.JSON(200, controller.Update())

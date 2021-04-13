@@ -159,7 +159,7 @@ INSERT INTO users(username, password, passwordShow, quota, download, upload, use
 			return &responseBody
 		}
 	}
-	return nil
+	return &responseBody
 }
 
 // ExportCsv 导出trojan表数据到csv文件
