@@ -119,11 +119,11 @@ func ImportCsv(c *gin.Context) *ResponseBody {
 	reader := csv.NewReader(bufio.NewReader(file))
 	var userList []*core.User
 	for {
-		line, err2 := reader.Read()
-		if err2 == io.EOF {
+		line, readErr := reader.Read()
+		if readErr == io.EOF {
 			break
-		} else if err2 != nil {
-			responseBody.Msg = err.Error()
+		} else if readErr != nil {
+			responseBody.Msg = readErr.Error()
 			return &responseBody
 		}
 		quota, _ := strconv.Atoi(line[4])
