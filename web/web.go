@@ -1,16 +1,20 @@
 package web
 
 import (
+	"embed"
 	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/gobuffalo/packr/v2"
+	"io/fs"
 	"net/http"
 	"strconv"
 	"trojan/core"
 	"trojan/util"
 	"trojan/web/controller"
 )
+
+//go:embed templates/*
+var f embed.FS
 
 func userRouter(router *gin.Engine) {
 	user := router.Group("/trojan/user")
@@ -70,6 +74,15 @@ func trojanRouter(router *gin.Engine) {
 	})
 	router.GET("/trojan/loglevel", func(c *gin.Context) {
 		c.JSON(200, controller.GetLogLevel())
+	})
+	router.GET("/trojan/export", func(c *gin.Context) {
+		result := controller.ExportCsv(c)
+		if result != nil {
+			c.JSON(200, result)
+		}
+	})
+	router.POST("/trojan/import", func(c *gin.Context) {
+		c.JSON(200, controller.ImportCsv(c))
 	})
 	router.POST("/trojan/update", func(c *gin.Context) {
 		c.JSON(200, controller.Update())
@@ -133,13 +146,12 @@ func commonRouter(router *gin.Engine) {
 }
 
 func staticRouter(router *gin.Engine) {
-	box := packr.New("trojanBox", "./templates")
-	router.Use(func(c *gin.Context) {
-		requestUrl := c.Request.URL.Path
-		if box.Has(requestUrl) || requestUrl == "/" {
-			http.FileServer(box).ServeHTTP(c.Writer, c.Request)
-			c.Abort()
-		}
+	staticFs, _ := fs.Sub(f, "templates/static")
+	router.StaticFS("/static", http.FS(staticFs))
+
+	router.GET("/", func(c *gin.Context) {
+		indexHTML, _ := f.ReadFile("templates/" + "index.html")
+		c.Writer.Write(indexHTML)
 	})
 }
 
@@ -157,7 +169,7 @@ func Start(host string, port int, isSSL bool) {
 	controller.CollectTask()
 	util.OpenPort(port)
 	if isSSL {
-		config := core.Load("")
+		config := core.GetConfig()
 		ssl := &config.SSl
 		router.RunTLS(fmt.Sprintf("%s:%d", host, port), ssl.Cert, ssl.Key)
 	} else {

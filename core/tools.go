@@ -55,6 +55,16 @@ ADD COLUMN expiryDate char(10) DEFAULT '';
 			return err
 		}
 	}
+	var tableName string
+	error = db.QueryRow(fmt.Sprintf(
+		"SELECT * FROM information_schema.TABLES WHERE TABLE_NAME = 'users' AND TABLE_SCHEMA = '%s' ",
+		mysql.Database) + " AND TABLE_COLLATION LIKE 'utf8%';").Scan(&tableName)
+	if error == sql.ErrNoRows {
+		tempFile := "temp.sql"
+		mysql.DumpSql(tempFile)
+		mysql.ExecSql(tempFile)
+		os.Remove(tempFile)
+	}
 	return nil
 }
 
@@ -67,7 +77,7 @@ func (mysql *Mysql) DumpSql(filePath string) error {
 	defer file.Close()
 	writer := bufio.NewWriter(file)
 	writer.WriteString("DROP TABLE IF EXISTS users;")
-	writer.WriteString(createTableSql)
+	writer.WriteString(CreateTableSql)
 	db := mysql.GetDB()
 	userList, err := queryUserList(db, "SELECT * FROM users;")
 	if err != nil {

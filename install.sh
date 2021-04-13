@@ -109,10 +109,10 @@ checkSys() {
 #安装依赖
 installDependent(){
     if [[ ${PACKAGE_MANAGER} == 'dnf' || ${PACKAGE_MANAGER} == 'yum' ]];then
-        ${PACKAGE_MANAGER} install socat bash-completion -y
+        ${PACKAGE_MANAGER} install socat crontabs bash-completion -y
     else
         ${PACKAGE_MANAGER} update
-        ${PACKAGE_MANAGER} install socat bash-completion xz-utils -y
+        ${PACKAGE_MANAGER} install socat cron bash-completion xz-utils -y
     fi
 }
 

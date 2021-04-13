@@ -2,11 +2,11 @@ package trojan
 
 import (
 	"fmt"
-	"github.com/gobuffalo/packr/v2"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+	"trojan/asset"
 	"trojan/core"
 	"trojan/util"
 )
@@ -50,11 +50,7 @@ func InstallDocker() {
 // InstallTrojan 安装trojan
 func InstallTrojan() {
 	fmt.Println()
-	box := packr.New("trojan-install", "../asset")
-	data, err := box.FindString("trojan-install.sh")
-	if err != nil {
-		fmt.Println(err)
-	}
+	data := string(asset.GetAsset("trojan-install.sh"))
 	if util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service") != "" && Type() == "trojan-go" {
 		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
 	}
