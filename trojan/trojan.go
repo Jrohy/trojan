@@ -111,7 +111,7 @@ func Version() string {
 // SwitchType 切换Trojan类型
 func SwitchType(tType string) error {
 	ARCH := runtime.GOARCH
-	if ARCH != "amd64" || ARCH != "arm64" {
+	if ARCH != "amd64" && ARCH != "arm64" {
 		return errors.New("not support " + ARCH + " machine")
 	}
 	if tType == "trojan" && ARCH != "amd64" {

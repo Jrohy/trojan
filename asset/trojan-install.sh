@@ -23,7 +23,7 @@ if [[ $(id -u) != 0 ]]; then
 fi
 
 ARCH=$(uname -m 2> /dev/null)
-if [[ $ARCH != x86_64 || $ARCH != aarch64 ]];then
+if [[ $ARCH != x86_64 && $ARCH != aarch64 ]];then
     echo "not support $ARCH machine".
     exit 1
 fi
