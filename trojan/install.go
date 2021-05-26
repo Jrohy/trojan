@@ -3,6 +3,7 @@ package trojan
 import (
 	"fmt"
 	"net"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -52,7 +53,7 @@ func InstallTrojan() {
 	fmt.Println()
 	data := string(asset.GetAsset("trojan-install.sh"))
 	checkTrojan := util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service")
-	if checkTrojan == "" || Type() == "trojan-go" {
+	if (checkTrojan == "" && runtime.GOARCH != "amd64") || Type() == "trojan-go" {
 		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
 	}
 	util.ExecCommand(data)
