@@ -56,7 +56,7 @@ CONFIGPATH="/usr/local/etc/$NAME/config.json"
 SYSTEMDPATH="$SYSTEMDPREFIX/$NAME.service"
 
 echo Creating $NAME install directory
-mkdir -p $INSTALLPREFIX
+mkdir -p $INSTALLPREFIX /usr/local/etc/$NAME
 
 echo Entering temp directory $TMPDIR...
 cd "$TMPDIR"
