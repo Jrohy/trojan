@@ -70,11 +70,10 @@ func SetDomain(domain string) *ResponseBody {
 func SetTrojanType(tType string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	err := core.SetValue("trojanType", tType)
+	err := trojan.SwitchType(tType)
 	if err != nil {
 		responseBody.Msg = err.Error()
 	}
-	trojan.InstallTrojan()
 	return &responseBody
 }
 
