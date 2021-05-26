@@ -31,7 +31,14 @@ function upload() {
 
 cd $SHELL_PATH
 
-go build -ldflags "-s -w -X 'trojan/trojan.MVersion=`git describe --tags $(git rev-list --tags --max-count=1)`' -X 'trojan/trojan.BuildDate=`TZ=Asia/Shanghai date "+%Y%m%d-%H%M"`' -X 'trojan/trojan.GoVersion=`go version|awk '{print $3,$4}'`' -X 'trojan/trojan.GitVersion=`git rev-parse HEAD`'" -o "result/trojan" .
+VERSION=`git describe --tags $(git rev-list --tags --max-count=1)`
+NOW=`TZ=Asia/Shanghai date "+%Y%m%d-%H%M"`
+GO_VERSION=`go version|awk '{print $3,$4}'`
+GIT_VERSION=`git rev-parse HEAD`
+LDFLAGS="-w -s -X 'trojan/trojan.MVersion=$VERSION' -X 'trojan/trojan.BuildDate=$NOW' -X 'trojan/trojan.GoVersion=$GO_VERSION' -X 'trojan/trojan.GitVersion=$GIT_VERSION'"
+
+GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o "result/trojan-linux-amd64" .
+GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o "result/trojan-linux-arm64" .
 
 cd result
 
