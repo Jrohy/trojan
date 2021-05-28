@@ -29,7 +29,7 @@ func Execute() {
 func check() {
 	if !util.IsExists("/usr/local/etc/trojan/config.json") {
 		fmt.Println("本机未安装trojan, 正在自动安装...")
-		trojan.InstallTrojan()
+		trojan.InstallTrojan("")
 		core.WritePassword(nil)
 		trojan.InstallTls()
 		trojan.InstallMysql()

@@ -45,7 +45,7 @@ func Restart() *ResponseBody {
 func Update() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	trojan.InstallTrojan()
+	trojan.InstallTrojan("")
 	return &responseBody
 }
 

@@ -120,7 +120,7 @@ func SwitchType(tType string) error {
 	if err := core.SetValue("trojanType", tType); err != nil {
 		return err
 	}
-	InstallTrojan()
+	InstallTrojan("")
 	return nil
 }
 

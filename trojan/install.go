@@ -24,7 +24,7 @@ func InstallMenu() {
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
-		InstallTrojan()
+		InstallTrojan("")
 	case 2:
 		InstallTls()
 	case 3:
@@ -49,12 +49,15 @@ func InstallDocker() {
 }
 
 // InstallTrojan 安装trojan
-func InstallTrojan() {
+func InstallTrojan(version string) {
 	fmt.Println()
 	data := string(asset.GetAsset("trojan-install.sh"))
 	checkTrojan := util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service")
 	if (checkTrojan == "" && runtime.GOARCH != "amd64") || Type() == "trojan-go" {
 		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
+	}
+	if version != "" {
+		data = strings.ReplaceAll(data, "INSTALL_VERSION=\"\"", "INSTALL_VERSION=\""+version+"\"")
 	}
 	util.ExecCommand(data)
 	util.OpenPort(443)
