@@ -60,7 +60,7 @@ NAME=trojan
 if [[ -z $INSTALL_VERSION ]];then
     VERSION=$(curl -H 'Cache-Control: no-cache' -s "$CHECKVERSION" | grep 'tag_name' | cut -d\" -f4 | sed 's/v//g' | head -n 1)
 else
-    if [[ -z `curl -H 'Cache-Control: no-cache' -s "$CHECKVERSION"|grep $INSTALL_VERSION` ]];then
+    if [[ -z `curl -H 'Cache-Control: no-cache' -s "$CHECKVERSION"|grep 'tag_name'|grep $INSTALL_VERSION` ]];then
         echo "no $INSTALL_VERSION version file!"
         exit 1
     fi
