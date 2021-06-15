@@ -102,6 +102,11 @@ func InstallTls() {
 		}
 		util.ExecCommand("systemctl stop trojan-web")
 		util.OpenPort(80)
+		checkResult := util.ExecCommandWithResult("/root/.acme.sh/acme.sh -v|tr -cd '[0-9]'")
+		acmeVersion, _ := strconv.Atoi(checkResult)
+		if acmeVersion >= 300 {
+			util.ExecCommand("/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt")
+		}
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
