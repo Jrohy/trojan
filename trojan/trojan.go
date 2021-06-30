@@ -49,6 +49,7 @@ func ControllMenu() {
 
 // Restart 重启trojan
 func Restart() {
+	util.OpenPort(core.GetConfig().LocalPort)
 	if err := util.ExecCommand("systemctl restart trojan"); err != nil {
 		fmt.Println(util.Red("重启trojan失败!"))
 	} else {
@@ -58,6 +59,7 @@ func Restart() {
 
 // Start 启动trojan
 func Start() {
+	util.OpenPort(core.GetConfig().LocalPort)
 	if err := util.ExecCommand("systemctl start trojan"); err != nil {
 		fmt.Println(util.Red("启动trojan失败!"))
 	} else {
