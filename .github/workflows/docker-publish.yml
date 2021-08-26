@@ -23,9 +23,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      - name: Get version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF:10}
 
       # https://github.com/docker/login-action
       - name: Login
@@ -42,5 +42,5 @@ jobs:
           file: ./asset/Dockerfile
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }}
+            ${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
             ${{ env.IMAGE_NAME }}:latest  
