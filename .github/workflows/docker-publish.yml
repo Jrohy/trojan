@@ -23,9 +23,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      - name: Set output
-        id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF:10}
+      - name: Get latest tag
+        uses: oprypin/find-latest-tag@v1
+        id: octokit  # The step ID to refer to later.
+        with:
+          repository: ${{ github.repository }}  # The repository to scan.
 
       # https://github.com/docker/login-action
       - name: Login
@@ -42,5 +44,5 @@ jobs:
           file: ./asset/Dockerfile
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:${{ steps.octokit.outputs.tag }}
             ${{ env.IMAGE_NAME }}:latest  
