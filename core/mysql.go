@@ -229,7 +229,7 @@ func (mysql *Mysql) DailyCheckExpire() (bool, error) {
 		return false, errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays != 0 AND quota != 0")
+	userList, err := queryUserList(db, "SELECT * FROM users WHERE quota != 0")
 	if err != nil {
 		return false, err
 	}
