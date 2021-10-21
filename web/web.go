@@ -156,11 +156,11 @@ func staticRouter(router *gin.Engine) {
 }
 
 // Start web启动入口
-func Start(host string, port int, isSSL bool) {
+func Start(host string, port, timeout int, isSSL bool) {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
-	router.Use(Auth(router).MiddlewareFunc())
+	router.Use(Auth(router, timeout).MiddlewareFunc())
 	trojanRouter(router)
 	userRouter(router)
 	dataRouter(router)

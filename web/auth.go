@@ -5,7 +5,6 @@ import (
 	"github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"time"
-	"trojan/cmd"
 	"trojan/core"
 	"trojan/web/controller"
 )
@@ -22,12 +21,12 @@ type Login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-func init() {
+func jwtInit(timeout int) {
 	authMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "k8s-manager",
 		Key:         []byte("secret key"),
-		Timeout:     time.Minute * time.Duration(cmd.Timeout),
-		MaxRefresh:  time.Minute * time.Duration(cmd.Timeout),
+		Timeout:     time.Minute * time.Duration(timeout),
+		MaxRefresh:  time.Minute * time.Duration(timeout),
 		IdentityKey: identityKey,
 		SendCookie:  true,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
@@ -115,7 +114,9 @@ func RequestUsername(c *gin.Context) string {
 }
 
 // Auth 权限router
-func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
+func Auth(r *gin.Engine, timeout int) *jwt.GinJWTMiddleware {
+	jwtInit(timeout)
+
 	newInstall := gin.H{"code": 201, "message": "No administrator account found inside the database", "data": nil}
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
