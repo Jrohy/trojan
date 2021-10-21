@@ -5,6 +5,7 @@ import (
 	"github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"time"
+	"trojan/cmd"
 	"trojan/core"
 	"trojan/web/controller"
 )
@@ -25,8 +26,8 @@ func init() {
 	authMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "k8s-manager",
 		Key:         []byte("secret key"),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
+		Timeout:     time.Minute * time.Duration(cmd.Timeout),
+		MaxRefresh:  time.Minute * time.Duration(cmd.Timeout),
 		IdentityKey: identityKey,
 		SendCookie:  true,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {

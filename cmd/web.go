@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	host string
-	port int
-	ssl  bool
+	host    string
+	port    int
+	ssl     bool
+	Timeout int
 )
 
 // webCmd represents the web command
@@ -24,5 +25,6 @@ func init() {
 	webCmd.Flags().StringVarP(&host, "host", "", "0.0.0.0", "web服务监听地址")
 	webCmd.Flags().IntVarP(&port, "port", "p", 80, "web服务启动端口")
 	webCmd.Flags().BoolVarP(&ssl, "ssl", "", false, "web服务是否以https方式运行")
+	webCmd.Flags().IntVarP(&Timeout, "timeout", "t", 120, "登录超时时间(min)")
 	rootCmd.AddCommand(webCmd)
 }
