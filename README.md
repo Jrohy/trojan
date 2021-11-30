@@ -93,3 +93,7 @@ Flags:
 
 ## 注意
 安装完trojan后强烈建议开启BBR等加速: [Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)  
+
+## Thanks
+感谢JetBrains提供的免费GoLand  
+[![avatar](asset/jetbrains.svg)](https://jb.gg/OpenSource)
