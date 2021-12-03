@@ -205,6 +205,10 @@ func ClashSubInfo(c *gin.Context) {
 			c.Header("subscription-userinfo", userInfo)
 			domain, port := trojan.GetDomainAndPort()
 			name := fmt.Sprintf("%s:%d", domain, port)
+			rules, _ := core.GetValue("clash-rules")
+			if rules == "" {
+				rules = string(asset.GetAsset("clash-rules.yaml"))
+			}
 			result := fmt.Sprintf(`proxies:
   - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s}
 
@@ -215,7 +219,7 @@ proxy-groups:
       - %s
 
 %s
-`, name, domain, port, data.Pass, domain, name, string(asset.GetAsset("clash-rules.yaml")))
+`, name, domain, port, data.Pass, domain, name, rules)
 			c.String(200, result)
 			return
 		}

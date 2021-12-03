@@ -139,6 +139,13 @@ func commonRouter(router *gin.Engine) {
 		common.GET("/serverInfo", func(c *gin.Context) {
 			c.JSON(200, controller.ServerInfo())
 		})
+		common.GET("/clashRules", func(c *gin.Context) {
+			c.JSON(200, controller.GetClashRules())
+		})
+		common.POST("/clashRules", func(c *gin.Context) {
+			rules := c.PostForm("rules")
+			c.JSON(200, controller.SetClashRules(rules))
+		})
 		common.POST("/loginInfo", func(c *gin.Context) {
 			c.JSON(200, controller.SetLoginInfo(c.PostForm("title")))
 		})

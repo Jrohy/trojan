@@ -8,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"time"
+	"trojan/asset"
 	"trojan/core"
 	"trojan/trojan"
 )
@@ -63,6 +64,26 @@ func SetDomain(domain string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	trojan.SetDomain(domain)
+	return &responseBody
+}
+
+// SetClashRules 设置clash规则
+func SetClashRules(rules string) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	core.SetValue("clash-rules", rules)
+	return &responseBody
+}
+
+// GetClashRules 获取clash规则
+func GetClashRules() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	rules, _ := core.GetValue("clash-rules")
+	if rules == "" {
+		rules = string(asset.GetAsset("clash-rules.yaml"))
+	}
+	responseBody.Data = rules
 	return &responseBody
 }
 
