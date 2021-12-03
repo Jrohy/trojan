@@ -174,15 +174,17 @@ func ClashSubInfo(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
 		c.String(200, "token is null")
+		return
 	}
 	decodeStr, err := base64.StdEncoding.DecodeString(token)
 	if err != nil {
 		c.String(200, "token is error")
+		return
 	}
 	var data ClashReq
-	err = json.Unmarshal(decodeStr, &data)
-	if err != nil {
+	if err = json.Unmarshal(decodeStr, &data); err != nil {
 		c.String(200, "token is error")
+		return
 	}
 
 	mysql := core.GetMysql()
@@ -215,6 +217,7 @@ proxy-groups:
 %s
 `, name, domain, port, data.Pass, domain, name, string(asset.GetAsset("clash-rules.yaml")))
 			c.String(200, result)
+			return
 		}
 	}
 	c.String(200, "token is error")
