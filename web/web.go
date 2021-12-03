@@ -155,11 +155,18 @@ func staticRouter(router *gin.Engine) {
 	})
 }
 
+func noTokenRouter(router *gin.Engine) {
+	router.GET("/trojan/user/subscribe", func(c *gin.Context) {
+		controller.ClashSubInfo(c)
+	})
+}
+
 // Start web启动入口
 func Start(host string, port, timeout int, isSSL bool) {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
+	noTokenRouter(router)
 	router.Use(Auth(router, timeout).MiddlewareFunc())
 	trojanRouter(router)
 	userRouter(router)

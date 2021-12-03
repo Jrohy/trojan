@@ -2,8 +2,12 @@ package controller
 
 import (
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"strconv"
 	"time"
+	"trojan/asset"
 	"trojan/core"
 	"trojan/trojan"
 )
@@ -157,4 +161,61 @@ func CancelExpire(id uint) *ResponseBody {
 		responseBody.Msg = err.Error()
 	}
 	return &responseBody
+}
+
+// ClashReq 结构体
+type ClashReq struct {
+	User string `json: "user"`
+	Pass string `json: "pass"`
+}
+
+// ClashSubInfo 获取clash订阅信息
+func ClashSubInfo(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		c.String(200, "token is null")
+	}
+	decodeStr, err := base64.StdEncoding.DecodeString(token)
+	if err != nil {
+		c.String(200, "token is error")
+	}
+	var data ClashReq
+	err = json.Unmarshal(decodeStr, &data)
+	if err != nil {
+		c.String(200, "token is error")
+	}
+
+	mysql := core.GetMysql()
+	user := mysql.GetUserByName(data.User)
+	if user != nil {
+		pass, _ := base64.StdEncoding.DecodeString(user.Password)
+		if data.Pass == string(pass) {
+			userInfo := fmt.Sprintf("upload=%d, download=%d", user.Upload, user.Download)
+			if user.Quota != -1 {
+				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Quota)
+			}
+			if user.ExpiryDate != "" {
+				utc, _ := time.LoadLocation("Asia/Shanghai")
+				t, _ := time.ParseInLocation("2006-01-02", user.ExpiryDate, utc)
+				userInfo = fmt.Sprintf("%s, expire=%d", userInfo, t.Unix())
+			}
+			c.Header("content-disposition", fmt.Sprintf("filename=%s", user.Username))
+			c.Header("subscription-userinfo", userInfo)
+			domain, port := trojan.GetDomainAndPort()
+			name := fmt.Sprintf("%s:%d", domain, port)
+			result := fmt.Sprintf(`proxies:
+  - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s}
+
+proxy-groups:
+  - name: PROXY
+    type: select
+    proxies:
+      - %s
+
+%s
+`, name, domain, port, data.Pass, domain, name, string(asset.GetAsset("clash-rules.yaml")))
+			c.String(200, result)
+		}
+	}
+	c.String(200, "token is error")
 }
