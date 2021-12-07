@@ -17,7 +17,8 @@ trojan多用户管理部署程序
 - 生成客户端配置文件
 - 在线实时查看trojan日志
 - 在线trojan和trojan-go随时切换
-- 支持trojan://分享链接和二维码分享(二维码仅限web页面)
+- 支持trojan://分享链接和二维码分享(仅限web页面)
+- 支持转化为clash订阅地址并导入到[clash_for_windows](https://github.com/Fndroid/clash_for_windows_pkg/releases)(仅限web页面)
 - 限制用户使用期限
 
 ## 安装方式
