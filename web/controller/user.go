@@ -175,7 +175,7 @@ func ClashSubInfo(c *gin.Context) {
 		c.String(200, "token is error")
 		return
 	}
-	if !gjson.GetBytes(decodeByte, "user").Exists() || gjson.GetBytes(decodeByte, "pass").Exists() {
+	if !gjson.GetBytes(decodeByte, "user").Exists() || !gjson.GetBytes(decodeByte, "pass").Exists() {
 		c.String(200, "token is error")
 		return
 	}
