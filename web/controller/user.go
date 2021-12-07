@@ -2,9 +2,9 @@ package controller
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 	"strconv"
 	"time"
 	"trojan/asset"
@@ -163,12 +163,6 @@ func CancelExpire(id uint) *ResponseBody {
 	return &responseBody
 }
 
-// ClashReq 结构体
-type ClashReq struct {
-	User string `json: "user"`
-	Pass string `json: "pass"`
-}
-
 // ClashSubInfo 获取clash订阅信息
 func ClashSubInfo(c *gin.Context) {
 	token := c.Query("token")
@@ -176,22 +170,23 @@ func ClashSubInfo(c *gin.Context) {
 		c.String(200, "token is null")
 		return
 	}
-	decodeStr, err := base64.StdEncoding.DecodeString(token)
+	decodeByte, err := base64.StdEncoding.DecodeString(token)
 	if err != nil {
 		c.String(200, "token is error")
 		return
 	}
-	var data ClashReq
-	if err = json.Unmarshal(decodeStr, &data); err != nil {
+	if !gjson.GetBytes(decodeByte, "user").Exists() || gjson.GetBytes(decodeByte, "pass").Exists() {
 		c.String(200, "token is error")
 		return
 	}
+	username := gjson.GetBytes(decodeByte, "user").String()
+	password := gjson.GetBytes(decodeByte, "pass").String()
 
 	mysql := core.GetMysql()
-	user := mysql.GetUserByName(data.User)
+	user := mysql.GetUserByName(username)
 	if user != nil {
 		pass, _ := base64.StdEncoding.DecodeString(user.Password)
-		if data.Pass == string(pass) {
+		if password == string(pass) {
 			userInfo := fmt.Sprintf("upload=%d, download=%d", user.Upload, user.Download)
 			if user.Quota != -1 {
 				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Quota)
@@ -209,8 +204,17 @@ func ClashSubInfo(c *gin.Context) {
 			if rules == "" {
 				rules = string(asset.GetAsset("clash-rules.yaml"))
 			}
+			configData := string(core.Load(""))
+			proxyData := ""
+			if gjson.Get(configData, "websocket").Exists() && gjson.Get(configData, "websocket.enabled").Bool() {
+				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, network: ws, udp: true, password: %s, sni: %s, ws-opts:{path: %s, headers:{Host: %s}} }",
+					name, domain, port, password, domain, gjson.Get(configData, "websocket.path").String(), gjson.Get(configData, "websocket.host").String())
+			} else {
+				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s}",
+					name, domain, port, password, domain)
+			}
 			result := fmt.Sprintf(`proxies:
-  - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s}
+%s
 
 proxy-groups:
   - name: PROXY
@@ -219,7 +223,7 @@ proxy-groups:
       - %s
 
 %s
-`, name, domain, port, data.Pass, domain, name, rules)
+`, proxyData, name, rules)
 			c.String(200, result)
 			return
 		}
