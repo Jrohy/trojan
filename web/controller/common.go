@@ -32,6 +32,14 @@ func TimeCost(start time.Time, body *ResponseBody) {
 	body.Duration = time.Since(start).String()
 }
 
+func clashRules() string {
+	rules, _ := core.GetValue("clash-rules")
+	if rules == "" {
+		rules = string(asset.GetAsset("clash-rules.yaml"))
+	}
+	return rules
+}
+
 // Version 获取版本信息
 func Version() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
@@ -87,11 +95,7 @@ func ResetClashRules() *ResponseBody {
 func GetClashRules() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	rules, _ := core.GetValue("clash-rules")
-	if rules == "" {
-		rules = string(asset.GetAsset("clash-rules.yaml"))
-	}
-	responseBody.Data = rules
+	responseBody.Data = clashRules()
 	return &responseBody
 }
 

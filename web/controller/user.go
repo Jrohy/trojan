@@ -7,7 +7,6 @@ import (
 	"github.com/tidwall/gjson"
 	"strconv"
 	"time"
-	"trojan/asset"
 	"trojan/core"
 	"trojan/trojan"
 )
@@ -187,6 +186,7 @@ func ClashSubInfo(c *gin.Context) {
 	if user != nil {
 		pass, _ := base64.StdEncoding.DecodeString(user.Password)
 		if password == string(pass) {
+			var wsData, wsHost string
 			userInfo := fmt.Sprintf("upload=%d, download=%d", user.Upload, user.Download)
 			if user.Quota != -1 {
 				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Quota)
@@ -198,29 +198,22 @@ func ClashSubInfo(c *gin.Context) {
 			}
 			c.Header("content-disposition", fmt.Sprintf("filename=%s", user.Username))
 			c.Header("subscription-userinfo", userInfo)
+
 			domain, port := trojan.GetDomainAndPort()
 			name := fmt.Sprintf("%s:%d", domain, port)
-			rules, _ := core.GetValue("clash-rules")
-			if rules == "" {
-				rules = string(asset.GetAsset("clash-rules.yaml"))
-			}
 			configData := string(core.Load(""))
-			proxyData := ""
 			if gjson.Get(configData, "websocket").Exists() && gjson.Get(configData, "websocket.enabled").Bool() {
-				wsHost := ""
 				if gjson.Get(configData, "websocket.host").Exists() {
 					hostTemp := gjson.Get(configData, "websocket.host").String()
 					if hostTemp != "" {
-						wsHost = fmt.Sprintf(", headers:{Host: %s}", hostTemp)
+						wsHost = fmt.Sprintf(", headers: {Host: %s}", hostTemp)
 					}
 				}
 				wsOpt := fmt.Sprintf("{path: %s%s}", gjson.Get(configData, "websocket.path").String(), wsHost)
-				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, network: ws, udp: true, password: %s, sni: %s, ws-opts:%s }",
-					name, domain, port, password, domain, wsOpt)
-			} else {
-				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s}",
-					name, domain, port, password, domain)
+				wsData = fmt.Sprintf(", network: ws, udp: true, ws-opts: %s", wsOpt)
 			}
+			proxyData := fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s%s}",
+				name, domain, port, password, domain, wsData)
 			result := fmt.Sprintf(`proxies:
 %s
 
@@ -231,7 +224,7 @@ proxy-groups:
       - %s
 
 %s
-`, proxyData, name, rules)
+`, proxyData, name, clashRules())
 			c.String(200, result)
 			return
 		}
