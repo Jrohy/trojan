@@ -75,6 +75,14 @@ func SetClashRules(rules string) *ResponseBody {
 	return &responseBody
 }
 
+// ResetClashRules 重置clash规则
+func ResetClashRules() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	core.DelValue("clash-rules")
+	return &responseBody
+}
+
 // GetClashRules 获取clash规则
 func GetClashRules() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}

@@ -146,6 +146,9 @@ func commonRouter(router *gin.Engine) {
 			rules := c.PostForm("rules")
 			c.JSON(200, controller.SetClashRules(rules))
 		})
+		common.DELETE("/clashRules", func(c *gin.Context) {
+			c.JSON(200, controller.ResetClashRules())
+		})
 		common.POST("/loginInfo", func(c *gin.Context) {
 			c.JSON(200, controller.SetLoginInfo(c.PostForm("title")))
 		})
