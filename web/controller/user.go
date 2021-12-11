@@ -207,8 +207,16 @@ func ClashSubInfo(c *gin.Context) {
 			configData := string(core.Load(""))
 			proxyData := ""
 			if gjson.Get(configData, "websocket").Exists() && gjson.Get(configData, "websocket.enabled").Bool() {
-				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, network: ws, udp: true, password: %s, sni: %s, ws-opts:{path: %s, headers:{Host: %s}} }",
-					name, domain, port, password, domain, gjson.Get(configData, "websocket.path").String(), gjson.Get(configData, "websocket.host").String())
+				wsHost := ""
+				if gjson.Get(configData, "websocket.host").Exists() {
+					hostTemp := gjson.Get(configData, "websocket.host").String()
+					if hostTemp != "" {
+						wsHost = fmt.Sprintf(", headers:{Host: %s}", hostTemp)
+					}
+				}
+				wsOpt := fmt.Sprintf("{path: %s}%s", gjson.Get(configData, "websocket.path").String(), wsHost)
+				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, network: ws, udp: true, password: %s, sni: %s, ws-opts:%s }",
+					name, domain, port, password, domain, wsOpt)
 			} else {
 				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, password: %s, sni: %s}",
 					name, domain, port, password, domain)
