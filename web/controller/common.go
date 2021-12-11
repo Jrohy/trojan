@@ -88,6 +88,7 @@ func ResetClashRules() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	core.DelValue("clash-rules")
+	responseBody.Data = clashRules()
 	return &responseBody
 }
 
