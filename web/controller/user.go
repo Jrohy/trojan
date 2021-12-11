@@ -214,7 +214,7 @@ func ClashSubInfo(c *gin.Context) {
 						wsHost = fmt.Sprintf(", headers:{Host: %s}", hostTemp)
 					}
 				}
-				wsOpt := fmt.Sprintf("{path: %s}%s", gjson.Get(configData, "websocket.path").String(), wsHost)
+				wsOpt := fmt.Sprintf("{path: %s%s}", gjson.Get(configData, "websocket.path").String(), wsHost)
 				proxyData = fmt.Sprintf("  - {name: %s, server: %s, port: %d, type: trojan, network: ws, udp: true, password: %s, sni: %s, ws-opts:%s }",
 					name, domain, port, password, domain, wsOpt)
 			} else {
