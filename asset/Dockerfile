@@ -13,7 +13,7 @@ ARG SERVICE_URL="https://raw.githubusercontent.com/Jrohy/trojan/master/asset/tro
 RUN yum install socat bash-completion crontabs iptables openssl unzip -y && \
     LATEST_VERSION=`curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4` && \
     [[ $TARGETARCH =~ "arm64" ]] && ARCH="arm64" || ARCH="amd64" && \
-    curl -L "$DOWNLAOD_URL/$LATEST_VERSION/trojan-linux-$ARCH" -o /usr/local/bin/trojan && \
+    curl -fL "$DOWNLAOD_URL/$LATEST_VERSION/trojan-linux-$ARCH" -o /usr/local/bin/trojan && \
     curl -L $SERVICE_URL -o /etc/systemd/system/trojan-web.service && \
     chmod +x /usr/local/bin/trojan && \
     echo "source <(trojan completion bash)" >> ~/.bashrc && \
