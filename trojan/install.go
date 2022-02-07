@@ -121,7 +121,7 @@ func InstallTls() {
 		}
 		if server != "letsencrypt" {
 			email := util.Input(fmt.Sprintf("请输入申请%s域名所需的邮箱: ", server), "")
-			if email != "" {
+			if email == "" {
 				fmt.Println("申请域名的邮箱地址不能为空!")
 				return
 			}
