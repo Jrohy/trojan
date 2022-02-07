@@ -5,6 +5,7 @@ import (
 	"github.com/eiannone/keyboard"
 	"math/rand"
 	"reflect"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -43,6 +44,13 @@ func RandString(length int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+// VerifyEmailFormat 邮箱验证
+func VerifyEmailFormat(email string) bool {
+	pattern := `^[0-9a-z][_.0-9a-z-]{0,31}@([0-9a-z][0-9a-z-]{0,30}[0-9a-z]\.){1,4}[a-z]{2,4}$`
+	reg := regexp.MustCompile(pattern)
+	return reg.MatchString(email)
 }
 
 func getChar(str string) string {

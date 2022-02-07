@@ -120,10 +120,17 @@ func InstallTls() {
 			util.ExecCommand("/root/.acme.sh/acme.sh --upgrade")
 		}
 		if server != "letsencrypt" {
-			email := util.Input(fmt.Sprintf("请输入申请%s域名所需的邮箱: ", server), "")
-			if email == "" {
-				fmt.Println("申请域名的邮箱地址不能为空!")
-				return
+			var email string
+			for {
+				email = util.Input(fmt.Sprintf("请输入申请%s域名所需的邮箱: ", server), "")
+				if email == "" {
+					fmt.Println("申请域名的邮箱地址为空!")
+					return
+				} else if util.VerifyEmailFormat(email) {
+					break
+				} else {
+					fmt.Println("邮箱格式不正确, 请重新输入!")
+				}
 			}
 			util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --server %s --register-account -m %s", server, email))
 		}
