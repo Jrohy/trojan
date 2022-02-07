@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 )
 
@@ -54,15 +53,6 @@ func GetLocalIP() string {
 	defer resp.Body.Close()
 	s, _ := ioutil.ReadAll(resp.Body)
 	return string(s)
-}
-
-// CheckIP 检测ipv4地址的合法性
-func CheckIP(ip string) bool {
-	isOk, err := regexp.Match(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`, []byte(ip))
-	if err != nil {
-		fmt.Println(err)
-	}
-	return isOk
 }
 
 // InstallPack 安装指定名字软件

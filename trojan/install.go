@@ -61,11 +61,30 @@ func InstallTrojan(version string) {
 // InstallTls 安装证书
 func InstallTls() {
 	domain := ""
+	server := "letsencrypt"
 	fmt.Println()
-	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"}, true)
+	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "ZeroSSL 证书", "BuyPass 证书", "自定义证书路径"}, true)
 	if choice < 0 {
 		return
-	} else if choice == 1 {
+	} else if choice == 4 {
+		crtFile := util.Input("请输入证书的cert文件路径: ", "")
+		keyFile := util.Input("请输入证书的key文件路径: ", "")
+		if !util.IsExists(crtFile) || !util.IsExists(keyFile) {
+			fmt.Println("输入的cert或者key文件不存在!")
+		} else {
+			domain = util.Input("请输入此证书对应的域名: ", "")
+			if domain == "" {
+				fmt.Println("输入域名为空!")
+				return
+			}
+			core.WriteTls(crtFile, keyFile, domain)
+		}
+	} else {
+		if choice == 2 {
+			server = "zerossl"
+		} else if choice == 3 {
+			server = "buypass"
+		}
 		localIP := util.GetLocalIP()
 		fmt.Printf("本机ip: %s\n", localIP)
 		for {
@@ -97,26 +116,25 @@ func InstallTls() {
 		util.OpenPort(80)
 		checkResult := util.ExecCommandWithResult("/root/.acme.sh/acme.sh -v|tr -cd '[0-9]'")
 		acmeVersion, _ := strconv.Atoi(checkResult)
-		if acmeVersion >= 300 {
-			util.ExecCommand("/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt")
+		if acmeVersion < 300 {
+			util.ExecCommand("/root/.acme.sh/acme.sh --upgrade")
 		}
-		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
+		if server != "letsencrypt" {
+			email := util.Input(fmt.Sprintf("请输入申请%s域名所需的邮箱: ", server), "")
+			if email != "" {
+				fmt.Println("申请域名的邮箱地址不能为空!")
+				return
+			}
+			util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --server %s --register-account -m %s", server, email))
+		}
+		issueCommand := fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256 --force --server %s", domain, server)
+		if server == "buypass" {
+			issueCommand = issueCommand + " --days 170"
+		}
+		util.ExecCommand(issueCommand)
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
 		core.WriteTls(crtFile, keyFile, domain)
-	} else if choice == 2 {
-		crtFile := util.Input("请输入证书的cert文件路径: ", "")
-		keyFile := util.Input("请输入证书的key文件路径: ", "")
-		if !util.IsExists(crtFile) || !util.IsExists(keyFile) {
-			fmt.Println("输入的cert或者key文件不存在!")
-		} else {
-			domain = util.Input("请输入此证书对应的域名: ", "")
-			if domain == "" {
-				fmt.Println("输入域名为空!")
-				return
-			}
-			core.WriteTls(crtFile, keyFile, domain)
-		}
 	}
 	Restart()
 	util.ExecCommand("systemctl restart trojan-web")
