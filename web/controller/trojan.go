@@ -86,7 +86,7 @@ func Log(c *gin.Context) {
 	} else {
 		param = "-n " + param
 	}
-	result, err := trojan.LogChan(param, wsConn.CloseChan)
+	result, err := websocket.LogChan("trojan", param, wsConn.CloseChan)
 	if err != nil {
 		fmt.Println(err)
 		wsConn.WsClose()

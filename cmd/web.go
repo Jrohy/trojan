@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"trojan/util"
 	"trojan/web"
 )
 
@@ -26,5 +27,20 @@ func init() {
 	webCmd.Flags().IntVarP(&port, "port", "p", 80, "web服务启动端口")
 	webCmd.Flags().BoolVarP(&ssl, "ssl", "", false, "web服务是否以https方式运行")
 	webCmd.Flags().IntVarP(&timeout, "timeout", "t", 120, "登录超时时间(min)")
+	webCmd.AddCommand(&cobra.Command{Use: "stop", Short: "停止trojan-web", Run: func(cmd *cobra.Command, args []string) {
+		util.ExecCommand("systemctl stop trojan-web")
+	}})
+	webCmd.AddCommand(&cobra.Command{Use: "start", Short: "启动trojan-web", Run: func(cmd *cobra.Command, args []string) {
+		util.ExecCommand("systemctl start trojan-web")
+	}})
+	webCmd.AddCommand(&cobra.Command{Use: "restart", Short: "重启trojan-web", Run: func(cmd *cobra.Command, args []string) {
+		util.ExecCommand("systemctl restart trojan-web")
+	}})
+	webCmd.AddCommand(&cobra.Command{Use: "status", Short: "查看trojan-web状态", Run: func(cmd *cobra.Command, args []string) {
+		util.ExecCommand("systemctl status trojan-web -l")
+	}})
+	webCmd.AddCommand(&cobra.Command{Use: "log", Short: "查看trojan-web日志", Run: func(cmd *cobra.Command, args []string) {
+		util.Log("trojan-web", 300)
+	}})
 	rootCmd.AddCommand(webCmd)
 }

@@ -1,14 +1,11 @@
 package trojan
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
 	"runtime"
-	"strconv"
 	"strings"
 	"trojan/core"
 	"trojan/util"
@@ -35,7 +32,7 @@ func ControllMenu() {
 	case 4:
 		Status(true)
 	case 5:
-		go Log(300)
+		go util.Log("trojan", 300)
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, os.Kill)
 		//阻塞
@@ -138,38 +135,4 @@ func Type() string {
 		_ = core.SetValue("trojanType", tType)
 	}
 	return tType
-}
-
-// Log 实时打印trojan日志
-func Log(line int) {
-	result, _ := LogChan("-n "+strconv.Itoa(line), make(chan byte))
-	for line := range result {
-		fmt.Println(line)
-	}
-}
-
-// LogChan trojan实时日志, 返回chan
-func LogChan(param string, closeChan chan byte) (chan string, error) {
-	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan -o cat "+param)
-
-	stdout, _ := cmd.StdoutPipe()
-
-	if err := cmd.Start(); err != nil {
-		fmt.Println("Error:The command is err: ", err.Error())
-		return nil, err
-	}
-	ch := make(chan string, 100)
-	stdoutScan := bufio.NewScanner(stdout)
-	go func() {
-		for stdoutScan.Scan() {
-			select {
-			case <-closeChan:
-				stdout.Close()
-				return
-			default:
-				ch <- stdoutScan.Text()
-			}
-		}
-	}()
-	return ch, nil
 }

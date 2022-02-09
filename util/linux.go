@@ -1,12 +1,15 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -81,4 +84,38 @@ func OpenPort(port int) {
 		ExecCommand(fmt.Sprintf("iptables -I OUTPUT -p udp --sport %d -j ACCEPT", port))
 		ExecCommand(fmt.Sprintf("iptables -I OUTPUT -p tcp --sport %d -j ACCEPT", port))
 	}
+}
+
+// Log 实时打印指定服务日志
+func Log(serviceName string, line int) {
+	result, _ := LogChan(serviceName, "-n "+strconv.Itoa(line), make(chan byte))
+	for line := range result {
+		fmt.Println(line)
+	}
+}
+
+// LogChan 指定服务实时日志, 返回chan
+func LogChan(serviceName, param string, closeChan chan byte) (chan string, error) {
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("journalctl -f -u %s -o cat %s", serviceName, param))
+
+	stdout, _ := cmd.StdoutPipe()
+
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Error:The command is err: ", err.Error())
+		return nil, err
+	}
+	ch := make(chan string, 100)
+	stdoutScan := bufio.NewScanner(stdout)
+	go func() {
+		for stdoutScan.Scan() {
+			select {
+			case <-closeChan:
+				stdout.Close()
+				return
+			default:
+				ch <- stdoutScan.Text()
+			}
+		}
+	}()
+	return ch, nil
 }
