@@ -108,6 +108,7 @@ func ChangePort() {
 		return
 	}
 	if core.WritePort(newPort) {
+		util.OpenPort(newPort)
 		fmt.Println(util.Green("端口修改成功!"))
 		Restart()
 	} else {
