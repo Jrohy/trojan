@@ -24,10 +24,10 @@ var webCmd = &cobra.Command{
 }
 
 func controllWeb(key, keyCN string) {
-	if err := util.ExecCommand(fmt.Sprintf("systemctl %s trojan", key)); err != nil {
-		fmt.Println(util.Red(fmt.Sprintf("%strojan失败!", keyCN)))
+	if err := util.ExecCommand(fmt.Sprintf("systemctl %s trojan-web", key)); err != nil {
+		fmt.Println(util.Red(fmt.Sprintf("%strojan-web失败!", keyCN)))
 	} else {
-		fmt.Println(util.Green(fmt.Sprintf("%strojan成功!", keyCN)))
+		fmt.Println(util.Green(fmt.Sprintf("%strojan-web成功!", keyCN)))
 	}
 }
 

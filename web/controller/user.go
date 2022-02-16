@@ -196,7 +196,7 @@ func ClashSubInfo(c *gin.Context) {
 				t, _ := time.ParseInLocation("2006-01-02", user.ExpiryDate, utc)
 				userInfo = fmt.Sprintf("%s, expire=%d", userInfo, t.Unix())
 			}
-			c.Header("content-disposition", fmt.Sprintf("filename=%s", user.Username))
+			c.Header("content-disposition", fmt.Sprintf("attachment; filename=%s", user.Username))
 			c.Header("subscription-userinfo", userInfo)
 
 			domain, port := trojan.GetDomainAndPort()
