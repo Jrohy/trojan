@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"strings"
 	"trojan/core"
 	"trojan/util"
@@ -20,7 +21,7 @@ func ControllMenu() {
 	} else {
 		tType = "trojan"
 	}
-	menu := []string{"启动trojan", "停止trojan", "重启trojan", "查看trojan状态", "查看trojan日志"}
+	menu := []string{"启动trojan", "停止trojan", "重启trojan", "查看trojan状态", "查看trojan日志", "修改trojan端口"}
 	menu = append(menu, "切换为"+tType)
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
@@ -38,6 +39,8 @@ func ControllMenu() {
 		//阻塞
 		<-c
 	case 6:
+		ChangePort()
+	case 7:
 		if err := SwitchType(tType); err != nil {
 			fmt.Println(err)
 		}
@@ -90,6 +93,26 @@ func RunTime() string {
 		return resultSlice[0]
 	}
 	return ""
+}
+
+// ChangePort 修改trojan端口
+func ChangePort() {
+	config := core.GetConfig()
+	oldPort := config.LocalPort
+	randomPort := util.RandomPort()
+	fmt.Println("当前trojan端口: " + util.Green(strconv.Itoa(oldPort)))
+	newPortStr := util.Input(fmt.Sprintf("请输入新的trojan端口(若要使用随机端口%s直接回车即可): ", util.Blue(strconv.Itoa(randomPort))), strconv.Itoa(randomPort))
+	newPort, err := strconv.Atoi(newPortStr)
+	if err != nil {
+		fmt.Println("修改端口失败: " + err.Error())
+		return
+	}
+	if core.WritePort(newPort) {
+		fmt.Println(util.Green("端口修改成功!"))
+		Restart()
+	} else {
+		fmt.Println(util.Red("端口修改成功!"))
+	}
 }
 
 // Version Trojan版本
