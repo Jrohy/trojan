@@ -69,10 +69,7 @@ func SystemctlEnable(name string) {
 func SystemctlStatus(name string) string {
 	out, err := exec.Command("bash", "-c", fmt.Sprintf("systemctl status %s", name)).CombinedOutput()
 	if v, _ := systemctlReplace(err); v {
-		out, err = exec.Command("bash", "-c", fmt.Sprintf("systemctl status %s", name)).CombinedOutput()
-	}
-	if err != nil {
-		fmt.Println(Red(fmt.Sprintf("查看%s状态失败!", name)))
+		out, _ = exec.Command("bash", "-c", fmt.Sprintf("systemctl status %s", name)).CombinedOutput()
 	}
 	return string(out)
 }
