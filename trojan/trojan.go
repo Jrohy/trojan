@@ -50,35 +50,23 @@ func ControllMenu() {
 // Restart 重启trojan
 func Restart() {
 	util.OpenPort(core.GetConfig().LocalPort)
-	if err := util.ExecCommand("systemctl restart trojan"); err != nil {
-		fmt.Println(util.Red("重启trojan失败!"))
-	} else {
-		fmt.Println(util.Green("重启trojan成功!"))
-	}
+	util.SystemctlRestart("trojan")
 }
 
 // Start 启动trojan
 func Start() {
 	util.OpenPort(core.GetConfig().LocalPort)
-	if err := util.ExecCommand("systemctl start trojan"); err != nil {
-		fmt.Println(util.Red("启动trojan失败!"))
-	} else {
-		fmt.Println(util.Green("启动trojan成功!"))
-	}
+	util.SystemctlStart("trojan")
 }
 
 // Stop 停止trojan
 func Stop() {
-	if err := util.ExecCommand("systemctl stop trojan"); err != nil {
-		fmt.Println(util.Red("停止trojan失败!"))
-	} else {
-		fmt.Println(util.Green("停止trojan成功!"))
-	}
+	util.SystemctlStop("trojan")
 }
 
 // Status 获取trojan状态
 func Status(isPrint bool) string {
-	result := util.ExecCommandWithResult("systemctl status trojan")
+	result := util.SystemctlStatus("trojan")
 	if isPrint {
 		fmt.Println(result)
 	}

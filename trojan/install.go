@@ -54,8 +54,8 @@ func InstallTrojan(version string) {
 	}
 	util.ExecCommand(data)
 	util.OpenPort(443)
-	util.ExecCommand("systemctl restart trojan")
-	util.ExecCommand("systemctl enable trojan")
+	util.SystemctlRestart("trojan")
+	util.SystemctlEnable("trojan")
 }
 
 // InstallTls 安装证书
@@ -112,7 +112,7 @@ func InstallTls() {
 		if !util.IsExists("/root/.acme.sh/acme.sh") {
 			util.RunWebShell("https://get.acme.sh")
 		}
-		util.ExecCommand("systemctl stop trojan-web")
+		util.SystemctlStop("trojan-web")
 		util.OpenPort(80)
 		checkResult := util.ExecCommandWithResult("/root/.acme.sh/acme.sh -v|tr -cd '[0-9]'")
 		acmeVersion, _ := strconv.Atoi(checkResult)
@@ -144,7 +144,7 @@ func InstallTls() {
 		core.WriteTls(crtFile, keyFile, domain)
 	}
 	Restart()
-	util.ExecCommand("systemctl restart trojan-web")
+	util.SystemctlRestart("trojan-web")
 	fmt.Println()
 }
 
