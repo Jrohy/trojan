@@ -9,9 +9,12 @@ import (
 	"strings"
 )
 
-func systemctlReplace(err error) (bool, error) {
-	var isReplace bool
-	if err != nil && IsExists("/.dockerenv") && strings.Contains(err.Error(), "Failed to get D-Bus") {
+func systemctlReplace(out string) (bool, error) {
+	var (
+		err       error
+		isReplace bool
+	)
+	if IsExists("/.dockerenv") && strings.Contains(out, "Failed to get D-Bus") {
 		isReplace = true
 		fmt.Println(Yellow("正在下载并替换适配的systemctl。。"))
 		if err = ExecCommand("curl -L https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -o /usr/bin/systemctl && chmod +x /usr/bin/systemctl"); err != nil {
@@ -21,19 +24,17 @@ func systemctlReplace(err error) (bool, error) {
 	return isReplace, err
 }
 
-func systemctlBase(name, operate string) error {
-	err := ExecCommand(fmt.Sprintf("systemctl %s %s", operate, name))
-	if v, err := systemctlReplace(err); v {
-		if err = ExecCommand(fmt.Sprintf("systemctl %s %s", operate, name)); err != nil {
-			return err
-		}
+func systemctlBase(name, operate string) (string, error) {
+	out, err := exec.Command("bash", "-c", fmt.Sprintf("systemctl %s %s", operate, name)).CombinedOutput()
+	if v, _ := systemctlReplace(string(out)); v {
+		out, err = exec.Command("bash", "-c", fmt.Sprintf("systemctl %s %s", operate, name)).CombinedOutput()
 	}
-	return err
+	return string(out), err
 }
 
 // SystemctlStart 服务启动
 func SystemctlStart(name string) {
-	if err := systemctlBase(name, "start"); err != nil {
+	if _, err := systemctlBase(name, "start"); err != nil {
 		fmt.Println(Red(fmt.Sprintf("启动%s失败!", name)))
 	} else {
 		fmt.Println(Green(fmt.Sprintf("启动%s成功!", name)))
@@ -42,7 +43,7 @@ func SystemctlStart(name string) {
 
 // SystemctlStop 服务停止
 func SystemctlStop(name string) {
-	if err := systemctlBase(name, "stop"); err != nil {
+	if _, err := systemctlBase(name, "stop"); err != nil {
 		fmt.Println(Red(fmt.Sprintf("停止%s失败!", name)))
 	} else {
 		fmt.Println(Green(fmt.Sprintf("停止%s成功!", name)))
@@ -51,7 +52,7 @@ func SystemctlStop(name string) {
 
 // SystemctlRestart 服务重启
 func SystemctlRestart(name string) {
-	if err := systemctlBase(name, "restart"); err != nil {
+	if _, err := systemctlBase(name, "restart"); err != nil {
 		fmt.Println(Red(fmt.Sprintf("重启%s失败!", name)))
 	} else {
 		fmt.Println(Green(fmt.Sprintf("重启%s成功!", name)))
@@ -60,18 +61,15 @@ func SystemctlRestart(name string) {
 
 // SystemctlEnable 服务设置开机自启
 func SystemctlEnable(name string) {
-	if err := systemctlBase(name, "enable"); err != nil {
+	if _, err := systemctlBase(name, "enable"); err != nil {
 		fmt.Println(Red(fmt.Sprintf("设置%s开机自启失败!", name)))
 	}
 }
 
 // SystemctlStatus 服务状态查看
 func SystemctlStatus(name string) string {
-	out, err := exec.Command("bash", "-c", fmt.Sprintf("systemctl status %s", name)).CombinedOutput()
-	if v, _ := systemctlReplace(err); v {
-		out, _ = exec.Command("bash", "-c", fmt.Sprintf("systemctl status %s", name)).CombinedOutput()
-	}
-	return string(out)
+	out, _ := systemctlBase(name, "status")
+	return out
 }
 
 // CheckCommandExists 检查命令是否存在
@@ -144,7 +142,7 @@ func ExecCommand(command string) error {
 func ExecCommandWithResult(command string) string {
 	out, err := exec.Command("bash", "-c", command).CombinedOutput()
 	if strings.Contains(command, "systemctl") {
-		if v, _ := systemctlReplace(err); v {
+		if v, _ := systemctlReplace(string(out)); v {
 			out, err = exec.Command("bash", "-c", command).CombinedOutput()
 		}
 	}
