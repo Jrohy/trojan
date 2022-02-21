@@ -20,6 +20,7 @@ func systemctlReplace(out string) (bool, error) {
 		if err = ExecCommand("curl -L https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -o /usr/bin/systemctl && chmod +x /usr/bin/systemctl"); err != nil {
 			return isReplace, err
 		}
+		fmt.Println()
 	}
 	return isReplace, err
 }
