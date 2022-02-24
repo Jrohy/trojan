@@ -9,10 +9,10 @@ var dbPath = "/var/lib/trojan-manager"
 // GetValue 获取leveldb值
 func GetValue(key string) (string, error) {
 	db, err := leveldb.OpenFile(dbPath, nil)
-	defer db.Close()
 	if err != nil {
 		return "", err
 	}
+	defer db.Close()
 	result, err := db.Get([]byte(key), nil)
 	if err != nil {
 		return "", err
@@ -23,19 +23,19 @@ func GetValue(key string) (string, error) {
 // SetValue 设置leveldb值
 func SetValue(key string, value string) error {
 	db, err := leveldb.OpenFile(dbPath, nil)
-	defer db.Close()
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	return db.Put([]byte(key), []byte(value), nil)
 }
 
 // DelValue 删除值
 func DelValue(key string) error {
 	db, err := leveldb.OpenFile(dbPath, nil)
-	defer db.Close()
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	return db.Delete([]byte(key), nil)
 }
