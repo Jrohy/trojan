@@ -119,7 +119,7 @@ installDependent(){
         ${PACKAGE_MANAGER} install socat cron bash-completion xz-utils -y
     else
         ${PACKAGE_MANAGER} update
-        ${PACKAGE_MANAGER} in socat cron bash-completion xz -y
+        ${PACKAGE_MANAGER} in -y socat cron bash-completion xz
     fi
 }
 
