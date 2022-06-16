@@ -66,6 +66,9 @@ func InstallPack(name string) {
 		} else if CheckCommandExists("apt-get") {
 			ExecCommand("apt-get update")
 			ExecCommand("apt-get install -y " + name)
+		} else if CheckCommandExists("zypper") {
+			ExecCommand("zypper update")
+			ExecCommand("zypper install -y " + name)
 		}
 	}
 }

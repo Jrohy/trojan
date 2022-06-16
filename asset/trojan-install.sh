@@ -103,6 +103,8 @@ else
             yum install unzip -y
         elif [[ `command -v apt-get` ]];then
             apt-get install unzip -y
+        elif [[ `command -v zypper` ]];then
+            zypper install unzip -y
         fi
     fi
     unzip "$TARBALL"

@@ -99,6 +99,8 @@ checkSys() {
         PACKAGE_MANAGER='dnf'
     elif [[ `command -v yum` ]];then
         PACKAGE_MANAGER='yum'
+    elif [[ `command -v zypper` ]]:then
+        PACKAGE_MANAGER='zypper'
     else
         colorEcho $RED "Not support OS!"
         exit 1
@@ -112,9 +114,12 @@ checkSys() {
 installDependent(){
     if [[ ${PACKAGE_MANAGER} == 'dnf' || ${PACKAGE_MANAGER} == 'yum' ]];then
         ${PACKAGE_MANAGER} install socat crontabs bash-completion -y
-    else
+    elif [[ ${PACKAGE_MANAGER} == 'apt-get' ]];then
         ${PACKAGE_MANAGER} update
         ${PACKAGE_MANAGER} install socat cron bash-completion xz-utils -y
+    else
+        ${PACKAGE_MANAGER} update
+        ${PACKAGE_MANAGER} in socat cron bash-completion xz -y
     fi
 }
 
