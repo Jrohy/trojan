@@ -99,7 +99,7 @@ checkSys() {
         PACKAGE_MANAGER='dnf'
     elif [[ `command -v yum` ]];then
         PACKAGE_MANAGER='yum'
-    elif [[ `command -v zypper` ]]:then
+    elif [[ `command -v zypper` ]];then
         PACKAGE_MANAGER='zypper'
     else
         colorEcho $RED "Not support OS!"
