@@ -50,7 +50,7 @@ func Version() *ResponseBody {
 		"goVersion":     trojan.GoVersion,
 		"gitVersion":    trojan.GitVersion,
 		"trojanVersion": trojan.Version(),
-		"trojanRuntime": trojan.RunTime(),
+		"trojanUptime":  trojan.UpTime(),
 		"trojanType":    trojan.Type(),
 	}
 	return &responseBody

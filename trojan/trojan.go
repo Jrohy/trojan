@@ -73,8 +73,8 @@ func Status(isPrint bool) string {
 	return result
 }
 
-// RunTime Trojan运行时间
-func RunTime() string {
+// UpTime Trojan运行时间
+func UpTime() string {
 	result := strings.TrimSpace(util.ExecCommandWithResult("ps -Ao etime,args|grep -v grep|grep /usr/local/etc/trojan/config.json"))
 	resultSlice := strings.Split(result, " ")
 	if len(resultSlice) > 0 {
