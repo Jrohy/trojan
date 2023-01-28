@@ -17,7 +17,8 @@ trojan多用户管理部署程序
 - 生成客户端配置文件
 - 在线实时查看trojan日志
 - 在线trojan和trojan-go随时切换
-- 支持trojan://分享链接和二维码分享(二维码仅限web页面)
+- 支持trojan://分享链接和二维码分享(仅限web页面)
+- 支持转化为clash订阅地址并导入到[clash_for_windows](https://github.com/Fndroid/clash_for_windows_pkg/releases)(仅限web页面)
 - 限制用户使用期限
 
 ## 安装方式
@@ -75,6 +76,7 @@ Available Commands:
   help          Help about any command
   info          用户信息列表
   log           查看trojan日志
+  port          修改trojan端口
   restart       重启trojan
   start         启动trojan
   status        查看trojan状态
@@ -94,7 +96,6 @@ Flags:
 ## 注意
 安装完trojan后强烈建议开启BBR等加速: [Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)  
 
-推荐的trojan客户端: 
-   - pc: [Trojan-Qt5](https://github.com/TheWanderingCoel/Trojan-Qt5)
-   - ios: [shadowrocket](https://apps.apple.com/us/app/shadowrocket/id932747118)
-   - android: [igniter](https://github.com/trojan-gfw/igniter)
+## Thanks
+感谢JetBrains提供的免费GoLand  
+[![avatar](asset/jetbrains.svg)](https://jb.gg/OpenSource)

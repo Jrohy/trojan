@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"trojan/trojan"
+	"trojan/util"
 
 	"github.com/spf13/cobra"
 )
@@ -13,7 +13,7 @@ var logCmd = &cobra.Command{
 	Use:   "log",
 	Short: "查看trojan日志",
 	Run: func(cmd *cobra.Command, args []string) {
-		trojan.Log(line)
+		util.Log("trojan", line)
 	},
 }
 

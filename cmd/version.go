@@ -13,7 +13,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "显示版本号",
 	Run: func(cmd *cobra.Command, args []string) {
-		runTime := trojan.RunTime()
+		upTime := trojan.UpTime()
 		trojanVersion := trojan.Version()
 		fmt.Println()
 		fmt.Printf("Version: %s\n\n", util.Cyan(trojan.MVersion))
@@ -21,7 +21,7 @@ var versionCmd = &cobra.Command{
 		fmt.Printf("GoVersion: %s\n\n", util.Cyan(trojan.GoVersion))
 		fmt.Printf("GitVersion: %s\n\n", util.Cyan(trojan.GitVersion))
 		fmt.Printf("TrojanVersion: %s\n\n", util.Cyan(trojanVersion))
-		fmt.Printf("TrojanRunTime: %s\n\n", util.Cyan(runTime))
+		fmt.Printf("TrojanUpTime: %s\n\n", util.Cyan(upTime))
 	},
 }
 

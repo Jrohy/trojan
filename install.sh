@@ -86,8 +86,10 @@ removeTrojan() {
 checkSys() {
     #检查是否为Root
     [ $(id -u) != "0" ] && { colorEcho ${RED} "Error: You must be root to run this script"; exit 1; }
-    if [[ $(uname -m 2> /dev/null) != x86_64 ]]; then
-        colorEcho $YELLOW "Please run this script on x86_64 machine."
+
+    ARCH=$(uname -m 2> /dev/null)
+    if [[ $ARCH != x86_64 && $ARCH != aarch64 ]];then
+        colorEcho $YELLOW "not support $ARCH machine".
         exit 1
     fi
 
@@ -147,7 +149,8 @@ installTrojan(){
     fi
     LASTEST_VERSION=$(curl -H 'Cache-Control: no-cache' -s "$VERSION_CHECK" | grep 'tag_name' | cut -d\" -f4)
     echo "正在下载管理程序`colorEcho $BLUE $LASTEST_VERSION`版本..."
-    curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/trojan" -o /usr/local/bin/trojan
+    [[ $ARCH == x86_64 ]] && BIN="trojan-linux-amd64" || BIN="trojan-linux-arm64" 
+    curl -L "$DOWNLAOD_URL/$LASTEST_VERSION/$BIN" -o /usr/local/bin/trojan
     chmod +x /usr/local/bin/trojan
     if [[ ! -e /etc/systemd/system/trojan-web.service ]];then
         SHOW_TIP=1

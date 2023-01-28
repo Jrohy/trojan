@@ -107,6 +107,13 @@ func WritePassword(pass []string) bool {
 	return Save(data, "")
 }
 
+// WritePort 写trojan端口
+func WritePort(port int) bool {
+	data := Load("")
+	data, _ = sjson.SetBytes(data, "local_port", port)
+	return Save(data, "")
+}
+
 // WriteLogLevel 写日志等级
 func WriteLogLevel(level int) bool {
 	data := Load("")

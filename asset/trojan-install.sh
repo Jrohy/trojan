@@ -5,7 +5,26 @@ set -eo pipefail
 # trojan: 0, trojan-go: 1
 TYPE=0
 
-[[ $1 == "go" ]] && TYPE=1
+INSTALL_VERSION=""
+
+while [[ $# > 0 ]];do
+    KEY="$1"
+    case $KEY in
+        -v|--version)
+        INSTALL_VERSION="$2"
+        echo -e "prepare install $INSTALL_VERSION version..\n"
+        shift
+        ;;
+        -g|--go)
+        TYPE=1
+        ;;
+        *)
+                # unknown option
+        ;;
+    esac
+    shift # past argument or value
+done
+#############################
 
 function prompt() {
     while true; do
@@ -22,8 +41,13 @@ if [[ $(id -u) != 0 ]]; then
     exit 1
 fi
 
-if [[ $(uname -m 2> /dev/null) != x86_64 ]]; then
-    echo Please run this script on x86_64 machine.
+ARCH=$(uname -m 2> /dev/null)
+if [[ $ARCH != x86_64 && $ARCH != aarch64 ]];then
+    echo "not support $ARCH machine".
+    exit 1
+fi
+if [[ $TYPE == 0 && $ARCH != x86_64 ]];then
+    echo "trojan not support $ARCH machine"
     exit 1
 fi
 
@@ -33,12 +57,20 @@ else
     CHECKVERSION="https://api.github.com/repos/p4gefau1t/trojan-go/releases"
 fi
 NAME=trojan
-VERSION=$(curl -H 'Cache-Control: no-cache' -s "$CHECKVERSION" | grep 'tag_name' | cut -d\" -f4 | sed 's/v//g' | head -n 1)
+if [[ -z $INSTALL_VERSION ]];then
+    VERSION=$(curl -H 'Cache-Control: no-cache' -s "$CHECKVERSION" | grep 'tag_name' | cut -d\" -f4 | sed 's/v//g' | head -n 1)
+else
+    if [[ -z `curl -H 'Cache-Control: no-cache' -s "$CHECKVERSION"|grep 'tag_name'|grep $INSTALL_VERSION` ]];then
+        echo "no $INSTALL_VERSION version file!"
+        exit 1
+    fi
+    VERSION=`echo "$INSTALL_VERSION"|sed 's/v//g'`
+fi
 if [[ $TYPE == 0 ]];then
     TARBALL="$NAME-$VERSION-linux-amd64.tar.xz"
     DOWNLOADURL="https://github.com/trojan-gfw/$NAME/releases/download/v$VERSION/$TARBALL"
 else
-    TARBALL="trojan-go-linux-amd64.zip"
+    [[ $ARCH == x86_64 ]] && TARBALL="trojan-go-linux-amd64.zip" || TARBALL="trojan-go-linux-armv8.zip" 
     DOWNLOADURL="https://github.com/p4gefau1t/trojan-go/releases/download/v$VERSION/$TARBALL"
 fi
 
@@ -51,7 +83,7 @@ CONFIGPATH="/usr/local/etc/$NAME/config.json"
 SYSTEMDPATH="$SYSTEMDPREFIX/$NAME.service"
 
 echo Creating $NAME install directory
-mkdir -p $INSTALLPREFIX
+mkdir -p $INSTALLPREFIX /usr/local/etc/$NAME
 
 echo Entering temp directory $TMPDIR...
 cd "$TMPDIR"
@@ -82,11 +114,59 @@ install -Dm755 "$NAME" "$BINARYPATH"
 
 echo Installing $NAME server config to $CONFIGPATH...
 if ! [[ -f "$CONFIGPATH" ]] || prompt "The server config already exists in $CONFIGPATH, overwrite?"; then
-    if [[ $TYPE == 0 ]];then
-        install -Dm644 examples/server.json-example "$CONFIGPATH"
-    else
-        install -Dm644 example/server.json "$CONFIGPATH"
-    fi
+    cat > "$CONFIGPATH" << EOF
+{
+    "run_type": "server",
+    "local_addr": "0.0.0.0",
+    "local_port": 443,
+    "remote_addr": "127.0.0.1",
+    "remote_port": 80,
+    "password": [
+        "password1",
+        "password2"
+    ],
+    "log_level": 1,
+    "ssl": {
+        "cert": "/path/to/certificate.crt",
+        "key": "/path/to/private.key",
+        "key_password": "",
+        "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384",
+        "cipher_tls13": "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
+        "prefer_server_cipher": true,
+        "alpn": [
+            "http/1.1"
+        ],
+        "alpn_port_override": {
+            "h2": 81
+        },
+        "reuse_session": true,
+        "session_ticket": false,
+        "session_timeout": 600,
+        "plain_http_response": "",
+        "curves": "",
+        "dhparam": ""
+    },
+    "tcp": {
+        "prefer_ipv4": false,
+        "no_delay": true,
+        "keep_alive": true,
+        "reuse_port": false,
+        "fast_open": false,
+        "fast_open_qlen": 20
+    },
+    "mysql": {
+        "enabled": false,
+        "server_addr": "127.0.0.1",
+        "server_port": 3306,
+        "database": "trojan",
+        "username": "trojan",
+        "password": "",
+        "key": "",
+        "cert": "",
+        "ca": ""
+    }
+}
+EOF
 else
     echo Skipping installing $NAME server config...
 fi

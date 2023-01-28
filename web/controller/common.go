@@ -8,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"time"
+	"trojan/asset"
 	"trojan/core"
 	"trojan/trojan"
 )
@@ -31,6 +32,14 @@ func TimeCost(start time.Time, body *ResponseBody) {
 	body.Duration = time.Since(start).String()
 }
 
+func clashRules() string {
+	rules, _ := core.GetValue("clash-rules")
+	if rules == "" {
+		rules = string(asset.GetAsset("clash-rules.yaml"))
+	}
+	return rules
+}
+
 // Version 获取版本信息
 func Version() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
@@ -41,7 +50,7 @@ func Version() *ResponseBody {
 		"goVersion":     trojan.GoVersion,
 		"gitVersion":    trojan.GitVersion,
 		"trojanVersion": trojan.Version(),
-		"trojanRuntime": trojan.RunTime(),
+		"trojanUptime":  trojan.UpTime(),
 		"trojanType":    trojan.Type(),
 	}
 	return &responseBody
@@ -66,15 +75,39 @@ func SetDomain(domain string) *ResponseBody {
 	return &responseBody
 }
 
+// SetClashRules 设置clash规则
+func SetClashRules(rules string) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	core.SetValue("clash-rules", rules)
+	return &responseBody
+}
+
+// ResetClashRules 重置clash规则
+func ResetClashRules() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	core.DelValue("clash-rules")
+	responseBody.Data = clashRules()
+	return &responseBody
+}
+
+// GetClashRules 获取clash规则
+func GetClashRules() *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	responseBody.Data = clashRules()
+	return &responseBody
+}
+
 // SetTrojanType 设置trojan类型
 func SetTrojanType(tType string) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	err := core.SetValue("trojanType", tType)
+	err := trojan.SwitchType(tType)
 	if err != nil {
 		responseBody.Msg = err.Error()
 	}
-	trojan.InstallTrojan()
 	return &responseBody
 }
 

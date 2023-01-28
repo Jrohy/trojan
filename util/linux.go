@@ -1,13 +1,15 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
-	"regexp"
+	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -56,15 +58,6 @@ func GetLocalIP() string {
 	return string(s)
 }
 
-// CheckIP 检测ipv4地址的合法性
-func CheckIP(ip string) bool {
-	isOk, err := regexp.Match(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`, []byte(ip))
-	if err != nil {
-		fmt.Println(err)
-	}
-	return isOk
-}
-
 // InstallPack 安装指定名字软件
 func InstallPack(name string) {
 	if !CheckCommandExists(name) {
@@ -91,4 +84,38 @@ func OpenPort(port int) {
 		ExecCommand(fmt.Sprintf("iptables -I OUTPUT -p udp --sport %d -j ACCEPT", port))
 		ExecCommand(fmt.Sprintf("iptables -I OUTPUT -p tcp --sport %d -j ACCEPT", port))
 	}
+}
+
+// Log 实时打印指定服务日志
+func Log(serviceName string, line int) {
+	result, _ := LogChan(serviceName, "-n "+strconv.Itoa(line), make(chan byte))
+	for line := range result {
+		fmt.Println(line)
+	}
+}
+
+// LogChan 指定服务实时日志, 返回chan
+func LogChan(serviceName, param string, closeChan chan byte) (chan string, error) {
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("journalctl -f -u %s -o cat %s", serviceName, param))
+
+	stdout, _ := cmd.StdoutPipe()
+
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Error:The command is err: ", err.Error())
+		return nil, err
+	}
+	ch := make(chan string, 100)
+	stdoutScan := bufio.NewScanner(stdout)
+	go func() {
+		for stdoutScan.Scan() {
+			select {
+			case <-closeChan:
+				stdout.Close()
+				return
+			default:
+				ch <- stdoutScan.Text()
+			}
+		}
+	}()
+	return ch, nil
 }

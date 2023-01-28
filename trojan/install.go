@@ -3,6 +3,7 @@ package trojan
 import (
 	"fmt"
 	"net"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -12,9 +13,8 @@ import (
 )
 
 var (
-	dockerInstallUrl1 = "https://get.docker.com"
-	dockerInstallUrl2 = "https://git.io/docker-install"
-	dbDockerRun       = "docker run --name trojan-mariadb --restart=always -p %d:3306 -v /home/mariadb:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mariadb:10.2"
+	dockerInstallUrl = "https://docker-install.netlify.app/install.sh"
+	dbDockerRun      = "docker run --name trojan-mariadb --restart=always -p %d:3306 -v /home/mariadb:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=%s -e MYSQL_ROOT_HOST=%% -e MYSQL_DATABASE=trojan -d mariadb:10.2"
 )
 
 // InstallMenu 安装目录
@@ -23,7 +23,7 @@ func InstallMenu() {
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
-		InstallTrojan()
+		InstallTrojan("")
 	case 2:
 		InstallTls()
 	case 3:
@@ -36,38 +36,55 @@ func InstallMenu() {
 // InstallDocker 安装docker
 func InstallDocker() {
 	if !util.CheckCommandExists("docker") {
-		util.RunWebShell(dockerInstallUrl1)
-		if !util.CheckCommandExists("docker") {
-			util.RunWebShell(dockerInstallUrl2)
-		} else {
-			util.ExecCommand("systemctl enable docker")
-			util.ExecCommand("systemctl start docker")
-		}
+		util.RunWebShell(dockerInstallUrl)
 		fmt.Println()
 	}
 }
 
 // InstallTrojan 安装trojan
-func InstallTrojan() {
+func InstallTrojan(version string) {
 	fmt.Println()
 	data := string(asset.GetAsset("trojan-install.sh"))
-	if util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service") != "" && Type() == "trojan-go" {
+	checkTrojan := util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service")
+	if (checkTrojan == "" && runtime.GOARCH != "amd64") || Type() == "trojan-go" {
 		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
+	}
+	if version != "" {
+		data = strings.ReplaceAll(data, "INSTALL_VERSION=\"\"", "INSTALL_VERSION=\""+version+"\"")
 	}
 	util.ExecCommand(data)
 	util.OpenPort(443)
-	util.ExecCommand("systemctl restart trojan")
-	util.ExecCommand("systemctl enable trojan")
+	util.SystemctlRestart("trojan")
+	util.SystemctlEnable("trojan")
 }
 
 // InstallTls 安装证书
 func InstallTls() {
 	domain := ""
+	server := "letsencrypt"
 	fmt.Println()
-	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "自定义证书路径"}, true)
+	choice := util.LoopInput("请选择使用证书方式: ", []string{"Let's Encrypt 证书", "ZeroSSL 证书", "BuyPass 证书", "自定义证书路径"}, true)
 	if choice < 0 {
 		return
-	} else if choice == 1 {
+	} else if choice == 4 {
+		crtFile := util.Input("请输入证书的cert文件路径: ", "")
+		keyFile := util.Input("请输入证书的key文件路径: ", "")
+		if !util.IsExists(crtFile) || !util.IsExists(keyFile) {
+			fmt.Println("输入的cert或者key文件不存在!")
+		} else {
+			domain = util.Input("请输入此证书对应的域名: ", "")
+			if domain == "" {
+				fmt.Println("输入域名为空!")
+				return
+			}
+			core.WriteTls(crtFile, keyFile, domain)
+		}
+	} else {
+		if choice == 2 {
+			server = "zerossl"
+		} else if choice == 3 {
+			server = "buypass"
+		}
 		localIP := util.GetLocalIP()
 		fmt.Printf("本机ip: %s\n", localIP)
 		for {
@@ -95,28 +112,39 @@ func InstallTls() {
 		if !util.IsExists("/root/.acme.sh/acme.sh") {
 			util.RunWebShell("https://get.acme.sh")
 		}
-		util.ExecCommand("systemctl stop trojan-web")
+		util.SystemctlStop("trojan-web")
 		util.OpenPort(80)
-		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
+		checkResult := util.ExecCommandWithResult("/root/.acme.sh/acme.sh -v|tr -cd '[0-9]'")
+		acmeVersion, _ := strconv.Atoi(checkResult)
+		if acmeVersion < 300 {
+			util.ExecCommand("/root/.acme.sh/acme.sh --upgrade")
+		}
+		if server != "letsencrypt" {
+			var email string
+			for {
+				email = util.Input(fmt.Sprintf("请输入申请%s域名所需的邮箱: ", server), "")
+				if email == "" {
+					fmt.Println("申请域名的邮箱地址为空!")
+					return
+				} else if util.VerifyEmailFormat(email) {
+					break
+				} else {
+					fmt.Println("邮箱格式不正确, 请重新输入!")
+				}
+			}
+			util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --server %s --register-account -m %s", server, email))
+		}
+		issueCommand := fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256 --force --server %s", domain, server)
+		if server == "buypass" {
+			issueCommand = issueCommand + " --days 170"
+		}
+		util.ExecCommand(issueCommand)
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
 		core.WriteTls(crtFile, keyFile, domain)
-	} else if choice == 2 {
-		crtFile := util.Input("请输入证书的cert文件路径: ", "")
-		keyFile := util.Input("请输入证书的key文件路径: ", "")
-		if !util.IsExists(crtFile) || !util.IsExists(keyFile) {
-			fmt.Println("输入的cert或者key文件不存在!")
-		} else {
-			domain = util.Input("请输入此证书对应的域名: ", "")
-			if domain == "" {
-				fmt.Println("输入域名为空!")
-				return
-			}
-			core.WriteTls(crtFile, keyFile, domain)
-		}
 	}
 	Restart()
-	util.ExecCommand("systemctl restart trojan-web")
+	util.SystemctlRestart("trojan-web")
 	fmt.Println()
 }
 

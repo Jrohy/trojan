@@ -139,6 +139,16 @@ func commonRouter(router *gin.Engine) {
 		common.GET("/serverInfo", func(c *gin.Context) {
 			c.JSON(200, controller.ServerInfo())
 		})
+		common.GET("/clashRules", func(c *gin.Context) {
+			c.JSON(200, controller.GetClashRules())
+		})
+		common.POST("/clashRules", func(c *gin.Context) {
+			rules := c.PostForm("rules")
+			c.JSON(200, controller.SetClashRules(rules))
+		})
+		common.DELETE("/clashRules", func(c *gin.Context) {
+			c.JSON(200, controller.ResetClashRules())
+		})
 		common.POST("/loginInfo", func(c *gin.Context) {
 			c.JSON(200, controller.SetLoginInfo(c.PostForm("title")))
 		})
@@ -155,12 +165,20 @@ func staticRouter(router *gin.Engine) {
 	})
 }
 
+func noTokenRouter(router *gin.Engine) {
+	router.GET("/trojan/user/subscribe", func(c *gin.Context) {
+		controller.ClashSubInfo(c)
+	})
+}
+
 // Start web启动入口
-func Start(host string, port int, isSSL bool) {
+func Start(host string, port, timeout int, isSSL bool) {
 	router := gin.Default()
+	router.SetTrustedProxies(nil)
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
-	router.Use(Auth(router).MiddlewareFunc())
+	noTokenRouter(router)
+	router.Use(Auth(router, timeout).MiddlewareFunc())
 	trojanRouter(router)
 	userRouter(router)
 	dataRouter(router)

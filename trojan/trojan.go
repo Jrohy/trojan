@@ -1,11 +1,11 @@
 package trojan
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 	"trojan/core"
@@ -21,7 +21,7 @@ func ControllMenu() {
 	} else {
 		tType = "trojan"
 	}
-	menu := []string{"启动trojan", "停止trojan", "重启trojan", "查看trojan状态", "查看trojan日志"}
+	menu := []string{"启动trojan", "停止trojan", "重启trojan", "查看trojan状态", "查看trojan日志", "修改trojan端口"}
 	menu = append(menu, "切换为"+tType)
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
@@ -33,61 +33,75 @@ func ControllMenu() {
 	case 4:
 		Status(true)
 	case 5:
-		go Log(300)
+		go util.Log("trojan", 300)
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, os.Kill)
 		//阻塞
 		<-c
 	case 6:
-		_ = core.SetValue("trojanType", tType)
-		InstallTrojan()
+		ChangePort()
+	case 7:
+		if err := SwitchType(tType); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
 // Restart 重启trojan
 func Restart() {
-	if err := util.ExecCommand("systemctl restart trojan"); err != nil {
-		fmt.Println(util.Red("重启trojan失败!"))
-	} else {
-		fmt.Println(util.Green("重启trojan成功!"))
-	}
+	util.OpenPort(core.GetConfig().LocalPort)
+	util.SystemctlRestart("trojan")
 }
 
 // Start 启动trojan
 func Start() {
-	if err := util.ExecCommand("systemctl start trojan"); err != nil {
-		fmt.Println(util.Red("启动trojan失败!"))
-	} else {
-		fmt.Println(util.Green("启动trojan成功!"))
-	}
+	util.OpenPort(core.GetConfig().LocalPort)
+	util.SystemctlStart("trojan")
 }
 
 // Stop 停止trojan
 func Stop() {
-	if err := util.ExecCommand("systemctl stop trojan"); err != nil {
-		fmt.Println(util.Red("停止trojan失败!"))
-	} else {
-		fmt.Println(util.Green("停止trojan成功!"))
-	}
+	util.SystemctlStop("trojan")
 }
 
 // Status 获取trojan状态
 func Status(isPrint bool) string {
-	result := util.ExecCommandWithResult("systemctl status trojan")
+	result := util.SystemctlStatus("trojan")
 	if isPrint {
 		fmt.Println(result)
 	}
 	return result
 }
 
-// RunTime Trojan运行时间
-func RunTime() string {
+// UpTime Trojan运行时间
+func UpTime() string {
 	result := strings.TrimSpace(util.ExecCommandWithResult("ps -Ao etime,args|grep -v grep|grep /usr/local/etc/trojan/config.json"))
 	resultSlice := strings.Split(result, " ")
 	if len(resultSlice) > 0 {
 		return resultSlice[0]
 	}
 	return ""
+}
+
+// ChangePort 修改trojan端口
+func ChangePort() {
+	config := core.GetConfig()
+	oldPort := config.LocalPort
+	randomPort := util.RandomPort()
+	fmt.Println("当前trojan端口: " + util.Green(strconv.Itoa(oldPort)))
+	newPortStr := util.Input(fmt.Sprintf("请输入新的trojan端口(若要使用随机端口%s直接回车即可): ", util.Blue(strconv.Itoa(randomPort))), strconv.Itoa(randomPort))
+	newPort, err := strconv.Atoi(newPortStr)
+	if err != nil {
+		fmt.Println("修改端口失败: " + err.Error())
+		return
+	}
+	if core.WritePort(newPort) {
+		util.OpenPort(newPort)
+		fmt.Println(util.Green("端口修改成功!"))
+		Restart()
+	} else {
+		fmt.Println(util.Red("端口修改成功!"))
+	}
 }
 
 // Version Trojan版本
@@ -105,6 +119,22 @@ func Version() string {
 	return tempSlice[len(tempSlice)-1]
 }
 
+// SwitchType 切换Trojan类型
+func SwitchType(tType string) error {
+	ARCH := runtime.GOARCH
+	if ARCH != "amd64" && ARCH != "arm64" {
+		return errors.New("not support " + ARCH + " machine")
+	}
+	if tType == "trojan" && ARCH != "amd64" {
+		return errors.New("trojan not support " + ARCH + " machine")
+	}
+	if err := core.SetValue("trojanType", tType); err != nil {
+		return err
+	}
+	InstallTrojan("")
+	return nil
+}
+
 // Type Trojan类型
 func Type() string {
 	tType, _ := core.GetValue("trojanType")
@@ -117,38 +147,4 @@ func Type() string {
 		_ = core.SetValue("trojanType", tType)
 	}
 	return tType
-}
-
-// Log 实时打印trojan日志
-func Log(line int) {
-	result, _ := LogChan("-n "+strconv.Itoa(line), make(chan byte))
-	for line := range result {
-		fmt.Println(line)
-	}
-}
-
-// LogChan trojan实时日志, 返回chan
-func LogChan(param string, closeChan chan byte) (chan string, error) {
-	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan -o cat "+param)
-
-	stdout, _ := cmd.StdoutPipe()
-
-	if err := cmd.Start(); err != nil {
-		fmt.Println("Error:The command is err: ", err.Error())
-		return nil, err
-	}
-	ch := make(chan string, 100)
-	stdoutScan := bufio.NewScanner(stdout)
-	go func() {
-		for stdoutScan.Scan() {
-			select {
-			case <-closeChan:
-				stdout.Close()
-				return
-			default:
-				ch <- stdoutScan.Text()
-			}
-		}
-	}()
-	return ch, nil
 }

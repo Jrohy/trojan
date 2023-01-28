@@ -222,23 +222,26 @@ func (mysql *Mysql) DailyCheckExpire() (bool, error) {
 		return false, err
 	}
 	addDay, _ := time.ParseDuration("-24h")
-	todayDay := now.Add(addDay).In(utc).Format("2006-01-02")
+	yesterdayStr := now.Add(addDay).In(utc).Format("2006-01-02")
+	yesterday, _ := time.Parse("2006-01-02", yesterdayStr)
 	db := mysql.GetDB()
 	if db == nil {
 		return false, errors.New("can't connect mysql")
 	}
 	defer db.Close()
-	userList, err := queryUserList(db, "SELECT * FROM users WHERE useDays != 0 AND quota != 0")
+	userList, err := queryUserList(db, "SELECT * FROM users WHERE quota != 0")
 	if err != nil {
 		return false, err
 	}
 	for _, user := range userList {
-		if user.ExpiryDate == todayDay {
-			if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=0 WHERE id=%d;", user.ID)); err != nil {
-				return false, err
-			}
-			if !needRestart {
-				needRestart = true
+		if expireDate, err := time.Parse("2006-01-02", user.ExpiryDate); err == nil {
+			if yesterday.Sub(expireDate).Seconds() >= 0 {
+				if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=0 WHERE id=%d;", user.ID)); err != nil {
+					return false, err
+				}
+				if !needRestart {
+					needRestart = true
+				}
 			}
 		}
 	}

@@ -45,7 +45,7 @@ func Restart() *ResponseBody {
 func Update() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
-	trojan.InstallTrojan()
+	trojan.InstallTrojan("")
 	return &responseBody
 }
 
@@ -86,7 +86,7 @@ func Log(c *gin.Context) {
 	} else {
 		param = "-n " + param
 	}
-	result, err := trojan.LogChan(param, wsConn.CloseChan)
+	result, err := websocket.LogChan("trojan", param, wsConn.CloseChan)
 	if err != nil {
 		fmt.Println(err)
 		wsConn.WsClose()

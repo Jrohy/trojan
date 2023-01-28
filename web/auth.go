@@ -21,12 +21,12 @@ type Login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-func init() {
+func jwtInit(timeout int) {
 	authMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "k8s-manager",
 		Key:         []byte("secret key"),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
+		Timeout:     time.Minute * time.Duration(timeout),
+		MaxRefresh:  time.Minute * time.Duration(timeout),
 		IdentityKey: identityKey,
 		SendCookie:  true,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
@@ -114,7 +114,10 @@ func RequestUsername(c *gin.Context) string {
 }
 
 // Auth 权限router
-func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
+func Auth(r *gin.Engine, timeout int) *jwt.GinJWTMiddleware {
+	jwtInit(timeout)
+
+	newInstall := gin.H{"code": 201, "message": "No administrator account found inside the database", "data": nil}
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
 		fmt.Printf("NoRoute claims: %#v\n", claims)
@@ -123,7 +126,7 @@ func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
 	r.GET("/auth/check", func(c *gin.Context) {
 		result, _ := core.GetValue("admin_pass")
 		if result == "" {
-			c.JSON(201, gin.H{"code": 201, "message": "No administrator account found inside the database", "data": nil})
+			c.JSON(201, newInstall)
 		} else {
 			title, err := core.GetValue("login_title")
 			if err != nil {
@@ -144,13 +147,18 @@ func Auth(r *gin.Engine) *jwt.GinJWTMiddleware {
 	authO.Use(authMiddleware.MiddlewareFunc())
 	{
 		authO.GET("/loginUser", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"code":    200,
-				"message": "success",
-				"data": map[string]string{
-					"username": RequestUsername(c),
-				},
-			})
+			result, _ := core.GetValue("admin_pass")
+			if result == "" {
+				c.JSON(201, newInstall)
+			} else {
+				c.JSON(200, gin.H{
+					"code":    200,
+					"message": "success",
+					"data": map[string]string{
+						"username": RequestUsername(c),
+					},
+				})
+			}
 		})
 		authO.POST("/reset_pass", updateUser)
 		authO.POST("/logout", authMiddleware.LogoutHandler)
