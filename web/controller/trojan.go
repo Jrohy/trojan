@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	ws "github.com/gorilla/websocket"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -81,6 +80,10 @@ func Log(c *gin.Context) {
 	}
 	defer wsConn.WsClose()
 	param := c.DefaultQuery("line", "300")
+	if !websocket.IsInteger(param) {
+		fmt.Println("invalid param: " + param)
+		return
+	}
 	if param == "-1" {
 		param = "--no-tail"
 	} else {
@@ -89,12 +92,11 @@ func Log(c *gin.Context) {
 	result, err := websocket.LogChan("trojan", param, wsConn.CloseChan)
 	if err != nil {
 		fmt.Println(err)
-		wsConn.WsClose()
 		return
 	}
 	for line := range result {
 		if err := wsConn.WsWrite(ws.TextMessage, []byte(line+"\n")); err != nil {
-			log.Println("can't send: ", line)
+			fmt.Println("can't send: ", line)
 			break
 		}
 	}
