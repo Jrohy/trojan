@@ -13,7 +13,7 @@ import (
 	"time"
 	"trojan/core"
 	"trojan/trojan"
-	websocket "trojan/util"
+	"trojan/util"
 )
 
 // Start 启动trojan
@@ -71,16 +71,16 @@ func GetLogLevel() *ResponseBody {
 // Log 通过ws查看trojan实时日志
 func Log(c *gin.Context) {
 	var (
-		wsConn *websocket.WsConnection
+		wsConn *util.WsConnection
 		err    error
 	)
-	if wsConn, err = websocket.InitWebsocket(c.Writer, c.Request); err != nil {
+	if wsConn, err = util.InitWebsocket(c.Writer, c.Request); err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer wsConn.WsClose()
 	param := c.DefaultQuery("line", "300")
-	if !websocket.IsInteger(param) {
+	if !util.IsInteger(param) {
 		fmt.Println("invalid param: " + param)
 		return
 	}
@@ -89,7 +89,7 @@ func Log(c *gin.Context) {
 	} else {
 		param = "-n " + param
 	}
-	result, err := websocket.LogChan("trojan", param, wsConn.CloseChan)
+	result, err := util.LogChan("trojan", param, wsConn.CloseChan)
 	if err != nil {
 		fmt.Println(err)
 		return
