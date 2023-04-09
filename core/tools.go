@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"trojan/util"
@@ -19,8 +18,8 @@ func (mysql *Mysql) UpgradeDB() error {
 		return errors.New("can't connect mysql")
 	}
 	var field string
-	error := db.QueryRow("SHOW COLUMNS FROM users LIKE 'passwordShow';").Scan(&field)
-	if error == sql.ErrNoRows {
+	err := db.QueryRow("SHOW COLUMNS FROM users LIKE 'passwordShow';").Scan(&field)
+	if err == sql.ErrNoRows {
 		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
 		if _, err := db.Exec("ALTER TABLE users ADD COLUMN passwordShow VARCHAR(255) NOT NULL AFTER password;"); err != nil {
 			fmt.Println(err)
@@ -43,8 +42,8 @@ func (mysql *Mysql) UpgradeDB() error {
 			}
 		}
 	}
-	error = db.QueryRow("SHOW COLUMNS FROM users LIKE 'useDays';").Scan(&field)
-	if error == sql.ErrNoRows {
+	err = db.QueryRow("SHOW COLUMNS FROM users LIKE 'useDays';").Scan(&field)
+	if err == sql.ErrNoRows {
 		fmt.Println(util.Yellow("正在进行数据库升级, 请稍等.."))
 		if _, err := db.Exec(`
 ALTER TABLE users
@@ -56,10 +55,10 @@ ADD COLUMN expiryDate char(10) DEFAULT '';
 		}
 	}
 	var tableName string
-	error = db.QueryRow(fmt.Sprintf(
+	err = db.QueryRow(fmt.Sprintf(
 		"SELECT * FROM information_schema.TABLES WHERE TABLE_NAME = 'users' AND TABLE_SCHEMA = '%s' ",
 		mysql.Database) + " AND TABLE_COLLATION LIKE 'utf8%';").Scan(&tableName)
-	if error == sql.ErrNoRows {
+	if err == sql.ErrNoRows {
 		tempFile := "temp.sql"
 		mysql.DumpSql(tempFile)
 		mysql.ExecSql(tempFile)
@@ -96,7 +95,7 @@ INSERT INTO users(username, password, passwordShow, quota, download, upload, use
 // ExecSql 执行sql
 func (mysql *Mysql) ExecSql(filePath string) error {
 	db := mysql.GetDB()
-	fileByte, err := ioutil.ReadFile(filePath)
+	fileByte, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}

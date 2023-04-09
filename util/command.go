@@ -3,7 +3,7 @@ package util
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -92,7 +92,7 @@ func RunWebShell(webShellPath string) {
 		fmt.Println(err.Error())
 	}
 	defer resp.Body.Close()
-	installShell, err := ioutil.ReadAll(resp.Body)
+	installShell, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
