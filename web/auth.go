@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"time"
 	"trojan/core"
+	"trojan/util"
 	"trojan/web/controller"
 )
 
@@ -21,10 +22,19 @@ type Login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
+func getSecretKey() string {
+	sk, _ := core.GetValue("secretKey")
+	if sk == "" {
+		sk = util.RandString(15, util.ALL)
+		core.SetValue("secretKey", sk)
+	}
+	return sk
+}
+
 func jwtInit(timeout int) {
 	authMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
-		Realm:       "k8s-manager",
-		Key:         []byte("secret key"),
+		Realm:       "trojan-manager",
+		Key:         []byte(getSecretKey()),
 		Timeout:     time.Minute * time.Duration(timeout),
 		MaxRefresh:  time.Minute * time.Duration(timeout),
 		IdentityKey: identityKey,

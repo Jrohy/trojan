@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/tidwall/pretty"
 	"github.com/tidwall/sjson"
-	"io/ioutil"
+	"os"
 )
 
 var configPath = "/usr/local/etc/trojan/config.json"
@@ -40,7 +40,7 @@ func Load(path string) []byte {
 	if path == "" {
 		path = configPath
 	}
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -53,7 +53,7 @@ func Save(data []byte, path string) bool {
 	if path == "" {
 		path = configPath
 	}
-	if err := ioutil.WriteFile(path, pretty.Pretty(data), 0644); err != nil {
+	if err := os.WriteFile(path, pretty.Pretty(data), 0644); err != nil {
 		fmt.Println(err)
 		return false
 	}

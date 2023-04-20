@@ -163,7 +163,7 @@ func InstallMysql() {
 	if choice < 0 {
 		return
 	} else if choice == 1 {
-		mysql = core.Mysql{ServerAddr: "127.0.0.1", ServerPort: util.RandomPort(), Password: util.RandString(5), Username: "root", Database: "trojan"}
+		mysql = core.Mysql{ServerAddr: "127.0.0.1", ServerPort: util.RandomPort(), Password: util.RandString(8, util.LETTER+util.DIGITS), Username: "root", Database: "trojan"}
 		InstallDocker()
 		fmt.Println(fmt.Sprintf(dbDockerRun, mysql.ServerPort, mysql.Password))
 		if util.CheckCommandExists("setenforce") {

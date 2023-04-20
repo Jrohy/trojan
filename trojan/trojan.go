@@ -12,8 +12,8 @@ import (
 	"trojan/util"
 )
 
-// ControllMenu Trojan控制菜单
-func ControllMenu() {
+// ControlMenu Trojan控制菜单
+func ControlMenu() {
 	fmt.Println()
 	tType := Type()
 	if tType == "trojan" {

@@ -47,7 +47,7 @@ exit:
 		menuList := []string{"trojan管理", "用户管理", "安装管理", "web管理", "查看配置", "生成json"}
 		switch util.LoopInput("请选择: ", menuList, false) {
 		case 1:
-			trojan.ControllMenu()
+			trojan.ControlMenu()
 		case 2:
 			trojan.UserMenu()
 		case 3:

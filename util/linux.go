@@ -3,7 +3,7 @@ package util
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net"
 	"net/http"
@@ -27,7 +27,7 @@ func PortIsUse(port int) bool {
 // RandomPort 获取没占用的随机端口
 func RandomPort() int {
 	for {
-		rand.Seed(time.Now().UnixNano())
+		rand.New(rand.NewSource(time.Now().UnixNano()))
 		newPort := rand.Intn(65536)
 		if !PortIsUse(newPort) {
 			return newPort
@@ -54,7 +54,7 @@ func GetLocalIP() string {
 		resp, _ = http.Get("http://icanhazip.com")
 	}
 	defer resp.Body.Close()
-	s, _ := ioutil.ReadAll(resp.Body)
+	s, _ := io.ReadAll(resp.Body)
 	return string(s)
 }
 

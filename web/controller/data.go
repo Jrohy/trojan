@@ -77,8 +77,8 @@ func UpdateResetDay(day uint) *ResponseBody {
 	return &responseBody
 }
 
-// SheduleTask 定时任务
-func SheduleTask() {
+// ScheduleTask 定时任务
+func ScheduleTask() {
 	loc, _ := time.LoadLocation("Asia/Shanghai")
 	c = cron.New(cron.WithLocation(loc))
 	c.AddFunc("@daily", func() {

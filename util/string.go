@@ -27,6 +27,14 @@ const (
 	WHITE = "\033[37m"
 	// RESET 重置颜色
 	RESET = "\033[0m"
+	// LETTER 大小写英文字母常量
+	LETTER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// DIGITS 数字常量
+	DIGITS = "0123456789"
+	// SPECIALS 特殊字符常量
+	SPECIALS = "~=+%^*/()[]{}/!@#$?|"
+	// ALL 全部字符常量
+	ALL = LETTER + DIGITS + SPECIALS
 )
 
 // IsInteger 判断字符串是否为整数
@@ -36,12 +44,12 @@ func IsInteger(input string) bool {
 }
 
 // RandString 随机字符串
-func RandString(length int) string {
-	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+func RandString(length int, source string) string {
+	var runes = []rune(source)
 	b := make([]rune, length)
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		b[i] = runes[rand.Intn(len(runes))]
 	}
 	return string(b)
 }
