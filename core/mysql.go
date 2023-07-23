@@ -138,7 +138,7 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
-		maxip		int64
+		maxip       int64
 		id          uint
 		useDays     uint
 		expiryDate  string
@@ -147,7 +147,7 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 	if err := row.Scan(&id, &username, &encryptPass, &passShow, &quota, &maxip, &download, &upload, &useDays, &expiryDate); err != nil {
 		return nil, err
 	}
-	return &User{ID: id, Username: username, Password: passShow, EncryptPass: encryptPass, Download: download, Upload: upload, Quota: quota, Maxip: maxip , UseDays: useDays, ExpiryDate: expiryDate}, nil
+	return &User{ID: id, Username: username, Password: passShow, EncryptPass: encryptPass, Download: download, Upload: upload, Quota: quota, Maxip: maxip, UseDays: useDays, ExpiryDate: expiryDate}, nil
 }
 
 // CreateUser 创建Trojan用户

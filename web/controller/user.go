@@ -35,7 +35,7 @@ func UserList(requestUser string) *ResponseBody {
 		}
 	}
 	domain, port := trojan.GetDomainAndPort()
-	responseBody.Data = map[string]interface{}{
+	responseBody.Data = map[string]any{
 		"domain":   domain,
 		"port":     port,
 		"userList": userList,
@@ -54,7 +54,7 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 		return &responseBody
 	}
 	domain, port := trojan.GetDomainAndPort()
-	responseBody.Data = map[string]interface{}{
+	responseBody.Data = map[string]any{
 		"domain":   domain,
 		"port":     port,
 		"pageData": pageData,

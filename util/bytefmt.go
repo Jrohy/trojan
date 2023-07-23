@@ -23,6 +23,7 @@ const (
 )
 
 // Bytefmt returns a human-readable byte string of the form 10M, 12.5K, and so forth.  The following units are available:
+//
 //	E: Exabyte
 //	P: Petabyte
 //	T: Terabyte
@@ -30,6 +31,7 @@ const (
 //	M: Megabyte
 //	K: Kilobyte
 //	B: Byte
+//
 // The unit that results in the smallest number greater than or equal to 1 is always chosen.
 func Bytefmt(bytes uint64) string {
 	unit := ""

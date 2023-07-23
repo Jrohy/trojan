@@ -57,7 +57,7 @@ func GetResetDay() *ResponseBody {
 	defer TimeCost(time.Now(), &responseBody)
 	dayStr, _ := core.GetValue("reset_day")
 	day, _ := strconv.Atoi(dayStr)
-	responseBody.Data = map[string]interface{}{
+	responseBody.Data = map[string]any{
 		"resetDay": day,
 	}
 	return &responseBody

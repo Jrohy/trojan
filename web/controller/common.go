@@ -16,7 +16,7 @@ import (
 // ResponseBody 结构体
 type ResponseBody struct {
 	Duration string
-	Data     interface{}
+	Data     any
 	Msg      string
 }
 
@@ -153,7 +153,7 @@ func ServerInfo() *ResponseBody {
 		"tcp": len(tcpCon),
 		"udp": len(udpCon),
 	}
-	responseBody.Data = map[string]interface{}{
+	responseBody.Data = map[string]any{
 		"cpu":      cpuPercent,
 		"memory":   vmInfo,
 		"swap":     smInfo,

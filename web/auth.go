@@ -39,7 +39,7 @@ func jwtInit(timeout int) {
 		MaxRefresh:  time.Minute * time.Duration(timeout),
 		IdentityKey: identityKey,
 		SendCookie:  true,
-		PayloadFunc: func(data interface{}) jwt.MapClaims {
+		PayloadFunc: func(data any) jwt.MapClaims {
 			if v, ok := data.(*Login); ok {
 				return jwt.MapClaims{
 					identityKey: v.Username,
@@ -47,13 +47,13 @@ func jwtInit(timeout int) {
 			}
 			return jwt.MapClaims{}
 		},
-		IdentityHandler: func(c *gin.Context) interface{} {
+		IdentityHandler: func(c *gin.Context) any {
 			claims := jwt.ExtractClaims(c)
 			return &Login{
 				Username: claims[identityKey].(string),
 			}
 		},
-		Authenticator: func(c *gin.Context) (interface{}, error) {
+		Authenticator: func(c *gin.Context) (any, error) {
 			var (
 				password  string
 				loginVals Login
@@ -83,7 +83,7 @@ func jwtInit(timeout int) {
 			}
 			return nil, jwt.ErrFailedAuthentication
 		},
-		Authorizator: func(data interface{}, c *gin.Context) bool {
+		Authorizator: func(data any, c *gin.Context) bool {
 			if _, ok := data.(*Login); ok {
 				return true
 			}

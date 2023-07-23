@@ -77,7 +77,7 @@ func getChar(str string) string {
 }
 
 // LoopInput 循环输入选择, 或者直接回车退出
-func LoopInput(tip string, choices interface{}, singleRowPrint bool) int {
+func LoopInput(tip string, choices any, singleRowPrint bool) int {
 	reflectValue := reflect.ValueOf(choices)
 	if reflectValue.Kind() != reflect.Slice && reflectValue.Kind() != reflect.Array {
 		fmt.Println("only support slice or array type!")

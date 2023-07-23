@@ -62,7 +62,7 @@ func GetLogLevel() *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	config := core.GetConfig()
-	responseBody.Data = map[string]interface{}{
+	responseBody.Data = map[string]any{
 		"loglevel": &config.LogLevel,
 	}
 	return &responseBody
