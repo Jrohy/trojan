@@ -13,7 +13,6 @@ import (
 	"trojan/web/controller"
 )
 
-//go:embed templates/*
 var f embed.FS
 
 func userRouter(router *gin.Engine) {
@@ -113,6 +112,13 @@ func dataRouter(router *gin.Engine) {
 			id, _ := strconv.Atoi(sID)
 			quota, _ := strconv.Atoi(sQuota)
 			c.JSON(200, controller.SetData(uint(id), quota))
+		})
+		data.POST("", func(c *gin.Context) {
+			sID := c.PostForm("id")
+			sMaxip := c.PostForm("maxip")
+			id, _ := strconv.Atoi(sID)
+			maxip, _ := strconv.Atoi(sMaxip)
+			c.JSON(200, controller.SetData(uint(id), maxip))
 		})
 		data.DELETE("", func(c *gin.Context) {
 			sID := c.Query("id")

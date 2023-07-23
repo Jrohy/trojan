@@ -22,6 +22,17 @@ func SetData(id uint, quota int) *ResponseBody {
 	return &responseBody
 }
 
+// SetMaxip 限制最多ip
+func SetMaxip(id uint, maxip int) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	mysql := core.GetMysql()
+	if err := mysql.SetMaxip(id, maxip); err != nil {
+		responseBody.Msg = err.Error()
+	}
+	return &responseBody
+}
+
 // CleanData 清空流量
 func CleanData(id uint) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}

@@ -129,14 +129,16 @@ func ImportCsv(c *gin.Context) *ResponseBody {
 			return &responseBody
 		}
 		quota, _ := strconv.Atoi(line[4])
-		download, _ := strconv.Atoi(line[5])
-		upload, _ := strconv.Atoi(line[6])
-		useDays, _ := strconv.Atoi(line[7])
+		maxip, _ := strconv.Atoi(line[5])
+		download, _ := strconv.Atoi(line[6])
+		upload, _ := strconv.Atoi(line[7])
+		useDays, _ := strconv.Atoi(line[8])
 		userList = append(userList, &core.User{
 			Username:    line[1],
 			Password:    line[2],
 			EncryptPass: line[3],
 			Quota:       int64(quota),
+			Maxip:       int64(maxip),
 			Download:    uint64(download),
 			Upload:      uint64(upload),
 			UseDays:     uint(useDays),
@@ -155,8 +157,8 @@ func ImportCsv(c *gin.Context) *ResponseBody {
 	}
 	for _, user := range userList {
 		if _, err = db.Exec(fmt.Sprintf(`
-INSERT INTO users(username, password, passwordShow, quota, download, upload, useDays, expiryDate) VALUES ('%s','%s','%s', %d, %d, %d, %d, '%s');`,
-			user.Username, user.EncryptPass, user.Password, user.Quota, user.Download, user.Upload, user.UseDays, user.ExpiryDate)); err != nil {
+INSERT INTO users(username, password, passwordShow, quota,maxip, download, upload, useDays, expiryDate) VALUES ('%s','%s','%s', %d, %d, %d, %d, '%s');`,
+			user.Username, user.EncryptPass, user.Password, user.Quota, user.Maxip, user.Download, user.Upload, user.UseDays, user.ExpiryDate)); err != nil {
 			responseBody.Msg = err.Error()
 			return &responseBody
 		}
@@ -185,6 +187,7 @@ func ExportCsv(c *gin.Context) *ResponseBody {
 			user.Password,
 			user.EncryptPass,
 			strconv.Itoa(int(user.Quota)),
+			strconv.Itoa(int(user.Maxip)),
 			strconv.Itoa(int(user.Download)),
 			strconv.Itoa(int(user.Upload)),
 			strconv.Itoa(int(user.UseDays)),

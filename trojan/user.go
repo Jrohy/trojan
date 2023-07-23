@@ -13,7 +13,7 @@ import (
 // UserMenu 用户管理菜单
 func UserMenu() {
 	fmt.Println()
-	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量", "设置限期", "取消限期"}
+	menu := []string{"新增用户", "删除用户", "限制流量", "清空流量", "设置限期", "取消限期","限制最多ip"}
 	switch util.LoopInput("请选择: ", menu, false) {
 	case 1:
 		AddUser()
@@ -27,6 +27,8 @@ func UserMenu() {
 		SetupExpire()
 	case 6:
 		CancelExpire()
+	case 7:
+		SetUserMaxip()
 	}
 }
 
@@ -92,6 +94,32 @@ func SetUserQuota() {
 	}
 	if mysql.SetQuota(userList[choice-1].ID, limit) == nil {
 		fmt.Println("成功设置用户" + userList[choice-1].Username + "限制流量" + util.Bytefmt(uint64(limit)))
+	}
+}
+
+// SetUserMaxip 限制最多ip
+func SetUserMaxip() {
+	var (
+		limit int
+		err   error
+	)
+	userList := UserList()
+	mysql := core.GetMysql()
+	choice := util.LoopInput("请选择要限制最多ip的用户序号: ", userList, true)
+	if choice == -1 {
+		return
+	}
+	for {
+		maxip := util.Input("请输入用户"+userList[choice-1].Username+"限制最多ip是多少", "")
+		limit, err = strconv.Atoi(maxip)
+		if err != nil {
+			fmt.Printf("%s 不是数字, 请重新输入!\n", maxip)
+		} else {
+			break
+		}
+	}
+	if mysql.SetMaxip(userList[choice-1].ID, limit) == nil {
+		fmt.Println("成功设置用户" + userList[choice-1].Username + "限制最多ip" + util.Bytefmt(uint64(limit)))
 	}
 }
 
@@ -182,6 +210,11 @@ func UserList(ids ...string) []*core.User {
 			fmt.Println("流量限额: " + util.Cyan("无限制"))
 		} else {
 			fmt.Println("流量限额: " + util.Cyan(util.Bytefmt(uint64(k.Quota))))
+		}
+		if k.Maxip < 0 {
+			fmt.Println("限制最多ip: " + util.Cyan("无限制"))
+		} else {
+			fmt.Println("限制最多ip: " + util.Cyan(util.Bytefmt(uint64(k.Maxip))))
 		}
 		if k.UseDays == 0 {
 			fmt.Println("到期日期: " + util.Cyan("无限制"))

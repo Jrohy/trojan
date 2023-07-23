@@ -35,6 +35,7 @@ type User struct {
 	Password    string
 	EncryptPass string
 	Quota       int64
+	Maxip       int64
 	Download    uint64
 	Upload      uint64
 	UseDays     uint
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS users (
     password CHAR(56) NOT NULL,
     passwordShow VARCHAR(255) NOT NULL,
     quota BIGINT NOT NULL DEFAULT 0,
+	maxip BIGINT NOT NULL DEFAULT 0,
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
     useDays int(10) DEFAULT 0,
@@ -97,6 +99,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
+		maxip       int64
 		id          uint
 		useDays     uint
 		expiryDate  string
@@ -108,7 +111,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		if err := rows.Scan(&id, &username, &encryptPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
+		if err := rows.Scan(&id, &username, &encryptPass, &passShow, &quota, &maxip, &download, &upload, &useDays, &expiryDate); err != nil {
 			return nil, err
 		}
 		userList = append(userList, &User{
@@ -119,6 +122,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 			Download:    download,
 			Upload:      upload,
 			Quota:       quota,
+			Maxip:       maxip,
 			UseDays:     useDays,
 			ExpiryDate:  expiryDate,
 		})
@@ -134,15 +138,16 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
+		maxip		int64
 		id          uint
 		useDays     uint
 		expiryDate  string
 	)
 	row := db.QueryRow(sql)
-	if err := row.Scan(&id, &username, &encryptPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
+	if err := row.Scan(&id, &username, &encryptPass, &passShow, &quota, &maxip, &download, &upload, &useDays, &expiryDate); err != nil {
 		return nil, err
 	}
-	return &User{ID: id, Username: username, Password: passShow, EncryptPass: encryptPass, Download: download, Upload: upload, Quota: quota, UseDays: useDays, ExpiryDate: expiryDate}, nil
+	return &User{ID: id, Username: username, Password: passShow, EncryptPass: encryptPass, Download: download, Upload: upload, Quota: quota, Maxip: maxip , UseDays: useDays, ExpiryDate: expiryDate}, nil
 }
 
 // CreateUser 创建Trojan用户
@@ -153,7 +158,7 @@ func (mysql *Mysql) CreateUser(username string, base64Pass string, originPass st
 	}
 	defer db.Close()
 	encryPass := sha256.Sum224([]byte(originPass))
-	if _, err := db.Exec(fmt.Sprintf("INSERT INTO users(username, password, passwordShow, quota) VALUES ('%s', '%x', '%s', -1);", username, encryPass, base64Pass)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("INSERT INTO users(username, password, passwordShow, quota, maxip) VALUES ('%s', '%x', '%s', -1);", username, encryPass, base64Pass)); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -293,6 +298,20 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 	}
 	defer db.Close()
 	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET quota=%d WHERE id=%d;", quota, id)); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+// SetMaxip 限制最多ip
+func (mysql *Mysql) SetMaxip(id uint, maxip int) error {
+	db := mysql.GetDB()
+	if db == nil {
+		return errors.New("can't connect mysql")
+	}
+	defer db.Close()
+	if _, err := db.Exec(fmt.Sprintf("UPDATE users SET maxip=%d WHERE id=%d;", maxip, id)); err != nil {
 		fmt.Println(err)
 		return err
 	}

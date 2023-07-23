@@ -191,6 +191,9 @@ func ClashSubInfo(c *gin.Context) {
 			if user.Quota != -1 {
 				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Quota)
 			}
+			if user.Maxip != -1 {
+				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Maxip)
+			}
 			if user.ExpiryDate != "" {
 				utc, _ := time.LoadLocation("Asia/Shanghai")
 				t, _ := time.ParseInLocation("2006-01-02", user.ExpiryDate, utc)
