@@ -191,7 +191,7 @@ func ClashSubInfo(c *gin.Context) {
 			if user.Quota != -1 {
 				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Quota)
 			}
-			if user.Maxip != -1 {
+			if user.Maxip != 0 {
 				userInfo = fmt.Sprintf("%s, total=%d", userInfo, user.Maxip)
 			}
 			if user.ExpiryDate != "" {

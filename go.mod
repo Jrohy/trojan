@@ -20,6 +20,8 @@ require (
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 )
 
+require golang.org/x/net v0.14.0
+
 require (
 	github.com/bytedance/sonic v1.10.0-rc3 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -48,7 +50,6 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

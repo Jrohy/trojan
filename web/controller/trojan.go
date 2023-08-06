@@ -6,7 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	ws "github.com/gorilla/websocket"
+	ws "golang.org/x/net/websocket"
 	"io"
 	"strconv"
 	"strings"
@@ -138,7 +138,7 @@ func ImportCsv(c *gin.Context) *ResponseBody {
 			Password:    line[2],
 			EncryptPass: line[3],
 			Quota:       int64(quota),
-			Maxip:       int64(maxip),
+			Maxip:       uint(maxip),
 			Download:    uint64(download),
 			Upload:      uint64(upload),
 			UseDays:     uint(useDays),
