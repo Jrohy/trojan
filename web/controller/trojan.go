@@ -6,7 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	ws "golang.org/x/net/websocket"
+	ws "github.com/gorilla/websocket"
 	"io"
 	"strconv"
 	"strings"
