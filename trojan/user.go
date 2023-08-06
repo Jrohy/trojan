@@ -100,7 +100,7 @@ func SetUserQuota() {
 // SetUserMaxip 限制最多ip
 func SetUserMaxip() {
 	var (
-		limit int
+		limit uint
 		err   error
 	)
 	userList := UserList()
