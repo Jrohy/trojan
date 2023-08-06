@@ -35,7 +35,7 @@ type User struct {
 	Password    string
 	EncryptPass string
 	Quota       int64
-	Maxip       int64
+	Maxip       uint64
 	Download    uint64
 	Upload      uint64
 	UseDays     uint
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS users (
     password CHAR(56) NOT NULL,
     passwordShow VARCHAR(255) NOT NULL,
     quota BIGINT NOT NULL DEFAULT 0,
-	maxip BIGINT NOT NULL DEFAULT 0,
+	maxip BIGINT UNSIGNED NOT NULL DEFAULT 0,
     download BIGINT UNSIGNED NOT NULL DEFAULT 0,
     upload BIGINT UNSIGNED NOT NULL DEFAULT 0,
     useDays int(10) DEFAULT 0,
@@ -99,7 +99,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
-		maxip       int64
+		maxip       uint64
 		id          uint
 		useDays     uint
 		expiryDate  string
@@ -138,7 +138,7 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
-		maxip       int64
+		maxip       uint64
 		id          uint
 		useDays     uint
 		expiryDate  string
@@ -305,7 +305,7 @@ func (mysql *Mysql) SetQuota(id uint, quota int) error {
 }
 
 // SetMaxip 限制最多ip
-func (mysql *Mysql) SetMaxip(id uint, maxip int) error {
+func (mysql *Mysql) SetMaxip(id uint, maxip uint) error {
 	db := mysql.GetDB()
 	if db == nil {
 		return errors.New("can't connect mysql")
