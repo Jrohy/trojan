@@ -99,7 +99,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
-		maxip       uint64
+		maxip       uint
 		id          uint
 		useDays     uint
 		expiryDate  string
@@ -138,7 +138,7 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 		download    uint64
 		upload      uint64
 		quota       int64
-		maxip       int
+		maxip       uint
 		id          uint
 		useDays     uint
 		expiryDate  string
