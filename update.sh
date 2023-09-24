@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #获取当前的这个脚本所在绝对路径
-SHELL_PATH=$(cd `dirname $0`; pwd)
+shell_path=$(cd `dirname $0`; pwd)
 
-cd $SHELL_PATH
+cd $shell_path
 
 mkdir -p web/templates
 
