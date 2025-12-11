@@ -126,7 +126,7 @@ func queryUserList(db *sql.DB, sql string) ([]*User, error) {
 	return userList, nil
 }
 
-func queryUser(db *sql.DB, sql string) (*User, error) {
+func queryUser(db *sql.DB, sql string, args ...interface{}) (*User, error) {
 	var (
 		username    string
 		encryptPass string
@@ -138,7 +138,7 @@ func queryUser(db *sql.DB, sql string) (*User, error) {
 		useDays     uint
 		expiryDate  string
 	)
-	row := db.QueryRow(sql)
+	row := db.QueryRow(sql, args...)
 	if err := row.Scan(&id, &username, &encryptPass, &passShow, &quota, &download, &upload, &useDays, &expiryDate); err != nil {
 		return nil, err
 	}
@@ -343,7 +343,7 @@ func (mysql *Mysql) GetUserByName(name string) *User {
 		return nil
 	}
 	defer db.Close()
-	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE BINARY username='%s'", name))
+	user, err := queryUser(db, "SELECT * FROM users WHERE BINARY username=?", name)
 	if err != nil {
 		return nil
 	}
@@ -357,7 +357,7 @@ func (mysql *Mysql) GetUserByPass(pass string) *User {
 		return nil
 	}
 	defer db.Close()
-	user, err := queryUser(db, fmt.Sprintf("SELECT * FROM users WHERE BINARY passwordShow='%s'", pass))
+	user, err := queryUser(db, "SELECT * FROM users WHERE BINARY passwordShow=?", pass)
 	if err != nil {
 		return nil
 	}

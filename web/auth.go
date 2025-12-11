@@ -152,7 +152,12 @@ func Auth(r *gin.Engine, timeout int) *jwt.GinJWTMiddleware {
 		}
 	})
 	r.POST("/auth/login", authMiddleware.LoginHandler)
-	r.POST("/auth/register", updateUser)
+	// 只有在系统未初始化时才注册公开的 /auth/register 路由
+	adminPass, _ := core.GetValue("admin_pass")
+	if adminPass == "" {
+		r.POST("/auth/register", updateUser)
+	}
+
 	authO := r.Group("/auth")
 	authO.Use(authMiddleware.MiddlewareFunc())
 	{
@@ -173,6 +178,8 @@ func Auth(r *gin.Engine, timeout int) *jwt.GinJWTMiddleware {
 		authO.POST("/reset_pass", updateUser)
 		authO.POST("/logout", authMiddleware.LogoutHandler)
 		authO.POST("/refresh_token", authMiddleware.RefreshHandler)
+		// 系统初始化后，注册功能只能在授权后使用
+		authO.POST("/register", updateUser)
 	}
 	return authMiddleware
 }
