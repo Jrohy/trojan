@@ -8,15 +8,19 @@ import (
 	"io/fs"
 	"net/http"
 	"strconv"
+	"strings"
 	"trojan/core"
 	"trojan/util"
 	"trojan/web/controller"
+
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 //go:embed templates/*
 var f embed.FS
 
-func userRouter(router *gin.Engine) {
+func userRouter(router *gin.RouterGroup) {
 	user := router.Group("/trojan/user")
 	{
 		user.GET("", func(c *gin.Context) {
@@ -57,12 +61,12 @@ func userRouter(router *gin.Engine) {
 		user.DELETE("", func(c *gin.Context) {
 			stringId := c.Query("id")
 			id, _ := strconv.Atoi(stringId)
-			c.JSON(200, controller.DelUser(uint(id)))
+			c.JSON(200, controller.DelUser(uint(id), RequestUsername(c)))
 		})
 	}
 }
 
-func trojanRouter(router *gin.Engine) {
+func trojanRouter(router *gin.RouterGroup) {
 	router.POST("/trojan/start", func(c *gin.Context) {
 		c.JSON(200, controller.Start())
 	})
@@ -74,6 +78,9 @@ func trojanRouter(router *gin.Engine) {
 	})
 	router.GET("/trojan/loglevel", func(c *gin.Context) {
 		c.JSON(200, controller.GetLogLevel())
+	})
+	router.GET("/trojan/h2", func(c *gin.Context) {
+		c.JSON(200, controller.H2Profile())
 	})
 	router.GET("/trojan/export", func(c *gin.Context) {
 		result := controller.ExportCsv(c)
@@ -96,6 +103,9 @@ func trojanRouter(router *gin.Engine) {
 		level, _ := strconv.Atoi(slevel)
 		c.JSON(200, controller.SetLogLevel(level))
 	})
+	router.POST("/trojan/h2/apply", func(c *gin.Context) {
+		c.JSON(200, controller.ApplyH2Profile())
+	})
 	router.POST("/trojan/domain", func(c *gin.Context) {
 		c.JSON(200, controller.SetDomain(c.PostForm("domain")))
 	})
@@ -104,7 +114,7 @@ func trojanRouter(router *gin.Engine) {
 	})
 }
 
-func dataRouter(router *gin.Engine) {
+func dataRouter(router *gin.RouterGroup) {
 	data := router.Group("/trojan/data")
 	{
 		data.POST("", func(c *gin.Context) {
@@ -130,14 +140,62 @@ func dataRouter(router *gin.Engine) {
 	}
 }
 
-func commonRouter(router *gin.Engine) {
+func accessHistoryRouter(router *gin.RouterGroup) {
+	history := router.Group("/trojan/access-history")
+	{
+		history.GET("", func(c *gin.Context) {
+			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+			pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "50"))
+			c.JSON(200, controller.AccessHistoryList(
+				c.Query("startDate"),
+				c.Query("endDate"),
+				c.Query("userHash"),
+				c.Query("targetHost"),
+				c.Query("detailUserHash"),
+				c.Query("sortBy"),
+				c.Query("sortDir"),
+				page,
+				pageSize,
+			))
+		})
+		history.GET("/status", func(c *gin.Context) {
+			c.JSON(200, controller.AccessHistoryStatus())
+		})
+		history.POST("/collect", func(c *gin.Context) {
+			c.JSON(200, controller.AccessHistoryCollect())
+		})
+	}
+}
+
+func commonRouter(router *gin.RouterGroup) {
 	common := router.Group("/common")
 	{
+		common.GET("/ops", func(c *gin.Context) {
+			c.JSON(200, controller.OpsOverview(c.DefaultQuery("range", "24h")))
+		})
 		common.GET("/version", func(c *gin.Context) {
 			c.JSON(200, controller.Version())
 		})
 		common.GET("/serverInfo", func(c *gin.Context) {
 			c.JSON(200, controller.ServerInfo())
+		})
+		common.GET("/overview", func(c *gin.Context) {
+			c.JSON(200, controller.DashboardOverview(c.Query("refresh") == "1"))
+		})
+		common.GET("/activeUsers", func(c *gin.Context) {
+			c.JSON(200, controller.ActiveUsers())
+		})
+		common.GET("/processMetrics", func(c *gin.Context) {
+			c.JSON(200, controller.ProcessMetrics())
+		})
+		common.GET("/certInfo", func(c *gin.Context) {
+			c.JSON(200, controller.CertInfo())
+		})
+		common.GET("/qrcode", func(c *gin.Context) {
+			controller.QRCode(c)
+		})
+		common.POST("/cert/renew", func(c *gin.Context) {
+			c.JSON(200, controller.RenewCert())
 		})
 		common.GET("/clashRules", func(c *gin.Context) {
 			c.JSON(200, controller.GetClashRules())
@@ -155,13 +213,34 @@ func commonRouter(router *gin.Engine) {
 	}
 }
 
+func portalRouter(router *gin.RouterGroup) {
+	portal := router.Group("/portal")
+	portal.Use(PortalOnly())
+	portal.GET("/me/summary", func(c *gin.Context) {
+		c.JSON(200, controller.PortalOverview(PortalUserID(c)))
+	})
+}
+
 func staticRouter(router *gin.Engine) {
+	router.Use(func(c *gin.Context) {
+		if c.Request.URL.Path == "/" || c.Request.URL.Path == "/portal" || strings.HasPrefix(c.Request.URL.Path, "/static/") {
+			c.Header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+			c.Header("Pragma", "no-cache")
+			c.Header("Expires", "0")
+		}
+		c.Next()
+	})
+
 	staticFs, _ := fs.Sub(f, "templates/static")
 	router.StaticFS("/static", http.FS(staticFs))
 
 	router.GET("/", func(c *gin.Context) {
 		indexHTML, _ := f.ReadFile("templates/" + "index.html")
-		c.Writer.Write(indexHTML)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", indexHTML)
+	})
+	router.GET("/portal", func(c *gin.Context) {
+		portalHTML, _ := f.ReadFile("templates/" + "portal.html")
+		c.Data(http.StatusOK, "text/html; charset=utf-8", portalHTML)
 	})
 }
 
@@ -171,26 +250,51 @@ func noTokenRouter(router *gin.Engine) {
 	})
 }
 
-// Start web启动入口
-func Start(host string, port, timeout int, isSSL bool) {
+func newRouter(timeout int, isSSL bool) *gin.Engine {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
 	noTokenRouter(router)
-	router.Use(Auth(router, timeout).MiddlewareFunc())
-	trojanRouter(router)
-	userRouter(router)
-	dataRouter(router)
-	commonRouter(router)
+	auth := Auth(router, timeout, isSSL)
+	protected := router.Group("")
+	protected.Use(auth.MiddlewareFunc())
+	portalRouter(protected)
+	admin := protected.Group("")
+	admin.Use(AdminOnly())
+	trojanRouter(admin)
+	userRouter(admin)
+	dataRouter(admin)
+	accessHistoryRouter(admin)
+	commonRouter(admin)
+	return router
+}
+
+// Start web启动入口
+func Start(host string, port, timeout int, isSSL bool) {
+	router := newRouter(timeout, isSSL)
 	controller.ScheduleTask()
+	controller.AccessHistoryScheduleTask()
 	controller.CollectTask()
+	controller.StartOpsMonitor()
 	util.OpenPort(port)
 	if isSSL {
 		config := core.GetConfig()
 		ssl := &config.SSl
 		router.RunTLS(fmt.Sprintf("%s:%d", host, port), ssl.Cert, ssl.Key)
 	} else {
+		if port == 80 {
+			go func() {
+				addr := "127.0.0.1:81"
+				server := &http.Server{
+					Addr:    addr,
+					Handler: h2c.NewHandler(router, &http2.Server{}),
+				}
+				if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+					fmt.Println("h2c server error: " + err.Error())
+				}
+			}()
+		}
 		router.Run(fmt.Sprintf("%s:%d", host, port))
 	}
 }

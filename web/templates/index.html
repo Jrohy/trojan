@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>trojan 管理平台</title>
+  <link rel="stylesheet" href="/static/app.css?v=202608030130">
+  <link rel="stylesheet" href="/static/ops.css?v=202609060100">
+</head>
+<body>
+  <main id="authScreen" class="authScreen" hidden>
+    <section id="loginPanel" class="loginPanel">
+      <div class="loginBrand">
+        <span class="brandMark" aria-hidden="true">
+          <svg viewBox="350 140 600 710" focusable="false" style="overflow:hidden">
+            <image href="/static/trojan-original-20260906.png" width="1254" height="1254"/>
+          </svg>
+        </span>
+        <div><strong>trojan</strong><span>账户入口</span></div>
+      </div>
+      <header class="loginHeader">
+        <span>SECURE CONSOLE</span>
+        <h1 id="loginTitle">登录</h1>
+        <p>使用你的账号登录</p>
+      </header>
+      <form id="loginForm">
+        <label>用户名<input id="username" name="username" autocomplete="username" placeholder="请输入用户名"></label>
+        <label>密码<input id="password" name="password" type="password" autocomplete="current-password"></label>
+        <div id="loginNotice" class="notice" hidden></div>
+        <button id="loginBtn" class="primary" type="submit">登录</button>
+      </form>
+    </section>
+  </main>
+
+  <main id="appShell" class="appShell" hidden>
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brandMark" aria-hidden="true">
+          <svg viewBox="350 140 600 710" focusable="false" style="overflow:hidden">
+            <image href="/static/trojan-original-20260906.png" width="1254" height="1254"/>
+          </svg>
+        </span>
+        <div><strong>trojan</strong><span>管理平台</span></div>
+      </div>
+      <nav class="tabs" aria-label="主导航">
+        <button class="tab active" data-tab="home" type="button">仪表盘</button>
+        <button class="tab" data-tab="ops" type="button">运维监控</button>
+        <button class="tab" data-tab="system" type="button">系统监控</button>
+        <button class="tab" data-tab="users" type="button">用户管理</button>
+        <button class="tab" data-tab="history" type="button">访问历史</button>
+        <button class="tab" data-tab="service" type="button">Trojan管理</button>
+        <button class="tab" data-tab="settings" type="button">设置</button>
+      </nav>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div><h1 id="pageTitle">仪表盘</h1><p id="pageSub">今日业务、账号健康与在线状态</p></div>
+      </header>
+
+      <section id="dashboard" hidden>
+        <section class="view active" data-view="home">
+          <div class="summary">
+            <div><span>代理服务</span><strong id="serviceStateCard">-</strong><em id="uptimeCard">运行时长 -</em></div>
+            <div><span>在线用户</span><strong id="onlineCount">-</strong><em id="totalUsersCard">共 - 个账号</em></div>
+            <div><span>今日流量</span><strong id="todayTraffic">-</strong><em id="todayTrafficSplit">上传 - · 下载 -</em></div>
+            <div><span class="labelWithHelp">今日请求数 <button class="helpDot" type="button" title="按 Trojan 已关闭连接日志计数，不是 HTTP 页面请求数" aria-label="请求数统计说明">?</button></span><strong id="todayRequests">-</strong><em id="trafficLastCollect">等待统计</em></div>
+          </div>
+          <section class="panel healthPanel">
+            <div class="panelHead"><h2>账号健康</h2><span id="dashboardUpdatedAt">-</span></div>
+            <div class="accountHealthGrid">
+              <div><span class="healthDot ok"></span><p><strong id="accountNormal">-</strong><em>正常</em></p></div>
+              <div><span class="healthDot warn"></span><p><strong id="accountExpiring">-</strong><em>即将到期</em></p></div>
+              <div><span class="healthDot danger"></span><p><strong id="accountExpired">-</strong><em>已过期</em></p></div>
+              <div><span class="healthDot danger"></span><p><strong id="accountExhausted">-</strong><em>流量耗尽</em></p></div>
+            </div>
+            <div id="dashboardAlert" class="inlineAlert" hidden></div>
+          </section>
+          <section class="panel">
+            <div class="panelHead"><h2>当前连接用户</h2><span id="onlineUpdatedAt">每 5 秒自动刷新</span></div>
+            <div id="notice" class="notice" hidden></div>
+            <div class="tableWrap"><table><thead><tr><th>用户</th><th>状态</th><th>在线 IP</th><th>上传速度</th><th>下载速度</th><th>上传流量</th><th>下载流量</th></tr></thead><tbody id="userRows"></tbody></table></div>
+          </section>
+        </section>
+
+        <section class="view opsView" data-view="ops">
+          <div class="opsScopeNotice">
+            <span class="opsScopeIcon" aria-hidden="true"></span>
+            <div><strong>监测口径</strong><p>数据来自服务器端 Trojan 回环合成探测，覆盖 inbound → outbound → Google / YouTube 目标回流；不覆盖用户到 VPS 的公网链路，不代表真实用户完整端到端体验或 HTTP 请求成功率。</p></div>
+          </div>
+          <div class="opsToolbar">
+            <div id="opsStatus" class="opsOverallStatus unknown"><span></span><strong>状态未知</strong></div>
+            <div class="opsRange" role="group" aria-label="监控时间范围">
+              <button type="button" data-ops-range="1h">1 小时</button>
+              <button type="button" data-ops-range="24h" class="active">24 小时</button>
+              <button type="button" data-ops-range="7d">7 天</button>
+              <button type="button" data-ops-range="30d">30 天</button>
+            </div>
+          </div>
+          <div id="opsNotice" class="notice" hidden></div>
+          <div class="opsSummary" aria-label="SLA 核心指标">
+            <article><span>合成探测可用性</span><strong id="opsAvailability">未知</strong><em id="opsAvailabilitySub">尚无有效样本</em></article>
+            <article><span>数据覆盖率</span><strong id="opsCoverage">未知</strong><em id="opsCoverageSub">有效 0 / 预期 0</em></article>
+            <article><span>P95 路径耗时</span><strong id="opsP95">未知</strong><em id="opsLatencySub">P50 / P99 均未知</em></article>
+            <article><span>失败与未知</span><strong id="opsErrors">未知</strong><em id="opsErrorsSub">等待采样</em></article>
+            <article><span>错误预算剩余</span><strong id="opsBudget">未知</strong><em id="opsBudgetSub">候选 SLO 99.9%</em></article>
+            <article><span>资源风险</span><strong id="opsResourceState">未知</strong><em id="opsResourceSub">等待系统采样</em></article>
+          </div>
+          <div class="opsGrid opsGridPrimary">
+            <section class="panel opsHistoryPanel">
+              <div class="panelHead"><div><h2>可用性与 P95 趋势</h2><p>间断线段表示数据缺失，不进行补值</p></div><span id="opsHistoryRange">-</span></div>
+              <div id="opsHistoryChart" class="opsChart" aria-label="可用性与 P95 趋势图"></div>
+              <div class="opsChartLegend"><span><i class="availability"></i>可用性</span><span><i class="latency"></i>P95 路径耗时</span><span><i class="gap"></i>缺失区间</span></div>
+            </section>
+            <section class="panel opsLatencyPanel">
+              <div class="panelHead"><div><h2>路径耗时分布</h2><p>仅统计有效合成探测样本</p></div><span id="opsLatencyTotal">0 个样本</span></div>
+              <div id="opsLatencyBuckets" class="opsBuckets"></div>
+            </section>
+          </div>
+          <section class="panel">
+            <div class="panelHead"><div><h2>探测目标状态</h2><p>服务器端合成探测，不采集真实用户访问内容</p></div><span id="opsTargetsUpdated">-</span></div>
+            <div class="tableWrap"><table class="opsTargetsTable"><thead><tr><th>目标</th><th>状态</th><th>最近耗时</th><th>最近检查</th><th>说明</th></tr></thead><tbody id="opsTargetRows"></tbody></table></div>
+          </section>
+          <div class="opsGrid opsGridSecondary">
+            <section class="panel">
+              <div class="panelHead"><div><h2>资源与容量</h2><p>高压力时采集器主动退让，避免影响代理流量</p></div><span id="opsResourceSampledAt">-</span></div>
+              <div id="opsResources" class="opsResources"></div>
+            </section>
+            <section class="panel">
+              <div class="panelHead"><h2>最近事件</h2><span>最多显示 50 条</span></div>
+              <div id="opsEvents" class="opsEvents"></div>
+            </section>
+          </div>
+          <section class="panel opsDataPanel">
+            <div class="panelHead"><div><h2>数据来源与新鲜度</h2><p>无数据时保持未知，不推断为健康</p></div><span id="opsUpdatedAt">-</span></div>
+            <div id="opsSources" class="opsSources"></div>
+            <div id="opsFreshness" class="opsFreshness">等待第一次采样</div>
+          </section>
+        </section>
+
+        <section class="view" data-view="users">
+          <section class="panel compactPanel">
+            <div class="panelHead"><h2>用户列表</h2><button id="addUserBtn" class="primary small" type="button">新增用户</button></div>
+            <div class="tableWrap"><table><thead><tr><th>ID</th><th>用户名</th><th>密码</th><th>上传</th><th>下载</th><th>总流量</th><th>限额</th><th>到期</th><th>操作</th></tr></thead><tbody id="allUserRows"></tbody></table></div>
+          </section>
+        </section>
+
+        <section class="view" data-view="history">
+          <section class="panel compactPanel">
+            <div class="panelHead"><h2>访问历史</h2><button id="collectHistoryBtn" class="primary small" type="button">收集统计</button></div>
+            <form id="historyFilter" class="filterBar">
+              <div class="historyDateRangeControl">
+                <label>开始日期<span class="historyDateInputWrap"><input id="historyStart" class="historyDateInput" name="startDate" type="text" inputmode="none" autocomplete="off" readonly aria-haspopup="dialog" aria-expanded="false" aria-controls="historyDatePicker" data-history-date-input="start"></span></label>
+                <label>结束日期<span class="historyDateInputWrap"><input id="historyEnd" class="historyDateInput" name="endDate" type="text" inputmode="none" autocomplete="off" readonly aria-haspopup="dialog" aria-expanded="false" aria-controls="historyDatePicker" data-history-date-input="end"></span></label>
+                <div id="historyDatePicker" class="historyDatePicker" role="dialog" aria-label="选择统计日期" hidden>
+                  <div class="historyDatePickerHead">
+                    <div><span id="historyDatePickerTitle">选择日期</span><strong id="historyDatePickerMonth">-</strong></div>
+                    <div class="historyDatePickerNav">
+                      <button type="button" data-picker-month="-1" aria-label="上个月">‹</button>
+                      <button type="button" data-picker-month="1" aria-label="下个月">›</button>
+                    </div>
+                  </div>
+                  <div class="historyDateWeek" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+                  <div id="historyDateGrid" class="historyDateGrid"></div>
+                  <div class="historyDatePickerFoot">
+                    <button type="button" class="historyDateTextAction" data-picker-action="clear">清除</button>
+                    <div class="historyDateQuick" aria-label="快捷日期范围">
+                      <button type="button" data-history-range="30">最近 30 天</button>
+                      <button type="button" data-history-range="year">最近一年</button>
+                    </div>
+                    <button type="button" class="historyDateTextAction" data-history-range="today">今天</button>
+                  </div>
+                </div>
+              </div>
+              <label>用户<select id="historyUser" name="userHash"><option value="">全部用户</option></select></label>
+              <label>目标域名<input id="historyTarget" name="targetHost" placeholder="例如 google.com"></label>
+              <button class="ghost small" type="submit">查询</button>
+            </form>
+            <div class="historyMeta" id="historyMeta">尚未加载</div>
+            <div id="historyGroups" class="historyGroups"></div>
+          </section>
+        </section>
+
+        <section class="view" data-view="service">
+          <section class="panel">
+            <div class="panelHead"><h2>Trojan-Go 服务</h2><span id="h2State"></span></div>
+            <div class="serviceStatus" id="serviceStatus">
+              <span id="serviceDot" class="statusDot unknown"></span>
+              <div><strong id="serviceStateText">检测中</strong><em id="serviceStateSub">正在读取 trojan.service 状态</em></div>
+            </div>
+            <div id="serviceNotice" class="notice" hidden></div>
+            <div class="toolbar serviceToolbar">
+              <button data-action="start" class="ghost" type="button">启动</button>
+              <button data-action="stop" class="ghost danger" type="button">停止</button>
+              <button data-action="restart" class="ghost" type="button">重启</button>
+              <button id="switchTypeBtn" class="ghost" type="button">切换 Trojan/Trojan-Go</button>
+            </div>
+            <div class="kvGrid" id="serviceInfo"></div>
+          </section>
+          <section class="panel">
+            <div class="panelHead"><h2>Trojan 日志</h2><button id="logBtn" class="primary small" type="button">查看日志</button></div>
+            <pre id="logBox" class="logBox">点击查看日志，日志中的用户 hash 会自动替换为用户名。</pre>
+          </section>
+        </section>
+
+        <section class="view" data-view="system">
+          <div id="systemNotice" class="notice" hidden></div>
+          <section class="panel trafficPanel">
+            <div class="panelHead"><div><h2>本月流量</h2><p>2TB，每月 1 日重新计算（流量按小时逐渐分配）</p></div><span id="monthTrafficPeriod">-</span></div>
+            <div class="trafficHero">
+              <div class="trafficPrimary">
+                <div class="trafficTitle"><span>Trojan 翻墙服务</span><b id="monthTrafficStatus" class="trafficStatus">-</b></div>
+                <div class="trafficNumber"><strong id="monthTrafficTotal">-</strong><span> / 2TB</span></div>
+                <div class="meter trafficMeter"><i id="monthTrafficMeter"></i></div>
+                <div class="trafficMetricGrid">
+                  <div><span>已用比例</span><b id="monthTrafficPercent">-</b></div>
+                  <div><span>剩余流量</span><b id="monthTrafficRemaining">-</b></div>
+                  <div><span>日均流量</span><b id="monthTrafficAverage">-</b></div>
+                  <div><span>月底预估</span><b id="monthTrafficProjected">-</b></div>
+                  <div><span>上传</span><b id="monthTrafficUpload">-</b></div>
+                  <div><span>下载</span><b id="monthTrafficDownload">-</b></div>
+                </div>
+                <p id="monthTrafficUpdated" class="trafficFootnote">-</p>
+              </div>
+              <aside class="trafficSecondary">
+                <span id="networkTrafficLabel">VPS 整机本月流量</span>
+                <strong id="networkMonthTotal">-</strong>
+                <em id="networkMonthPercent">占套餐 -</em>
+                <div class="miniTraffic"><span>上传 <b id="networkMonthUpload">-</b></span><span>下载 <b id="networkMonthDownload">-</b></span></div>
+                <p id="networkTrackingSince">统计初始化中</p>
+              </aside>
+            </div>
+          </section>
+          <div class="chartGrid" id="chartGrid"></div>
+          <section class="systemGrid">
+            <section class="panel realtimePanel">
+              <div class="panelHead"><h2>实时网络与负载</h2><span>仅进入本页时刷新</span></div>
+              <div id="realtimeInfo" class="kvGrid"></div>
+            </section>
+            <section class="panel processPanel">
+              <div class="panelHead"><h2>Trojan 进程压力</h2><span>每 15 秒刷新</span></div>
+              <div class="pressureGrid">
+                <div><div class="meterLabel"><span>TCP 连接占用</span><b id="tcpRatio">-</b></div><div class="meter"><i id="tcpMeter"></i></div><p id="tcpLimitText" class="metricNote">-</p></div>
+                <div><div class="meterLabel"><span>FD 占用</span><b id="fdRatio">-</b></div><div class="meter"><i id="fdMeter"></i></div><p id="fdLimitText" class="metricNote">-</p></div>
+              </div>
+              <div id="kernelLimits" class="kvGrid kernelGrid"></div>
+            </section>
+          </section>
+          <section class="panel">
+            <div class="panelHead"><h2>TLS 证书</h2><button id="renewCertBtn" class="primary small" type="button">续签证书</button></div>
+            <div class="kvGrid certGrid" id="certInfo"></div>
+          </section>
+        </section>
+
+        <section class="view" data-view="settings">
+          <section class="panel">
+            <div class="panelHead"><h2>界面设置</h2><span>主题偏好保存在当前浏览器</span></div>
+            <div class="settingsRow"><span>主题</span><button id="themeBtnInline" class="ghost" type="button">切换主题</button></div>
+          </section>
+          <section class="panel">
+            <div class="panelHead"><h2>登录状态</h2><span>退出当前管理会话</span></div>
+            <div class="settingsRow"><span>当前账号</span><button id="logoutBtn" class="ghost" type="button">退出登录</button></div>
+          </section>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <div id="historyIPTooltip" class="historyIPTooltip" role="tooltip" hidden></div>
+
+  <dialog id="userDialog">
+    <form id="userForm" method="dialog" class="dialogForm">
+      <h2 id="userDialogTitle">用户</h2>
+      <input type="hidden" id="userId">
+      <label>用户名<input id="userNameInput"></label>
+      <label>密码<input id="userPassInput"></label>
+      <div class="dialogActions"><button class="ghost" value="cancel" type="button" data-close>取消</button><button class="primary" type="submit">保存</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="shareDialog">
+    <div class="dialogForm wide">
+      <button class="dialogClose" type="button" data-close aria-label="关闭">x</button>
+      <h2>分享入口</h2>
+      <div class="shareGrid">
+        <section>
+          <h3>Trojan</h3>
+          <img id="trojanQr" alt="Trojan二维码">
+          <textarea id="trojanShare" readonly></textarea>
+        </section>
+        <section>
+          <h3>Clash订阅</h3>
+          <img id="clashQr" alt="Clash订阅二维码">
+          <textarea id="clashShare" readonly></textarea>
+        </section>
+        <section>
+          <h3>SS兼容入口</h3>
+          <img id="ssQr" alt="SS兼容入口二维码">
+          <textarea id="ssShare" readonly></textarea>
+        </section>
+      </div>
+      <div class="dialogActions"><button class="primary" type="button" data-close>关闭</button></div>
+    </div>
+  </dialog>
+
+  <script src="/static/ops.js?v=202609060100"></script>
+  <script src="/static/app.js?v=202609060100"></script>
+</body>
+</html>

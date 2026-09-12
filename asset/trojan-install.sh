@@ -134,6 +134,7 @@ if ! [[ -f "$CONFIGPATH" ]] || prompt "The server config already exists in $CONF
         "cipher_tls13": "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
         "prefer_server_cipher": true,
         "alpn": [
+            "h2",
             "http/1.1"
         ],
         "alpn_port_override": {
@@ -154,6 +155,11 @@ if ! [[ -f "$CONFIGPATH" ]] || prompt "The server config already exists in $CONF
         "fast_open": false,
         "fast_open_qlen": 20
     },
+    "mux": {
+        "enabled": false,
+        "concurrency": 8,
+        "idle_timeout": 60
+    },
     "mysql": {
         "enabled": false,
         "server_addr": "127.0.0.1",
@@ -164,6 +170,18 @@ if ! [[ -f "$CONFIGPATH" ]] || prompt "The server config already exists in $CONF
         "key": "",
         "cert": "",
         "ca": ""
+    },
+    "api": {
+        "enabled": true,
+        "api_addr": "127.0.0.1",
+        "api_port": 10000,
+        "ssl": {
+            "enabled": false,
+            "cert": "",
+            "key": "",
+            "verify_client": false,
+            "client_cert": []
+        }
     }
 }
 EOF

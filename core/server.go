@@ -8,14 +8,22 @@ import (
 	"os"
 )
 
-var configPath = "/usr/local/etc/trojan/config.json"
+var configPath = func() string {
+	if path := os.Getenv("TROJAN_CONFIG_PATH"); path != "" {
+		return path
+	}
+	return "/usr/local/etc/trojan/config.json"
+}()
 
 // ServerConfig 结构体
 type ServerConfig struct {
 	Config
-	SSl   ServerSSL `json:"ssl"`
-	Tcp   ServerTCP `json:"tcp"`
-	Mysql Mysql     `json:"mysql"`
+	SSl       ServerSSL `json:"ssl"`
+	Tcp       ServerTCP `json:"tcp"`
+	Mux       Mux       `json:"mux"`
+	Mysql     Mysql     `json:"mysql"`
+	Websocket Websocket `json:"websocket"`
+	API       API       `json:"api"`
 }
 
 // ServerSSL 结构体
@@ -118,5 +126,28 @@ func WritePort(port int) bool {
 func WriteLogLevel(level int) bool {
 	data := Load("")
 	data, _ = sjson.SetBytes(data, "log_level", level)
+	return Save(data, "")
+}
+
+// WriteH2Profile 写入推荐的Trojan-Go H2链路配置
+func WriteH2Profile() bool {
+	data := Load("")
+	data, _ = sjson.SetBytes(data, "ssl.alpn", []string{"h2", "http/1.1"})
+	data, _ = sjson.SetBytes(data, "ssl.alpn_port_override.h2", 81)
+	data, _ = sjson.SetBytes(data, "tcp.no_delay", true)
+	data, _ = sjson.SetBytes(data, "tcp.keep_alive", true)
+	data, _ = sjson.SetBytes(data, "mux", Mux{
+		Enabled:     false,
+		Concurrency: 8,
+		IdleTimeout: 60,
+	})
+	data, _ = sjson.SetBytes(data, "api", API{
+		Enabled: true,
+		APIAddr: "127.0.0.1",
+		APIPort: 10000,
+		SSL: APISSL{
+			Enabled: false,
+		},
+	})
 	return Save(data, "")
 }

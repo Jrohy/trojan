@@ -18,7 +18,10 @@ require (
 	github.com/tidwall/pretty v1.2.1
 	github.com/tidwall/sjson v1.2.5
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
 )
+
+require golang.org/x/net v0.15.0
 
 require (
 	github.com/bytedance/sonic v1.10.1 // indirect
@@ -47,8 +50,6 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/arch v0.5.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

@@ -29,5 +29,10 @@
     "reuse_port": false,
     "fast_open": false,
     "fast_open_qlen": 20
+  },
+  "mux": {
+    "enabled": false,
+    "concurrency": 8,
+    "idle_timeout": 60
   }
 }

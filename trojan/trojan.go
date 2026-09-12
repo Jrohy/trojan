@@ -73,6 +73,20 @@ func Status(isPrint bool) string {
 	return result
 }
 
+// ActiveState 获取trojan systemd active状态
+func ActiveState() string {
+	result := strings.TrimSpace(util.ExecCommandWithResult("systemctl is-active trojan.service"))
+	if result == "" {
+		return "unknown"
+	}
+	return result
+}
+
+// IsRunning 判断trojan服务是否运行中
+func IsRunning() bool {
+	return ActiveState() == "active"
+}
+
 // UpTime Trojan运行时间
 func UpTime() string {
 	result := strings.TrimSpace(util.ExecCommandWithResult("ps -Ao etime,args|grep -v grep|grep /usr/local/etc/trojan/config.json"))

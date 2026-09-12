@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>trojan 个人账户</title>
+  <link rel="stylesheet" href="/static/portal.css?v=202608022030">
+</head>
+<body>
+  <header class="portalHeader">
+    <a class="portalBrand" href="/portal" aria-label="trojan 个人账户首页">
+      <span class="portalBrandMark" aria-hidden="true">
+        <svg viewBox="350 140 600 710" focusable="false" style="overflow:hidden">
+            <image href="/static/trojan-original-20260906.png" width="1254" height="1254"/>
+          </svg>
+      </span>
+      <span><strong>trojan</strong><em>个人账户</em></span>
+    </a>
+    <div class="portalHeaderActions">
+      <span id="headerUsername" class="headerUsername"></span>
+      <button id="openSettings" class="iconButton" type="button" aria-label="打开设置" title="设置">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V20.4h-3v-.18a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.56-1.04H5.2v-3h.24A1.7 1.7 0 0 0 7 9.92a1.7 1.7 0 0 0-.34-1.88L6.6 7.98l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.7 4.7v-.18h3v.18a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04h.24v3h-.24A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="portalMain">
+    <section id="portalLoading" class="portalStateCard">
+      <span class="loadingDot"></span>
+      <p>正在读取账号状态</p>
+    </section>
+
+    <section id="portalError" class="portalStateCard errorState" hidden>
+      <strong>暂时无法获取账号信息</strong>
+      <p id="portalErrorMessage">请稍后重试</p>
+      <button id="retryPortal" class="secondaryButton" type="button">重新加载</button>
+    </section>
+
+    <section id="portalOverview" hidden>
+      <header class="overviewIntro">
+        <div>
+          <span class="eyebrow">ACCOUNT OVERVIEW</span>
+          <h1>你好，<span id="overviewUsername">—</span></h1>
+          <p>这里是你的账号使用概况</p>
+        </div>
+        <span id="accountStatus" class="statusPill normal"><i></i><b>账号正常</b></span>
+      </header>
+
+      <section class="trafficCard">
+        <div class="trafficCardHead">
+          <div>
+            <span>本周期已用流量</span>
+            <strong><b id="trafficUsed">—</b><em id="trafficQuota">/ —</em></strong>
+          </div>
+          <span id="trafficRatio" class="trafficRatio">—</span>
+        </div>
+        <div id="trafficTrack" class="trafficTrack" role="progressbar" aria-label="流量使用比例" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <i id="trafficProgress"></i>
+        </div>
+        <div class="trafficMetrics">
+          <div><span>剩余流量</span><strong id="trafficRemaining">—</strong></div>
+          <div><span>上传</span><strong id="trafficUpload">—</strong></div>
+          <div><span>下载</span><strong id="trafficDownload">—</strong></div>
+        </div>
+      </section>
+
+      <section class="accountGrid">
+        <article>
+          <span class="accountIcon calendarIcon" aria-hidden="true"></span>
+          <div><span>到期时间</span><strong id="expiryDate">—</strong></div>
+        </article>
+        <article>
+          <span class="accountIcon timeIcon" aria-hidden="true"></span>
+          <div><span>剩余时间</span><strong id="daysRemaining">—</strong></div>
+        </article>
+      </section>
+
+      <footer class="overviewFooter">
+        <span id="updatedAt">—</span>
+        <button id="refreshPortal" class="refreshButton" type="button"><i aria-hidden="true"></i>刷新</button>
+      </footer>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog" class="settingsDialog">
+    <form method="dialog" class="settingsPanel">
+      <header><div><span>SETTINGS</span><h2>设置</h2></div><button id="closeSettings" class="iconButton" type="button" aria-label="关闭设置">×</button></header>
+      <section>
+        <h3>外观</h3>
+        <p>主题偏好仅保存在当前浏览器</p>
+        <div class="themeOptions" role="radiogroup" aria-label="界面主题">
+          <label><input type="radio" name="portalTheme" value="system"><span><i class="systemThemeIcon"></i>跟随系统</span></label>
+          <label><input type="radio" name="portalTheme" value="light"><span><i class="lightThemeIcon"></i>浅色</span></label>
+          <label><input type="radio" name="portalTheme" value="dark"><span><i class="darkThemeIcon"></i>深色</span></label>
+        </div>
+      </section>
+      <section class="accountSetting">
+        <h3>账号</h3>
+        <div><span>当前登录</span><strong id="settingsUsername">—</strong></div>
+        <button id="portalLogout" class="logoutButton" type="button">退出登录</button>
+      </section>
+    </form>
+  </dialog>
+
+  <script src="/static/portal.js?v=202608022030"></script>
+</body>
+</html>

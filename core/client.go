@@ -10,8 +10,10 @@ import (
 // ClientConfig 结构体
 type ClientConfig struct {
 	Config
-	SSl ClientSSL `json:"ssl"`
-	Tcp ClientTCP `json:"tcp"`
+	SSl       ClientSSL `json:"ssl"`
+	Tcp       ClientTCP `json:"tcp"`
+	Mux       Mux       `json:"mux"`
+	Websocket Websocket `json:"websocket,omitempty"`
 }
 
 // ClientSSL 结构体
@@ -37,6 +39,17 @@ func WriteClient(port int, password, domain, writePath string) bool {
 	config.RemoteAddr = domain
 	config.RemotePort = port
 	config.Password = []string{password}
+	config.SSl.Sni = domain
+	if len(config.SSl.Alpn) == 0 {
+		config.SSl.Alpn = []string{"h2", "http/1.1"}
+	}
+	if config.Mux.Concurrency == 0 {
+		config.Mux = Mux{
+			Enabled:     false,
+			Concurrency: 8,
+			IdleTimeout: 60,
+		}
+	}
 	outData, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
 		fmt.Println(err)

@@ -16,6 +16,10 @@ func SetData(id uint, quota int) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
+	if _, err := mutableUser(mysql, id); err != nil {
+		responseBody.Msg = err.Error()
+		return &responseBody
+	}
 	if err := mysql.SetQuota(id, quota); err != nil {
 		responseBody.Msg = err.Error()
 	}
@@ -27,6 +31,10 @@ func CleanData(id uint) *ResponseBody {
 	responseBody := ResponseBody{Msg: "success"}
 	defer TimeCost(time.Now(), &responseBody)
 	mysql := core.GetMysql()
+	if _, err := mutableUser(mysql, id); err != nil {
+		responseBody.Msg = err.Error()
+		return &responseBody
+	}
 	if err := mysql.CleanData(id); err != nil {
 		responseBody.Msg = err.Error()
 	}
